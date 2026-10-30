@@ -1,0 +1,106 @@
+name: PR rules
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened, labeled, unlabeled, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: read
+  issues: read
+
+concurrency:
+  group: pr-rules-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  rules:
+    name: PR rules
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check title, branch, issue link, size, area and UI checklist
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          OWNER: ${{ github.repository_owner }}
+          PR: ${{ github.event.pull_request.number }}
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+          TITLE: ${{ github.event.pull_request.title }}
+          BRANCH: ${{ github.event.pull_request.head.ref }}
+          BODY: ${{ github.event.pull_request.body }}
+          MAX_LINES: "500"
+        run: |
+          set -uo pipefail
+          errors=0
+          fail() { echo "::error::$1"; errors=$((errors+1)); }
+          ok()   { echo "OK  $1"; }
+
+          # 1. Title: Conventional Commit
+          if [[ "$TITLE" =~ ^(feat|fix|chore|docs|refactor|test|style|perf|ci)(\([a-z0-9-]+\))?!?:\ .{3,}$ ]]; then
+            ok "title: $TITLE"
+          else
+            fail "PR title must look like 'feat(booking): hold seats for 10 minutes' (types: feat fix chore docs refactor test style perf ci). Got: '$TITLE'"
+          fi
+
+          # 2. Branch: type/<issue>-slug
+          if [[ "$BRANCH" =~ ^(feat|fix|chore|docs|refactor|test)/([0-9]+)-[a-z0-9-]+$ ]]; then
+            ok "branch: $BRANCH"
+            branch_issue="${BASH_REMATCH[2]}"
+          else
+            fail "Branch must be named '<type>/<issue-number>-<slug>', e.g. 'feat/12-seat-map'. Got: '$BRANCH'"
+            branch_issue=""
+          fi
+
+          # 3. Linked issue in the body
+          if grep -Eiq '(close[sd]?|fix(e[sd])?|resolve[sd]?) +#[0-9]+' <<< "$BODY"; then
+            ok "linked issue"
+            body_issue=$(grep -Eio '(close[sd]?|fix(e[sd])?|resolve[sd]?) +#[0-9]+' <<< "$BODY" | head -1 | grep -Eo '[0-9]+')
+            if [[ -n "$branch_issue" && "$body_issue" != "$branch_issue" ]]; then
+              echo "::warning::Branch refers to issue #$branch_issue but the body closes #$body_issue."
+            fi
+          else
+            fail "PR body must link its issue with 'Closes #<number>'."
+          fi
+
+          # Changed files
+          gh api --paginate "repos/$REPO/pulls/$PR/files" \
+            --jq '.[] | [.filename, (.additions + .deletions)] | @tsv' > files.tsv
+
+          # 4. Size (lockfiles and generated files excluded)
+          size=$(grep -Ev '(^|/)(package-lock\.json|openapi\.json|schema\.d\.ts)'$'\t' files.tsv | awk -F'\t' '{s+=$2} END {print s+0}')
+          size_ok_by_owner=$(gh api --paginate "repos/$REPO/issues/$PR/events" \
+            --jq "[.[] | select(.event==\"labeled\" and .label.name==\"size-ok\" and .actor.login==\"$OWNER\")] | length" | awk '{s+=$1} END {print s+0}')
+          has_size_label=$(gh pr view "$PR" --repo "$REPO" --json labels --jq '[.labels[].name] | index("size-ok") != null')
+          if (( size <= MAX_LINES )); then
+            ok "size: $size changed lines"
+          elif [[ "$has_size_label" == "true" && "$size_ok_by_owner" -gt 0 ]]; then
+            ok "size: $size changed lines (allowed by owner's size-ok label)"
+          else
+            fail "PR changes $size lines (limit $MAX_LINES, lockfiles and generated files excluded). Split it into smaller PRs. Only the owner can allow an exception with the 'size-ok' label."
+          fi
+
+          # 5. Areas: frontend and workflow files are owner-only
+          if [[ "$AUTHOR" != "$OWNER" ]]; then
+            restricted=$(cut -f1 files.tsv | grep -E '^(frontend/|\.github/|\.claude/|AGENTS\.md$|CLAUDE\.md$|TEAM\.md$)' || true)
+            if [[ -n "$restricted" ]]; then
+              fail "These files are owner-only (see AGENTS.md). Open an issue instead: $(tr '\n' ' ' <<< "$restricted")"
+            else
+              ok "areas"
+            fi
+          fi
+
+          # 6. UI changes need the Impeccable box ticked
+          if cut -f1 files.tsv | grep -Eq '^frontend/src/.*\.(tsx|jsx|css)$'; then
+            if grep -Eiq '^- \[[xX]\] UI change: ran `/impeccable`' <<< "$BODY"; then
+              ok "impeccable box ticked"
+            else
+              fail "This PR changes UI files. Run /impeccable (audit or polish) on the changed screens and tick the box in the PR body."
+            fi
+          fi
+
+          echo
+          if (( errors > 0 )); then
+            echo "$errors rule(s) failed. Fix them; editing the PR title or body re-runs this check."
+            exit 1
+          fi
+          echo "All PR rules passed."

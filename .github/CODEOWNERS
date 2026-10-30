@@ -1,0 +1,3 @@
+# The owner reviews everything. Opening a PR requests this review automatically.
+# Approval itself is enforced by the "Owner approval" CI check, not by the ruleset.
+* @sawayaka143

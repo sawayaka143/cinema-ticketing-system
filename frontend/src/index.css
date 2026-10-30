@@ -1,0 +1,13 @@
+/* Minimal base. The real design system replaces this. */
+:root {
+  color-scheme: light dark;
+  font-family: system-ui, "Segoe UI", Roboto, sans-serif;
+}
+body {
+  margin: 0;
+}
+main {
+  padding: 2rem 1rem;
+  max-width: 60rem;
+  margin: 0 auto;
+}

@@ -1,0 +1,103 @@
+name: Telegram
+
+# Posts to the team's Telegram group. Does nothing until the owner adds the
+# TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID repository secrets.
+
+on:
+  pull_request:
+    types: [opened, ready_for_review, closed]
+  pull_request_review:
+    types: [submitted]
+  workflow_run:
+    workflows: [Deploy]
+    types: [completed]
+  schedule:
+    - cron: "0 14 * * 0" # Sunday 19:00 Almaty
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+  issues: read
+
+jobs:
+  notify:
+    name: Notify
+    runs-on: ubuntu-latest
+    env:
+      TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      CHAT: ${{ secrets.TELEGRAM_CHAT_ID }}
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+      EVENT: ${{ github.event_name }}
+      ACTION: ${{ github.event.action }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      PR_TITLE: ${{ github.event.pull_request.title }}
+      PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+      PR_URL: ${{ github.event.pull_request.html_url }}
+      PR_DRAFT: ${{ github.event.pull_request.draft }}
+      PR_MERGED: ${{ github.event.pull_request.merged }}
+      REVIEW_STATE: ${{ github.event.review.state }}
+      RUN_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+      RUN_URL: ${{ github.event.workflow_run.html_url }}
+    steps:
+      - name: Build and send message
+        run: |
+          set -uo pipefail
+          if [[ -z "$TOKEN" || -z "$CHAT" ]]; then
+            echo "Telegram secrets not set; nothing to do."
+            exit 0
+          fi
+
+          msg=""
+          case "$EVENT" in
+            pull_request)
+              if [[ "$ACTION" == "closed" && "$PR_MERGED" == "true" ]]; then
+                msg="✅ Merged #$PR_NUMBER: $PR_TITLE (by $PR_AUTHOR)"
+              elif [[ "$ACTION" != "closed" && "$PR_DRAFT" != "true" ]]; then
+                msg="👀 Review needed #$PR_NUMBER: $PR_TITLE (by $PR_AUTHOR)
+          $PR_URL"
+              fi ;;
+            pull_request_review)
+              if [[ "$REVIEW_STATE" == "changes_requested" ]]; then
+                msg="✏️ Changes requested on #$PR_NUMBER: $PR_TITLE (@$PR_AUTHOR)
+          $PR_URL"
+              fi ;;
+            workflow_run)
+              if [[ "$RUN_CONCLUSION" == "failure" ]]; then
+                msg="🔥 Production deploy FAILED
+          $RUN_URL"
+              fi ;;
+            schedule|workflow_dispatch)
+              since=$(date -u -d '7 days ago' +%Y-%m-%d)
+              stale=$(date -u -d '3 days ago' +%Y-%m-%dT%H:%M:%SZ)
+              merged=$(gh pr list --repo "$REPO" --state merged --search "merged:>=$since" --limit 200 \
+                --json author --jq 'group_by(.author.login) | map("  \(.[0].author.login): \(length)") | .[]')
+              waiting=$(gh pr list --repo "$REPO" --state open --json number,title,isDraft \
+                --jq '.[] | select(.isDraft|not) | "  #\(.number) \(.title)"')
+              stale_issues=$(gh issue list --repo "$REPO" --state open --limit 200 --json number,title,assignees,updatedAt \
+                --jq ".[] | select((.assignees|length)>0 and .updatedAt < \"$stale\") | \"  #\(.number) \(.title) → \([.assignees[].login]|join(\", \"))\"")
+              msg="📊 Weekly digest (since $since)
+
+          Merged PRs per person:
+          ${merged:-  nobody merged anything}
+
+          Open PRs:
+          ${waiting:-  none}
+
+          Stale issues (3-day rule, back to the pool):
+          ${stale_issues:-  none}"
+              ;;
+          esac
+
+          if [[ -z "$msg" ]]; then
+            echo "Nothing to send for $EVENT/$ACTION."
+            exit 0
+          fi
+          # Strip the YAML indentation from continuation lines
+          msg=$(sed -E 's/^ {10}//' <<< "$msg")
+          curl -sS -f -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=${CHAT}" \
+            --data-urlencode "text=${msg}" \
+            --data-urlencode "disable_web_page_preview=true" > /dev/null
+          echo "Sent."

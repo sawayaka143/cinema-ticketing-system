@@ -1,0 +1,56 @@
+name: Owner approval
+
+# Required status check that replaces GitHub's "required approvals" setting:
+# - PRs by the repo owner pass (the owner can't approve their own PR on GitHub).
+# - Everyone else needs an APPROVED review from the owner on the latest commit.
+#   Pushing new commits makes the old approval stale, so the check fails until the owner approves again.
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+  pull_request_review:
+    types: [submitted, dismissed]
+
+permissions:
+  pull-requests: read
+
+concurrency:
+  group: owner-approval-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  approval:
+    name: Owner approval
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check the owner's review
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          OWNER: ${{ github.repository_owner }}
+          PR: ${{ github.event.pull_request.number }}
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+        run: |
+          set -euo pipefail
+          if [[ "$AUTHOR" == "$OWNER" ]]; then
+            echo "PR is by the owner; no approval needed."
+            exit 0
+          fi
+          head_sha=$(gh pr view "$PR" --repo "$REPO" --json headRefOid --jq .headRefOid)
+          # Latest decisive review by the owner (approve / request changes / dismissed)
+          latest=$(gh api --paginate "repos/$REPO/pulls/$PR/reviews" \
+            --jq ".[] | select(.user.login==\"$OWNER\" and (.state==\"APPROVED\" or .state==\"CHANGES_REQUESTED\" or .state==\"DISMISSED\")) | \"\(.state) \(.commit_id)\"" \
+            | tail -1 || true)
+          state="${latest%% *}"
+          commit="${latest##* }"
+          echo "Owner's latest review: ${state:-none} on ${commit:-?}; head is $head_sha"
+          if [[ "$state" == "APPROVED" && "$commit" == "$head_sha" ]]; then
+            echo "Approved by @$OWNER on the latest commit."
+            exit 0
+          fi
+          if [[ "$state" == "APPROVED" ]]; then
+            echo "::error::@$OWNER approved an older commit. New commits were pushed since, so the owner has to approve again."
+          else
+            echo "::error::Waiting for @$OWNER to approve this PR."
+          fi
+          exit 1

@@ -1,0 +1,39 @@
+name: Task
+description: A piece of work small enough for one PR (under ~500 changed lines)
+labels: ["type:feat"]
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - backend
+        - database
+        - frontend
+        - tests
+        - docs
+        - ci
+    validations:
+      required: true
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What should be possible after this is done, and for which role (customer, cashier, manager, admin)?
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: A checklist the reviewer can verify one by one.
+      value: |
+        - [ ]
+        - [ ]
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Links to docs/schema-decisions.md sections, API shape, edge cases, dependencies on other issues.
