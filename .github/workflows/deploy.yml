@@ -27,6 +27,7 @@ jobs:
     steps:
       - name: Check secrets
         id: secrets
+        working-directory: .   # backend/ doesn't exist yet: checkout runs after this step
         env:
           DATABASE_URL: ${{ secrets.PROD_MIGRATION_DATABASE_URL }}
         run: |
