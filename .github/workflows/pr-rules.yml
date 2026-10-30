@@ -9,9 +9,9 @@ permissions:
   pull-requests: read
   issues: read
 
-concurrency:
-  group: pr-rules-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
+# No concurrency group on purpose: opening a PR with labels fires several events at once,
+# and a cancelled run can become the required check's result and block the PR.
+# Each run reads the PR's current state instead, so overlapping runs agree.
 
 jobs:
   rules:
@@ -25,15 +25,19 @@ jobs:
           OWNER: ${{ github.repository_owner }}
           PR: ${{ github.event.pull_request.number }}
           AUTHOR: ${{ github.event.pull_request.user.login }}
-          TITLE: ${{ github.event.pull_request.title }}
-          BRANCH: ${{ github.event.pull_request.head.ref }}
-          BODY: ${{ github.event.pull_request.body }}
           MAX_LINES: "500"
         run: |
           set -uo pipefail
           errors=0
           fail() { echo "::error::$1"; errors=$((errors+1)); }
           ok()   { echo "OK  $1"; }
+
+          # Current PR state, not the snapshot in the event that started this run
+          pr_json=$(gh pr view "$PR" --repo "$REPO" --json title,body,headRefName) || {
+            echo "::error::Could not read PR #$PR"; exit 1; }
+          TITLE=$(jq -r '.title' <<< "$pr_json")
+          BODY=$(jq -r '.body // ""' <<< "$pr_json")
+          BRANCH=$(jq -r '.headRefName' <<< "$pr_json")
 
           # 1. Title: Conventional Commit
           if [[ "$TITLE" =~ ^(feat|fix|chore|docs|refactor|test|style|perf|ci)(\([a-z0-9-]+\))?!?:\ .{3,}$ ]]; then
