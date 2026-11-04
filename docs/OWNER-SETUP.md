@@ -64,13 +64,6 @@ Both apps' `vercel.json` switch off Vercel's own production builds from `main`, 
 | `VERCEL_BACKEND_PROJECT_ID` | `cinema-api` project id |
 | `VERCEL_FRONTEND_PROJECT_ID` | `cinema-web` project id |
 
-Repository secrets (**Settings → Secrets → Actions**), whenever you get to it:
-
-| Secret | Value |
-|---|---|
-| `TELEGRAM_BOT_TOKEN` | from @BotFather (`/newbot`), then add the bot to the group |
-| `TELEGRAM_CHAT_ID` | group id: send a message in the group, open `https://api.telegram.org/bot<token>/getUpdates`, copy `chat.id` (starts with `-100`) |
-
 ## 5. Test the whole pipeline before inviting anyone
 
 1. `git switch -c chore/1-pipeline-check`, change a line in `README.md`, then open a PR (create issue #1 first).
