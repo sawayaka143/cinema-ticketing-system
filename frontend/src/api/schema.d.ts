@@ -44,10 +44,104 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/movies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Movies
+         * @description Active movies, by title.
+         */
+        get: operations["list_movies_api_movies_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/movies/{movie_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Movie
+         * @description One active movie. Unknown or archived ids are 404.
+         */
+        get: operations["get_movie_api_movies__movie_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/movies/{movie_id}/screenings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Movie Screenings
+         * @description Upcoming screenings of one movie, earliest first. Past screenings are never listed.
+         */
+        get: operations["list_movie_screenings_api_movies__movie_id__screenings_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/screenings/{screening_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Screening
+         * @description One screening with its movie and hall.
+         */
+        get: operations["get_screening_api_screenings__screening_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** HTTPValidationError */
+        HTTPValidationError: {
+            /** Detail */
+            detail?: components["schemas"]["ValidationError"][];
+        };
+        /** HallOut */
+        HallOut: {
+            /** Hall Id */
+            hall_id: number;
+            /** Hall Type */
+            hall_type: string;
+            /** Name */
+            name: string;
+        };
         /** Health */
         Health: {
             /** Status */
@@ -62,6 +156,79 @@ export interface components {
              * Format: uuid
              */
             id: string;
+        };
+        /** MovieOut */
+        MovieOut: {
+            /** Description */
+            description: string | null;
+            /** Duration Min */
+            duration_min: number;
+            /** Genres */
+            genres: string[];
+            /** Min Age */
+            min_age: number;
+            /** Movie Id */
+            movie_id: number;
+            /** Poster Url */
+            poster_url: string | null;
+            /** Release Year */
+            release_year: number | null;
+            /** Title */
+            title: string;
+        };
+        /** ScreeningDetail */
+        ScreeningDetail: {
+            /** Base Price */
+            base_price: string;
+            /**
+             * End Time
+             * Format: date-time
+             */
+            end_time: string;
+            hall: components["schemas"]["HallOut"];
+            movie: components["schemas"]["MovieOut"];
+            /** Movie Id */
+            movie_id: number;
+            /** Screening Id */
+            screening_id: number;
+            /**
+             * Start Time
+             * Format: date-time
+             */
+            start_time: string;
+        };
+        /** ScreeningOut */
+        ScreeningOut: {
+            /** Base Price */
+            base_price: string;
+            /**
+             * End Time
+             * Format: date-time
+             */
+            end_time: string;
+            hall: components["schemas"]["HallOut"];
+            /** Movie Id */
+            movie_id: number;
+            /** Screening Id */
+            screening_id: number;
+            /**
+             * Start Time
+             * Format: date-time
+             */
+            start_time: string;
+        };
+        /** ValidationError */
+        ValidationError: {
+            /** Context */
+            ctx?: Record<string, never>;
+            /** Input */
+            input?: unknown;
+            /** Location */
+            loc: (string | number)[];
+            /** Message */
+            msg: string;
+            /** Error Type */
+            type: string;
         };
     };
     responses: never;
@@ -108,6 +275,122 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Me"];
+                };
+            };
+        };
+    };
+    list_movies_api_movies_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MovieOut"][];
+                };
+            };
+        };
+    };
+    get_movie_api_movies__movie_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                movie_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MovieOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_movie_screenings_api_movies__movie_id__screenings_get: {
+        parameters: {
+            query?: {
+                /** @description Day in Almaty time (YYYY-MM-DD). Omit for the next 7 days. */
+                date?: string | null;
+            };
+            header?: never;
+            path: {
+                movie_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScreeningOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_screening_api_screenings__screening_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                screening_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScreeningDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
