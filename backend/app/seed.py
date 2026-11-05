@@ -2,9 +2,12 @@
 
 Run from backend/:  python -m app.seed
 Safe to run again: existing halls, movies and screenings are skipped, not duplicated.
-Refuses to run when APP_ENV=production.
+Refuses to run when APP_ENV=production, unless --allow-production is passed
+(a deliberate one-off, e.g. the demo seed before the final defence).
 """
 
+import argparse
+from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import datetime, time, timedelta
 from decimal import Decimal
@@ -236,9 +239,21 @@ def seed(db: Session) -> dict[str, int]:
     return added
 
 
-def main() -> None:
+def main(argv: Sequence[str] | None = None) -> None:
+    parser = argparse.ArgumentParser(prog="python -m app.seed", description=__doc__)
+    parser.add_argument(
+        "--allow-production",
+        action="store_true",
+        help="seed even when APP_ENV=production (one-off demo seed)",
+    )
+    args = parser.parse_args(argv)
     if get_settings().app_env == "production":
-        raise SystemExit("Refusing to seed: APP_ENV=production.")
+        if not args.allow_production:
+            raise SystemExit(
+                "Refusing to seed: APP_ENV=production. "
+                "Pass --allow-production to seed production on purpose."
+            )
+        print("WARNING: seeding the PRODUCTION database (--allow-production).")
     with Session(get_engine()) as db, db.begin():
         added = seed(db)
     print("Added " + ", ".join(f"{n} {k}" for k, n in added.items()))
