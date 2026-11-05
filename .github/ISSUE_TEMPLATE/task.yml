@@ -1,5 +1,5 @@
 name: Task
-description: A piece of work small enough for one PR (under ~500 changed lines)
+description: A piece of work small enough for one PR (under ~1,000 changed lines)
 labels: ["type:feat"]
 body:
   - type: dropdown

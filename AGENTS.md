@@ -48,7 +48,7 @@ Since W10 the owner carries the critical path, because no other member had joine
    Types: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`.
 4. **PR title = Conventional Commit:** `feat(booking): hold seats for 10 minutes`. It becomes the squash-commit message.
 5. **PR body links the issue:** `Closes #12`.
-6. **Keep PRs small: under 500 changed lines** (lockfiles and generated files don't count). Split bigger work into several issues.
+6. **Keep PRs small: under 1,000 changed lines** (lockfiles and generated files don't count). Split bigger work into several issues.
 7. **Never commit secrets.** No `.env`, no keys, no database URLs. Use `.env.example` with placeholder values.
 8. **Don't touch** `.github/`, `.claude/`, `AGENTS.md`, `CLAUDE.md`, `TEAM.md` or `CODEOWNERS` unless the owner asked for it.
 9. **Never force-push a branch that's under review, and never rewrite `main`.**
