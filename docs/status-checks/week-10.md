@@ -15,7 +15,7 @@ First check. "Since the last check" means since the Week 9 database task (Task 0
 - The Task 09 design was reviewed question by question and fixed in [`schema-decisions.md`](../schema-decisions.md). The repo, workflow rules, CI and the Vercel deployment for frontend and backend are set up.
 - The whole W10 critical path is merged: first migration with users and catalog tables (#25), second migration with booking, payment and audit tables (#26), catalog read endpoints (#27), demo seed `python -m app.seed` (#28), Supabase login linked to customer and staff profiles with `GET /api/me` (#29), frontend shell with routing, login and real catalog data in the dark theme from #18 (#30).
 - The PR size limit was raised to 1,000 changed lines (#32), so one feature fits in one PR.
-- All four teammates accepted their invitations and are now collaborators. W11 tasks for them are open as #21–#24.
+- W11 tasks for the teammates are open as #21–#24. Their collaborator invitations (write access, sent 2026-11-04) are still not accepted as of 2026-11-05. They expire on 2026-11-11.
 
 **Demo**
 1. **Browse movies:** the movie list loads from `GET /api/movies` with seeded posters and genres.
@@ -24,9 +24,9 @@ First check. "Since the last check" means since the Week 9 database task (Task 0
 4. **Sign up:** create a customer account on `/login` → `GET /api/me` returns the new customer profile.
 
 **Status: At Risk**
-- **Cause:** the owner still does all the work. The teammates joined the repo, but none has a commit, issue, PR or review yet.
+- **Cause:** the owner still does all the work. None of the four teammates has accepted the repo invitation, so none has a commit, issue, PR or review.
 - **Impact:** W11 is the core of the MVP (seat map, hold, payment, expiry). If it slips, the W13 feature freeze is at risk.
-- **Response:** the owner builds the W11 booking flow. Each teammate has one off-critical-path issue (#21–#24). A task with no branch by **Sun 2026-11-08 20:00** goes back to the owner or is dropped.
+- **Response:** the owner builds the W11 booking flow and sends each teammate the invitation link directly. Each teammate has one off-critical-path issue (#21–#24). A task with no branch by **Sun 2026-11-08 20:00** goes back to the owner or is dropped.
 - **Responsible:** Aldiyar Yeskenov.
 
 **Team decision this week:** keep the scope to the MVP: the customer booking flow and the manager panel. Cashier and admin screens stay out.
@@ -52,19 +52,19 @@ First check. "Since the last check" means since the Week 9 database task (Task 0
   - `ticket_type` seed
 
 ### Sanzhar Saparkhan (@Sanzhar872): backend
-- **Completed:** No evidence. The invitation is accepted, but there is no commit, issue, PR or review yet.
+- **Completed:** No evidence. The invitation (sent 2026-11-04) is not accepted yet.
 - **Next task (due 2026-11-13):** [#21](https://github.com/sawayaka143/cinema-ticketing-system/issues/21), seat-hall trigger migration (`seat.hall_id = screening.hall_id`). Checkable result: the migration plus a test showing that a ticket for a seat from another hall is rejected. No branch by 2026-11-08 20:00 → back to the owner or dropped.
 
 ### Ulan Abiltayev (@Ransa19): booking
-- **Completed:** No evidence. The invitation is accepted, but there is no commit, issue, PR or review yet.
+- **Completed:** No evidence. The invitation (sent 2026-11-04) is not accepted yet.
 - **Next task (due 2026-11-13):** [#22](https://github.com/sawayaka143/cinema-ticketing-system/issues/22), the booking section of `docs/test-cases.md`: 5 hold, payment and expiry cases. Checkable result: the file is merged, and each case has steps and an expected result. No branch by 2026-11-08 20:00 → back to the owner or dropped.
 
 ### Zhakhongir Shakarbekov (@Zhakha749): requirements, discounts
-- **Completed:** No evidence. The invitation is accepted, but there is no commit, issue, PR or review yet.
+- **Completed:** No evidence. The invitation (sent 2026-11-04) is not accepted yet.
 - **Next task (due 2026-11-13):** [#23](https://github.com/sawayaka143/cinema-ticketing-system/issues/23), `ticket_type` discounts. Checkable result: the issue has acceptance criteria and price rules that the owner agrees to. No branch by 2026-11-08 20:00 → back to the owner or dropped.
 
 ### Akzhol Idakhan (@akzhol01): tests, phone validation
-- **Completed:** No evidence. The invitation is accepted, but there is no commit, issue, PR or review yet.
+- **Completed:** No evidence. The invitation (sent 2026-11-04) is not accepted yet.
 - **Next task (due 2026-11-13):** [#24](https://github.com/sawayaka143/cinema-ticketing-system/issues/24), phone format validation (`+7XXXXXXXXXX`) in the backend. Checkable result: a merged PR where a wrong format returns 400, with a success test and a failure test. No branch by 2026-11-08 20:00 → back to the owner or dropped.
 
 ## Next tasks
@@ -82,7 +82,7 @@ Teammate issues are assigned when the person picks one up. With no branch by Sun
 
 ## Stale issues (3-day rule)
 
-None. #21–#24 were opened 2026-11-05 and are not assigned yet. The 2026-11-08 20:00 cutoff applies to them.
+None. #21–#24 were opened 2026-11-05 and can't be assigned until the invitations are accepted. The 2026-11-08 20:00 cutoff applies to them.
 
 ## Ready? (check before class)
 - [x] We can show a new result, not only talk about it (browse movies → movie page → screening page → sign up, on real data)
