@@ -49,6 +49,6 @@ Summarise for the user:
 - what the acceptance criteria require;
 - which files you expect to change (all must be inside the user's area);
 - which tests you'll add (backend: at least one success and one failure test per endpoint);
-- whether the change will stay **under 500 changed lines**. If it won't, propose how to split it into several issues **now**.
+- whether the change will stay **under 1,000 changed lines**. If it won't, propose how to split it into several issues **now**.
 
 Then start the work. When it's done, use the `open-pr` skill.

@@ -25,7 +25,7 @@ jobs:
           OWNER: ${{ github.repository_owner }}
           PR: ${{ github.event.pull_request.number }}
           AUTHOR: ${{ github.event.pull_request.user.login }}
-          MAX_LINES: "500"
+          MAX_LINES: "1000"
         run: |
           set -uo pipefail
           errors=0
