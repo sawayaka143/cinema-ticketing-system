@@ -285,5 +285,5 @@ Bookings are never deleted; only their tickets are.
 - **Cleaning buffer:** proposed 15 min between shows. Confirm.
 - **Rating list:** keep 0+/6+/12+/16+/18+, or add more (e.g. 3+)?
 - **pg_cron:** confirm it can be enabled on both Supabase projects (prod and dev).
-- **Seat-hall trigger:** should it also fire when a seat's `hall_id` or a screening's `hall_id` changes? Proposed: simply forbid changing `hall_id` on seats/screenings that already have tickets.
+- ~~**Seat-hall trigger:** should it also fire when a seat's `hall_id` or a screening's `hall_id` changes?~~ Decided (#21, migration 0004): changing `hall_id` on a seat or screening that already has tickets is rejected.
 - **Task 09 talking points to update** before the demo: Sanzhar (BOOKING–PAYMENT is now 1:M), Ulan (two-step booking, hold expiry), Aldiyar (capacity and total_amount are views), Akzhol (Postgres types, phone CHECK), Zhakhongir (TICKET_TYPE).
