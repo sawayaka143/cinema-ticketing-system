@@ -9,8 +9,10 @@ from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
+from app.api.bookings import expire_stale_holds
 from app.db import get_session
-from app.models import Movie, Screening
+from app.models import Movie, Screening, Seat, Ticket
+from app.pricing import ticket_price
 
 router = APIRouter(tags=["catalog"])
 
@@ -133,6 +135,57 @@ def list_movie_screenings(
         .order_by(Screening.start_time)
     )
     return [_screening_out(s) for s in screenings]
+
+
+class SeatOut(BaseModel):
+    seat_id: int
+    row_label: str
+    seat_number: int
+    grid_row: int
+    grid_col: int
+    seat_type: str
+    price: Decimal
+    is_taken: bool
+
+
+class SeatMap(BaseModel):
+    screening_id: int
+    hall: HallOut
+    seats: list[SeatOut]
+
+
+@router.get("/screenings/{screening_id}/seats", response_model=SeatMap)
+def get_seat_map(screening_id: int, db: SessionDep) -> SeatMap:
+    """Every seat of the screening's hall, its price and whether it is taken (held or sold)."""
+    s = db.scalar(
+        select(Screening)
+        .where(Screening.screening_id == screening_id)
+        .options(selectinload(Screening.hall))
+    )
+    if s is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Screening not found")
+    expire_stale_holds(db, screening_id)
+    taken = set(db.scalars(select(Ticket.seat_id).where(Ticket.screening_id == screening_id)))
+    seats = db.scalars(
+        select(Seat).where(Seat.hall_id == s.hall_id).order_by(Seat.grid_row, Seat.grid_col)
+    )
+    return SeatMap(
+        screening_id=s.screening_id,
+        hall=HallOut(hall_id=s.hall.hall_id, name=s.hall.name, hall_type=s.hall.hall_type),
+        seats=[
+            SeatOut(
+                seat_id=seat.seat_id,
+                row_label=seat.row_label,
+                seat_number=seat.seat_number,
+                grid_row=seat.grid_row,
+                grid_col=seat.grid_col,
+                seat_type=seat.seat_type,
+                price=ticket_price(s.base_price, seat.seat_type),
+                is_taken=seat.seat_id in taken,
+            )
+            for seat in seats
+        ],
+    )
 
 
 @router.get("/screenings/{screening_id}", response_model=ScreeningDetail)
