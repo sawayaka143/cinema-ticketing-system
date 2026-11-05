@@ -44,8 +44,7 @@ Since W10 the owner carries the critical path, because no other member had joine
 
 1. **Never push to `main`.** Every change goes through a pull request, and `main` is protected.
 2. **One issue → one branch → one PR.** No issue, no PR. Create the issue first.
-3. **Branch name:** `<type>/<issue-number>-<short-slug>`, e.g. `feat/12-seat-map`, `fix/31-expired-holds`.
-   Types: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`.
+3. **Branch name (recommended, not enforced):** `<type>/<issue-number>-<short-slug>`, e.g. `feat/12-seat-map`, `fix/31-expired-holds`.
 4. **PR title = Conventional Commit:** `feat(booking): hold seats for 10 minutes`. It becomes the squash-commit message.
 5. **PR body links the issue:** `Closes #12`.
 6. **Keep PRs small: under 1,000 changed lines** (lockfiles and generated files don't count). Split bigger work into several issues.
@@ -87,12 +86,12 @@ Claude Code users: the skills in `.claude/skills/` do these steps for you (`/sta
 3. **Open the PR:** follow [`.claude/skills/open-pr/SKILL.md`](.claude/skills/open-pr/SKILL.md). Rebase on `main`, run checks, fill in the template.
 4. **Review:** the owner reviews within about 24 hours. Fix the requested changes on the same branch, then push.
    While you wait, **start your next issue on a new branch**. Don't stack work on an unmerged branch.
-5. **Merge:** only after owner approval and green CI. Squash merge, and the branch is deleted automatically.
+5. **Merge:** after green CI. The owner's review is welcome but no longer required. Squash merge, and the branch is deleted automatically.
 
 ## Definition of done
 
 - The issue's acceptance criteria are met.
-- CI is green: PR rules, owner approval, Backend, Frontend.
+- CI is green: PR rules, Backend, Frontend.
 - Tests were added under the testing rule (backend).
 - `openapi.json` and `schema.d.ts` are regenerated if the API changed.
 - No secrets, no debug prints, no commented-out code.

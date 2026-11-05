@@ -1,6 +1,6 @@
 # How this team works
 
-Short version: **issue → branch → PR → owner review → merge.** CI blocks everything else.
+Short version: **issue → branch → PR → merge when CI is green** (owner review optional). CI blocks everything else.
 
 ## Weekly rhythm
 

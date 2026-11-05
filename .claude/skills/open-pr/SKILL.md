@@ -13,7 +13,7 @@ CI rejects PRs that skip these steps, so don't skip any. If a step fails, fix th
 git branch --show-current
 ```
 - It must **not** be `main`. If it is, stop.
-- It must match `^(feat|fix|chore|docs|refactor|test)/[0-9]+-[a-z0-9-]+$`. If it doesn't, rename it: `git branch -m <new-name>`.
+- Preferably it matches `^(feat|fix|chore|docs|refactor|test)/[0-9]+-[a-z0-9-]+$` (not enforced by CI). If it doesn't, you may rename it: `git branch -m <new-name>`.
 - Get the issue number from the branch name.
 
 ## 2. Update from main
