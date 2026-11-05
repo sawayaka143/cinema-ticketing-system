@@ -13,16 +13,23 @@ from decimal import Decimal
 from typing import Annotated, Literal
 
 import segno
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from pydantic import BaseModel, Field
 from sqlalchemy import delete, func, select, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.auth import CurrentUser, CurrentUserDep
+from app.auth import CurrentUser, CurrentUserDep, OptionalUserDep
 from app.db import get_session
-from app.models import Booking, Customer, Payment, Screening, Seat, Ticket, TicketType
+from app.models import Booking, Customer, Movie, Payment, Screening, Seat, Ticket, TicketType
 from app.pricing import ticket_price
+from app.ticket_types import (
+    DEFAULT_TYPE,
+    MAX_STAFF_TICKETS,
+    age_problem,
+    choosable,
+    is_active_staff,
+)
 
 router = APIRouter(tags=["bookings"])
 
@@ -38,6 +45,7 @@ class BookingTicketOut(BaseModel):
     seat_id: int
     row_label: str
     seat_number: int
+    ticket_type: str
     price: Decimal
 
 
@@ -81,8 +89,9 @@ def _own_booking(db: Session, user: CurrentUser, booking_id: int, *, lock: bool 
 
 def _booking_out(db: Session, booking: Booking) -> BookingOut:
     rows = db.execute(
-        select(Ticket, Seat)
+        select(Ticket, Seat, TicketType.name)
         .join(Seat, Seat.seat_id == Ticket.seat_id)
+        .join(TicketType, TicketType.ticket_type_id == Ticket.ticket_type_id)
         .where(Ticket.booking_id == booking.booking_id)
         .order_by(Seat.row_label, Seat.seat_number)
     ).all()
@@ -93,9 +102,10 @@ def _booking_out(db: Session, booking: Booking) -> BookingOut:
             seat_id=s.seat_id,
             row_label=s.row_label,
             seat_number=s.seat_number,
+            ticket_type=type_name,
             price=t.price,
         )
-        for t, s in rows
+        for t, s, type_name in rows
     ]
     seconds_left = 0
     if booking.status == "pending":
@@ -119,6 +129,18 @@ class HoldIn(BaseModel):
     seat_ids: list[int] = Field(
         description=f"1 to {MAX_SEATS} distinct seats of the screening's hall"
     )
+    ticket_types: dict[int, str] = Field(
+        default={},
+        description="seat_id -> ticket type name (student, child, staff). Others are adult.",
+        examples=[{"523": "child"}],
+    )
+
+
+class TicketTypeOut(BaseModel):
+    name: str
+    discount_pct: Decimal
+    max_age: int | None
+    staff_only: bool
 
 
 class PayIn(BaseModel):
@@ -133,6 +155,67 @@ def _my_customer(db: Session, user: CurrentUser) -> Customer:
     if customer is None:
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Create a customer profile first")
     return customer
+
+
+def _ticket_types_for(
+    db: Session, user: CurrentUser, body: HoldIn, screening: Screening
+) -> dict[int, TicketType]:
+    """seat_id -> TicketType for the hold, enforcing the §7 rules (400/403)."""
+    stray = set(body.ticket_types) - set(body.seat_ids)
+    if stray:
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST, "ticket_types names a seat not in seat_ids"
+        )
+    types = {t.name: t for t in db.scalars(select(TicketType))}
+    if DEFAULT_TYPE not in types:
+        raise RuntimeError(f"ticket type {DEFAULT_TYPE!r} is missing; run the migrations")
+    names = {seat_id: body.ticket_types.get(seat_id, DEFAULT_TYPE) for seat_id in body.seat_ids}
+    unknown = sorted(set(names.values()) - set(types))
+    if unknown:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, f"Unknown ticket type: {unknown[0]}")
+
+    min_age = db.scalar(select(Movie.min_age).where(Movie.movie_id == screening.movie_id))
+    used = {types[n] for n in names.values()}
+    for t in used:
+        problem = age_problem(t, min_age)
+        if problem:
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, problem)
+    staff_tickets = sum(types[n].staff_only for n in names.values())
+    if staff_tickets:
+        if not is_active_staff(db, user):
+            raise HTTPException(
+                status.HTTP_403_FORBIDDEN, "Staff tickets are for active staff only"
+            )
+        if staff_tickets > MAX_STAFF_TICKETS:
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
+                f"At most {MAX_STAFF_TICKETS} staff tickets per booking",
+            )
+    return {seat_id: types[name] for seat_id, name in names.items()}
+
+
+@router.get("/ticket-types", response_model=list[TicketTypeOut])
+def list_ticket_types(
+    user: OptionalUserDep,
+    db: SessionDep,
+    screening_id: Annotated[
+        int | None, Query(description="Only the types allowed for this screening's movie")
+    ] = None,
+) -> list[TicketTypeOut]:
+    """Price categories a customer may choose. Staff types only for logged-in active staff."""
+    min_age = 0
+    if screening_id is not None:
+        min_age = db.scalar(
+            select(Movie.min_age)
+            .join(Screening, Screening.movie_id == Movie.movie_id)
+            .where(Screening.screening_id == screening_id)
+        )
+        if min_age is None:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "Screening not found")
+    return [
+        TicketTypeOut.model_validate(t, from_attributes=True)
+        for t in choosable(db, min_age, is_active_staff(db, user))
+    ]
 
 
 @router.post("/bookings", response_model=BookingOut, status_code=status.HTTP_201_CREATED)
@@ -155,20 +238,18 @@ def hold_seats(body: HoldIn, user: CurrentUserDep, db: SessionDep) -> BookingOut
     ).all()
     if len(seats) != len(ids):
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "A seat is not in this screening's hall")
-    adult = db.scalar(select(TicketType).where(TicketType.name == "adult"))
-    if adult is None:
-        raise RuntimeError("ticket type 'adult' is missing; run the migrations")
+    chosen = _ticket_types_for(db, user, body, screening)
 
     # Plain values first: the commit in the lazy check expires the ORM objects above.
     rows = [
-        (seat.seat_id, ticket_price(screening.base_price, seat.seat_type, adult.discount_pct))
+        (
+            seat.seat_id,
+            chosen[seat.seat_id].ticket_type_id,
+            ticket_price(screening.base_price, seat.seat_type, chosen[seat.seat_id].discount_pct),
+        )
         for seat in seats
     ]
-    screening_id, customer_id, type_id = (
-        screening.screening_id,
-        customer.customer_id,
-        adult.ticket_type_id,
-    )
+    screening_id, customer_id = screening.screening_id, customer.customer_id
 
     expire_stale_holds(db, screening_id)  # lazy check: frees stale holds first
     booking = Booking(customer_id=customer_id)
@@ -184,7 +265,7 @@ def hold_seats(body: HoldIn, user: CurrentUserDep, db: SessionDep) -> BookingOut
                     ticket_type_id=type_id,
                     price=price,
                 )
-                for seat_id, price in rows
+                for seat_id, type_id, price in rows
             ]
         )
         db.commit()

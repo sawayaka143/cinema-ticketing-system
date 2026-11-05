@@ -310,6 +310,10 @@
           "ticket_id": {
             "title": "Ticket Id",
             "type": "integer"
+          },
+          "ticket_type": {
+            "title": "Ticket Type",
+            "type": "string"
           }
         },
         "required": [
@@ -318,6 +322,7 @@
           "seat_id",
           "row_label",
           "seat_number",
+          "ticket_type",
           "price"
         ],
         "title": "BookingTicketOut",
@@ -631,6 +636,20 @@
             },
             "title": "Seat Ids",
             "type": "array"
+          },
+          "ticket_types": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "default": {},
+            "description": "seat_id -> ticket type name (student, child, staff). Others are adult.",
+            "examples": [
+              {
+                "523": "child"
+              }
+            ],
+            "title": "Ticket Types",
+            "type": "object"
           }
         },
         "required": [
@@ -1399,6 +1418,41 @@
           "role"
         ],
         "title": "StaffOut",
+        "type": "object"
+      },
+      "TicketTypeOut": {
+        "properties": {
+          "discount_pct": {
+            "title": "Discount Pct",
+            "type": "string"
+          },
+          "max_age": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Age"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "staff_only": {
+            "title": "Staff Only",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "discount_pct",
+          "max_age",
+          "staff_only"
+        ],
+        "title": "TicketTypeOut",
         "type": "object"
       },
       "ValidationError": {
@@ -2811,6 +2865,67 @@
         "summary": "Get Seat Map",
         "tags": [
           "catalog"
+        ]
+      }
+    },
+    "/api/ticket-types": {
+      "get": {
+        "description": "Price categories a customer may choose. Staff types only for logged-in active staff.",
+        "operationId": "list_ticket_types_api_ticket_types_get",
+        "parameters": [
+          {
+            "description": "Only the types allowed for this screening's movie",
+            "in": "query",
+            "name": "screening_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Only the types allowed for this screening's movie",
+              "title": "Screening Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TicketTypeOut"
+                  },
+                  "title": "Response List Ticket Types Api Ticket Types Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Ticket Types",
+        "tags": [
+          "bookings"
         ]
       }
     }

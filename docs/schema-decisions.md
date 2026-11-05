@@ -285,7 +285,7 @@ Bookings are never deleted; only their tickets are.
 
 ## 9. Open questions
 
-- **Discount values:** exact `discount_pct` for student, child, staff (proposed staff = 50%), and the child `max_age` (proposed 11). Owner: Zhakhongir.
+- ~~**Discount values:**~~ Proposed in #57 (migration 0007), awaiting the owner's "agreed": adult 0%, student 20%, child 30% (`max_age` 11), staff 50% (`staff_only`, max 2 per booking).
 - **VIP multiplier:** proposed 1.5×. Confirm.
 - **Cleaning buffer:** proposed 15 min between shows. Confirm.
 - **Rating list:** keep 0+/6+/12+/16+/18+, or add more (e.g. 3+)?
