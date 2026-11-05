@@ -210,13 +210,14 @@ def seed(db: Session) -> dict[str, int]:
     today = datetime.now(ALMATY).date()
     for h, plan in enumerate(HALLS):
         hall = halls[plan.name]
-        booked = list(
-            db.execute(
+        booked = [
+            (s, e)
+            for s, e in db.execute(
                 select(Screening.start_time, Screening.end_time).where(
                     Screening.hall_id == hall.hall_id
                 )
-            ).tuples()
-        )
+            )
+        ]
         for day in range(DAYS):
             for i, showtime in enumerate(plan.showtimes):
                 start = datetime.combine(today + timedelta(days=day), showtime, ALMATY)
