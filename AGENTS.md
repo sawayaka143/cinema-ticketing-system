@@ -12,7 +12,7 @@ Work happens in weeks 10–14 (milestones `W10` … `W14`), and the demo is in w
 - **Main action:** a customer picks a movie → a screening → free seats on the hall map → seats are held for 10 minutes → (fake) payment → tickets.
 - **Roles:** Customer, Cashier, Manager, Admin.
 - **MVP:** the customer booking flow, plus a manager panel (CRUD for movies/halls/screenings and the occupancy/revenue report).
-  Cashier and admin screens are **stretch goals** that only start once the MVP works.
+  Cashier and admin screens are **out of scope** (dropped in W10 to protect the MVP).
 - Course brief: [`docs/brief.md`](docs/brief.md). Database design: [`docs/schema-decisions.md`](docs/schema-decisions.md) (the contract for all migrations).
 
 ## Repo layout
@@ -20,23 +20,25 @@ Work happens in weeks 10–14 (milestones `W10` … `W14`), and the demo is in w
 | Path | What | Owner |
 |---|---|---|
 | `frontend/` | React + Vite + TypeScript app (Vercel) | Aldiyar (@sawayaka143) only |
-| `backend/` | FastAPI app (Vercel) + Alembic migrations | backend team |
+| `backend/` | FastAPI app (Vercel) + Alembic migrations | Aldiyar; others through assigned issues |
 | `backend/migrations/` | database schema changes | needs owner approval |
-| `e2e/` | end-to-end tests (later) | Akzhol |
-| `docs/` | brief, schema decisions, weekly reports | everyone |
+| `e2e/` | end-to-end tests (later) | through assigned issues |
+| `docs/` | brief, schema decisions, weekly status checks (`docs/status-checks/`) | everyone |
 | `.github/`, `.claude/`, `AGENTS.md`, `CLAUDE.md`, `TEAM.md` | workflow and rules | owner only |
 
 ## Who owns what
 
 | Person | GitHub | Area |
 |---|---|---|
-| Aldiyar Yeskenov | @sawayaka143 | Repo owner, reviewer of every PR, all of `frontend/`, form validation, `booking_total` view |
-| Sanzhar Saparkhan | _tbd_ | Backend lead: structure, auth, catalog endpoints (movies, halls, seats, screenings), seat-hall trigger |
-| Ulan Abiltayev | _tbd_ | Booking: hold, payment, expiry, cancel/refund, role-based access (**critical path**) |
-| Zhakhongir Shakarbekov | _tbd_ | Requirements: writes issues with acceptance criteria; discounts (`ticket_type`) |
-| Akzhol Idakhan | _tbd_ | Tests, phone validation, CJM, PostHog analytics plan |
+| Aldiyar Yeskenov | @sawayaka143 | Repo owner, reviewer of every PR, all of `frontend/` and `backend/`, including the critical path (schema, auth, catalog, booking) |
+| Sanzhar Saparkhan | @Sanzhar872 | Assigned issues only. Can pick up: seat-hall trigger |
+| Ulan Abiltayev | @Ransa19 | Assigned issues only. Can pick up: booking test cases, hold expiry checks |
+| Zhakhongir Shakarbekov | @Zhakha749 | Assigned issues only. Can pick up: issues with acceptance criteria, discounts (`ticket_type`) |
+| Akzhol Idakhan | @akzhol01 | Assigned issues only. Can pick up: phone validation, tests, CJM, PostHog analytics plan |
 
-**Stay in your area.** If a task needs a change in someone else's area, open an issue for it or ask them. Never edit their files "while you're at it".
+Since W10 the owner carries the critical path, because no other member had joined the repo by the W10 deadline. Teammates work only on issues assigned to them. An area can be widened again once someone delivers.
+
+**Stay in your issue.** If a task needs a change outside it, open an issue for it or ask the owner. Never edit other files "while you're at it".
 
 ## Golden rules (CI enforces most of them, so breaking them only wastes your time)
 
@@ -77,7 +79,7 @@ Work happens in weeks 10–14 (milestones `W10` … `W14`), and the demo is in w
 
 ## How to do a task (step by step)
 
-Claude Code users: the skills in `.claude/skills/` do these steps for you (`/start-task`, `/open-pr`, `/review-pr`, `/weekly-report`).
+Claude Code users: the skills in `.claude/skills/` do these steps for you (`/start-task`, `/open-pr`, `/review-pr`, `/status-check`).
 **Other agents: open the matching `SKILL.md` file and follow it as a checklist.** The steps are the same.
 
 1. **Start:** follow [`.claude/skills/start-task/SKILL.md`](.claude/skills/start-task/SKILL.md). Pick an issue assigned to you, update `main`, create the branch.
