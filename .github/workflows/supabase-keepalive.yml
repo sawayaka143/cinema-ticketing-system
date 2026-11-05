@@ -1,0 +1,34 @@
+name: Supabase keep-alive
+
+# Supabase free projects pause after ~7 days without activity.
+# This pings the REST API of each project every 3 days so they stay awake.
+
+on:
+  schedule:
+    - cron: "0 6 */3 * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    name: Ping ${{ matrix.env }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        env: [prod, dev]
+    steps:
+      - name: Ping Supabase
+        env:
+          URL: ${{ matrix.env == 'prod' && secrets.PROD_SUPABASE_URL || secrets.DEV_SUPABASE_URL }}
+          KEY: ${{ matrix.env == 'prod' && secrets.PROD_SUPABASE_ANON_KEY || secrets.DEV_SUPABASE_ANON_KEY }}
+        run: |
+          if [[ -z "$URL" || -z "$KEY" ]]; then
+            echo "::warning::Supabase ${{ matrix.env }} URL or anon key is not set. Skipping."
+            exit 0
+          fi
+          code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 30 \
+            -H "apikey: $KEY" "${URL%/}/rest/v1/")
+          echo "HTTP $code"
+          [[ "$code" =~ ^2 ]]
