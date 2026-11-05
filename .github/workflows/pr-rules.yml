@@ -18,7 +18,7 @@ jobs:
     name: PR rules
     runs-on: ubuntu-latest
     steps:
-      - name: Check title, branch, issue link, size, area and UI checklist
+      - name: Check title, issue link, size, area and UI checklist
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
@@ -46,13 +46,10 @@ jobs:
             fail "PR title must look like 'feat(booking): hold seats for 10 minutes' (types: feat fix chore docs refactor test style perf ci). Got: '$TITLE'"
           fi
 
-          # 2. Branch: type/<issue>-slug
+          # 2. Branch name is no longer enforced (the issue link in the body is what counts)
+          branch_issue=""
           if [[ "$BRANCH" =~ ^(feat|fix|chore|docs|refactor|test)/([0-9]+)-[a-z0-9-]+$ ]]; then
-            ok "branch: $BRANCH"
             branch_issue="${BASH_REMATCH[2]}"
-          else
-            fail "Branch must be named '<type>/<issue-number>-<slug>', e.g. 'feat/12-seat-map'. Got: '$BRANCH'"
-            branch_issue=""
           fi
 
           # 3. Linked issue in the body
