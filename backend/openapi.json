@@ -12,15 +12,16 @@
           "phone": {
             "anyOf": [
               {
-                "pattern": "^\\+7[0-9]{10}$",
+                "maxLength": 30,
                 "type": "string"
               },
               {
                 "type": "null"
               }
             ],
+            "description": "Spaces, dashes, brackets and a leading 8 are fine; stored as +7XXXXXXXXXX",
             "examples": [
-              "+77011234567"
+              "8 (701) 123-45-67"
             ],
             "title": "Phone"
           }
