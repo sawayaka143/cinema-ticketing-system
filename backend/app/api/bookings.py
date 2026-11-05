@@ -6,12 +6,14 @@ it every minute; the endpoints here also run it first (the lazy check), so a cli
 sees a hold that should already have ended.
 """
 
+import io
 import secrets
 from datetime import UTC, datetime
 from decimal import Decimal
 from typing import Annotated, Literal
 
-from fastapi import APIRouter, Depends, HTTPException, status
+import segno
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from pydantic import BaseModel, Field
 from sqlalchemy import delete, func, select, text
 from sqlalchemy.exc import IntegrityError
@@ -27,6 +29,7 @@ router = APIRouter(tags=["bookings"])
 SessionDep = Annotated[Session, Depends(get_session)]
 
 MAX_SEATS = 10
+QR_TOKEN_BYTES = 18  # 144 random bits = 24 URL-safe characters: unguessable, still a small QR
 
 
 class BookingTicketOut(BaseModel):
@@ -48,6 +51,10 @@ class BookingOut(BaseModel):
     )
     total_amount: Decimal
     tickets: list[BookingTicketOut]
+    qr_token: str | None = Field(
+        description="Set once paid: one QR code for all seats. Image: GET .../qr.png"
+    )
+    checked_in_at: datetime | None
 
 
 def expire_stale_holds(db: Session, screening_id: int | None = None) -> int:
@@ -102,6 +109,8 @@ def _booking_out(db: Session, booking: Booking) -> BookingOut:
         seconds_left=seconds_left,
         total_amount=sum((t.price for t in tickets), Decimal("0.00")),
         tickets=tickets,
+        qr_token=booking.qr_token if booking.status == "paid" else None,
+        checked_in_at=booking.checked_in_at,
     )
 
 
@@ -221,8 +230,26 @@ def pay_booking(booking_id: int, body: PayIn, user: CurrentUserDep, db: SessionD
         )
     payment.paid_at = func.now()
     booking.status = "paid"
+    booking.qr_token = secrets.token_urlsafe(QR_TOKEN_BYTES)
     db.commit()
     return _booking_out(db, booking)
+
+
+@router.get(
+    "/bookings/{booking_id}/qr.png",
+    response_class=Response,
+    responses={200: {"content": {"image/png": {}}, "description": "The QR code as PNG"}},
+)
+def get_booking_qr(booking_id: int, user: CurrentUserDep, db: SessionDep) -> Response:
+    """The QR code of my paid booking. One code lets the whole group in."""
+    booking = _own_booking(db, user, booking_id)
+    if booking.status != "paid" or booking.qr_token is None:
+        raise HTTPException(status.HTTP_409_CONFLICT, "Only a paid booking has a QR code")
+    out = io.BytesIO()
+    segno.make_qr(booking.qr_token, error="m").save(out, kind="png", scale=8, border=4)
+    return Response(
+        out.getvalue(), media_type="image/png", headers={"Cache-Control": "private, no-store"}
+    )
 
 
 @router.get("/bookings/{booking_id}", response_model=BookingOut)
