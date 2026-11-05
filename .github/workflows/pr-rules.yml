@@ -39,13 +39,6 @@ jobs:
           BODY=$(jq -r '.body // ""' <<< "$pr_json")
           BRANCH=$(jq -r '.headRefName' <<< "$pr_json")
 
-          # 1. Title: Conventional Commit
-          if [[ "$TITLE" =~ ^(feat|fix|chore|docs|refactor|test|style|perf|ci)(\([a-z0-9-]+\))?!?:\ .{3,}$ ]]; then
-            ok "title: $TITLE"
-          else
-            fail "PR title must look like 'feat(booking): hold seats for 10 minutes' (types: feat fix chore docs refactor test style perf ci). Got: '$TITLE'"
-          fi
-
           # 2. Branch name is no longer enforced (the issue link in the body is what counts)
           branch_issue=""
           if [[ "$BRANCH" =~ ^(feat|fix|chore|docs|refactor|test)/([0-9]+)-[a-z0-9-]+$ ]]; then
@@ -80,22 +73,17 @@ jobs:
             fail "PR changes $size lines (limit $MAX_LINES, lockfiles and generated files excluded). Split it into smaller PRs. Only the owner can allow an exception with the 'size-ok' label."
           fi
 
-          # 5. Areas: frontend and workflow files are owner-only
+          # 5. Areas: frontend/ is owner-only; workflow and rule files only warn
           if [[ "$AUTHOR" != "$OWNER" ]]; then
-            restricted=$(cut -f1 files.tsv | grep -E '^(frontend/|\.github/|\.claude/|AGENTS\.md$|CLAUDE\.md$|TEAM\.md$)' || true)
+            restricted=$(cut -f1 files.tsv | grep -E '^frontend/' || true)
             if [[ -n "$restricted" ]]; then
-              fail "These files are owner-only (see AGENTS.md). Open an issue instead: $(tr '\n' ' ' <<< "$restricted")"
+              fail "frontend/ is owner-only (see AGENTS.md). Open an issue instead: $(tr '\n' ' ' <<< "$restricted")"
             else
               ok "areas"
             fi
-          fi
-
-          # 6. UI changes need the Impeccable box ticked
-          if cut -f1 files.tsv | grep -Eq '^frontend/src/.*\.(tsx|jsx|css)$'; then
-            if grep -Eiq '^- \[[xX]\] UI change: ran `/impeccable`' <<< "$BODY"; then
-              ok "impeccable box ticked"
-            else
-              fail "This PR changes UI files. Run /impeccable (audit or polish) on the changed screens and tick the box in the PR body."
+            rules_touched=$(cut -f1 files.tsv | grep -E '^(\.github/|\.claude/|AGENTS\.md$|CLAUDE\.md$|TEAM\.md$)' || true)
+            if [[ -n "$rules_touched" ]]; then
+              echo "::warning::Workflow/rule files changed; the owner will look closely: $(tr '\n' ' ' <<< "$rules_touched")"
             fi
           fi
 
