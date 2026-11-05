@@ -1,6 +1,42 @@
 {
   "components": {
     "schemas": {
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "HallOut": {
+        "properties": {
+          "hall_id": {
+            "title": "Hall Id",
+            "type": "integer"
+          },
+          "hall_type": {
+            "title": "Hall Type",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "hall_id",
+          "name",
+          "hall_type"
+        ],
+        "title": "HallOut",
+        "type": "object"
+      },
       "Health": {
         "properties": {
           "status": {
@@ -38,6 +74,200 @@
           "email"
         ],
         "title": "Me",
+        "type": "object"
+      },
+      "MovieOut": {
+        "properties": {
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "duration_min": {
+            "title": "Duration Min",
+            "type": "integer"
+          },
+          "genres": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Genres",
+            "type": "array"
+          },
+          "min_age": {
+            "title": "Min Age",
+            "type": "integer"
+          },
+          "movie_id": {
+            "title": "Movie Id",
+            "type": "integer"
+          },
+          "poster_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Poster Url"
+          },
+          "release_year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Release Year"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "movie_id",
+          "title",
+          "description",
+          "poster_url",
+          "duration_min",
+          "min_age",
+          "release_year",
+          "genres"
+        ],
+        "title": "MovieOut",
+        "type": "object"
+      },
+      "ScreeningDetail": {
+        "properties": {
+          "base_price": {
+            "title": "Base Price",
+            "type": "string"
+          },
+          "end_time": {
+            "format": "date-time",
+            "title": "End Time",
+            "type": "string"
+          },
+          "hall": {
+            "$ref": "#/components/schemas/HallOut"
+          },
+          "movie": {
+            "$ref": "#/components/schemas/MovieOut"
+          },
+          "movie_id": {
+            "title": "Movie Id",
+            "type": "integer"
+          },
+          "screening_id": {
+            "title": "Screening Id",
+            "type": "integer"
+          },
+          "start_time": {
+            "format": "date-time",
+            "title": "Start Time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "screening_id",
+          "movie_id",
+          "hall",
+          "start_time",
+          "end_time",
+          "base_price",
+          "movie"
+        ],
+        "title": "ScreeningDetail",
+        "type": "object"
+      },
+      "ScreeningOut": {
+        "properties": {
+          "base_price": {
+            "title": "Base Price",
+            "type": "string"
+          },
+          "end_time": {
+            "format": "date-time",
+            "title": "End Time",
+            "type": "string"
+          },
+          "hall": {
+            "$ref": "#/components/schemas/HallOut"
+          },
+          "movie_id": {
+            "title": "Movie Id",
+            "type": "integer"
+          },
+          "screening_id": {
+            "title": "Screening Id",
+            "type": "integer"
+          },
+          "start_time": {
+            "format": "date-time",
+            "title": "Start Time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "screening_id",
+          "movie_id",
+          "hall",
+          "start_time",
+          "end_time",
+          "base_price"
+        ],
+        "title": "ScreeningOut",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
         "type": "object"
       }
     },
@@ -100,6 +330,184 @@
         "summary": "Me",
         "tags": [
           "system"
+        ]
+      }
+    },
+    "/api/movies": {
+      "get": {
+        "description": "Active movies, by title.",
+        "operationId": "list_movies_api_movies_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MovieOut"
+                  },
+                  "title": "Response List Movies Api Movies Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Movies",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/api/movies/{movie_id}": {
+      "get": {
+        "description": "One active movie. Unknown or archived ids are 404.",
+        "operationId": "get_movie_api_movies__movie_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "movie_id",
+            "required": true,
+            "schema": {
+              "title": "Movie Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MovieOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Movie",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/api/movies/{movie_id}/screenings": {
+      "get": {
+        "description": "Upcoming screenings of one movie, earliest first. Past screenings are never listed.",
+        "operationId": "list_movie_screenings_api_movies__movie_id__screenings_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "movie_id",
+            "required": true,
+            "schema": {
+              "title": "Movie Id",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Day in Almaty time (YYYY-MM-DD). Omit for the next 7 days.",
+            "in": "query",
+            "name": "date",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Day in Almaty time (YYYY-MM-DD). Omit for the next 7 days.",
+              "title": "Date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ScreeningOut"
+                  },
+                  "title": "Response List Movie Screenings Api Movies  Movie Id  Screenings Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Movie Screenings",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/api/screenings/{screening_id}": {
+      "get": {
+        "description": "One screening with its movie and hall.",
+        "operationId": "get_screening_api_screenings__screening_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "screening_id",
+            "required": true,
+            "schema": {
+              "title": "Screening Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScreeningDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Screening",
+        "tags": [
+          "catalog"
         ]
       }
     }
