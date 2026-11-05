@@ -18,7 +18,9 @@ from sqlalchemy import (
     String,
     Text,
     func,
+    text,
 )
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
@@ -113,4 +115,85 @@ class Screening(Base):
     hall: Mapped[Hall] = relationship()
 
 
-__all__ = ["Base", "Customer", "Genre", "Hall", "Movie", "MovieGenre", "Screening", "Seat", "Staff"]
+class TicketType(Base):
+    __tablename__ = "ticket_type"
+
+    ticket_type_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    name: Mapped[str] = mapped_column(String(30), unique=True)
+    discount_pct: Mapped[Decimal] = mapped_column(Numeric(5, 2), server_default="0")
+    max_age: Mapped[int | None] = mapped_column(Integer)
+    staff_only: Mapped[bool] = mapped_column(Boolean, server_default="false")
+
+
+class Booking(Base):
+    __tablename__ = "booking"
+
+    booking_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    customer_id: Mapped[int | None] = mapped_column(ForeignKey("customer.customer_id"))
+    sold_by_staff_id: Mapped[int | None] = mapped_column(ForeignKey("staff.staff_id"))
+    booking_time: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    status: Mapped[str] = mapped_column(Text, server_default="pending")
+    hold_expires_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=text("now() + interval '10 minutes'")
+    )
+
+    tickets: Mapped[list["Ticket"]] = relationship(back_populates="booking")
+
+
+class Ticket(Base):
+    __tablename__ = "ticket"
+
+    ticket_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    booking_id: Mapped[int] = mapped_column(ForeignKey("booking.booking_id", ondelete="CASCADE"))
+    screening_id: Mapped[int] = mapped_column(ForeignKey("screening.screening_id"))
+    seat_id: Mapped[int] = mapped_column(ForeignKey("seat.seat_id"))
+    ticket_type_id: Mapped[int] = mapped_column(ForeignKey("ticket_type.ticket_type_id"))
+    price: Mapped[Decimal] = mapped_column(Numeric(8, 2))
+
+    booking: Mapped[Booking] = relationship(back_populates="tickets")
+
+
+class Payment(Base):
+    __tablename__ = "payment"
+
+    payment_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    booking_id: Mapped[int] = mapped_column(ForeignKey("booking.booking_id"))
+    amount: Mapped[Decimal] = mapped_column(Numeric(10, 2))
+    method: Mapped[str] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(Text)
+    provider_ref: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    paid_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    refunded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class AuditLog(Base):
+    __tablename__ = "audit_log"
+
+    audit_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    staff_id: Mapped[int] = mapped_column(ForeignKey("staff.staff_id"))
+    action: Mapped[str] = mapped_column(Text)
+    table_name: Mapped[str] = mapped_column(Text)
+    row_id: Mapped[int | None] = mapped_column(BigInteger)
+    details: Mapped[dict | None] = mapped_column(JSONB)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+__all__ = [
+    "AuditLog",
+    "Base",
+    "Booking",
+    "Customer",
+    "Genre",
+    "Hall",
+    "Movie",
+    "MovieGenre",
+    "Payment",
+    "Screening",
+    "Seat",
+    "Staff",
+    "Ticket",
+    "TicketType",
+]
