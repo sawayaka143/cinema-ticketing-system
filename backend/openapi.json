@@ -1,6 +1,99 @@
 {
   "components": {
     "schemas": {
+      "BookingOut": {
+        "properties": {
+          "booking_id": {
+            "title": "Booking Id",
+            "type": "integer"
+          },
+          "booking_time": {
+            "format": "date-time",
+            "title": "Booking Time",
+            "type": "string"
+          },
+          "hold_expires_at": {
+            "format": "date-time",
+            "title": "Hold Expires At",
+            "type": "string"
+          },
+          "seconds_left": {
+            "description": "Seconds until the hold ends. 0 unless the booking is pending.",
+            "title": "Seconds Left",
+            "type": "integer"
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "paid",
+              "cancelled",
+              "expired"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "tickets": {
+            "items": {
+              "$ref": "#/components/schemas/BookingTicketOut"
+            },
+            "title": "Tickets",
+            "type": "array"
+          },
+          "total_amount": {
+            "title": "Total Amount",
+            "type": "string"
+          }
+        },
+        "required": [
+          "booking_id",
+          "status",
+          "booking_time",
+          "hold_expires_at",
+          "seconds_left",
+          "total_amount",
+          "tickets"
+        ],
+        "title": "BookingOut",
+        "type": "object"
+      },
+      "BookingTicketOut": {
+        "properties": {
+          "price": {
+            "title": "Price",
+            "type": "string"
+          },
+          "row_label": {
+            "title": "Row Label",
+            "type": "string"
+          },
+          "screening_id": {
+            "title": "Screening Id",
+            "type": "integer"
+          },
+          "seat_id": {
+            "title": "Seat Id",
+            "type": "integer"
+          },
+          "seat_number": {
+            "title": "Seat Number",
+            "type": "integer"
+          },
+          "ticket_id": {
+            "title": "Ticket Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "ticket_id",
+          "screening_id",
+          "seat_id",
+          "row_label",
+          "seat_number",
+          "price"
+        ],
+        "title": "BookingTicketOut",
+        "type": "object"
+      },
       "CustomerCreate": {
         "properties": {
           "full_name": {
@@ -400,6 +493,102 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/bookings/{booking_id}": {
+      "get": {
+        "description": "One of my bookings, with the seconds left on its hold (for the countdown).",
+        "operationId": "get_booking_api_bookings__booking_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "booking_id",
+            "required": true,
+            "schema": {
+              "title": "Booking Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Booking",
+        "tags": [
+          "bookings"
+        ]
+      }
+    },
+    "/api/bookings/{booking_id}/cancel": {
+      "post": {
+        "description": "Cancel my pending hold: the booking becomes 'cancelled' and its seats are free again.\n\nPaid bookings are cancelled (with a refund) by a cashier or manager, not here.",
+        "operationId": "cancel_booking_api_bookings__booking_id__cancel_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "booking_id",
+            "required": true,
+            "schema": {
+              "title": "Booking Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Cancel Booking",
+        "tags": [
+          "bookings"
+        ]
+      }
+    },
     "/api/health": {
       "get": {
         "description": "Liveness check used after every deploy.",

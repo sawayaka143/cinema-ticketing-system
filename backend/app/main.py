@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import catalog, me, system
+from app.api import bookings, catalog, me, system
 from app.config import get_settings
 
 app = FastAPI(title="Cinema Ticketing API", version="0.1.0")
@@ -17,3 +17,4 @@ app.add_middleware(
 app.include_router(system.router, prefix="/api")
 app.include_router(me.router, prefix="/api")
 app.include_router(catalog.router, prefix="/api")
+app.include_router(bookings.router, prefix="/api")
