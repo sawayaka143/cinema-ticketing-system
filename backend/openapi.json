@@ -1,6 +1,71 @@
 {
   "components": {
     "schemas": {
+      "CustomerCreate": {
+        "properties": {
+          "full_name": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Full Name",
+            "type": "string"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "pattern": "^\\+7[0-9]{10}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "+77011234567"
+            ],
+            "title": "Phone"
+          }
+        },
+        "required": [
+          "full_name"
+        ],
+        "title": "CustomerCreate",
+        "type": "object"
+      },
+      "CustomerOut": {
+        "properties": {
+          "customer_id": {
+            "title": "Customer Id",
+            "type": "integer"
+          },
+          "email": {
+            "title": "Email",
+            "type": "string"
+          },
+          "full_name": {
+            "title": "Full Name",
+            "type": "string"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          }
+        },
+        "required": [
+          "customer_id",
+          "full_name",
+          "email",
+          "phone"
+        ],
+        "title": "CustomerOut",
+        "type": "object"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -52,6 +117,16 @@
       },
       "Me": {
         "properties": {
+          "customer": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CustomerOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "email": {
             "anyOf": [
               {
@@ -67,11 +142,24 @@
             "format": "uuid",
             "title": "Id",
             "type": "string"
+          },
+          "staff": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StaffOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Null when the user isn't staff or is deactivated."
           }
         },
         "required": [
           "id",
-          "email"
+          "email",
+          "customer",
+          "staff"
         ],
         "title": "Me",
         "type": "object"
@@ -230,6 +318,34 @@
         "title": "ScreeningOut",
         "type": "object"
       },
+      "StaffOut": {
+        "properties": {
+          "full_name": {
+            "title": "Full Name",
+            "type": "string"
+          },
+          "role": {
+            "enum": [
+              "cashier",
+              "manager",
+              "admin"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "staff_id": {
+            "title": "Staff Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "staff_id",
+          "full_name",
+          "role"
+        ],
+        "title": "StaffOut",
+        "type": "object"
+      },
       "ValidationError": {
         "properties": {
           "ctx": {
@@ -308,7 +424,7 @@
     },
     "/api/me": {
       "get": {
-        "description": "The logged-in Supabase user. Proves auth works end to end.",
+        "description": "Who is logged in, and which profiles they have.",
         "operationId": "me_api_me_get",
         "responses": {
           "200": {
@@ -329,7 +445,54 @@
         ],
         "summary": "Me",
         "tags": [
-          "system"
+          "me"
+        ]
+      }
+    },
+    "/api/me/customer": {
+      "post": {
+        "description": "Create the customer profile for the logged-in user. Email comes from the login.",
+        "operationId": "create_customer_api_me_customer_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomerCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Customer",
+        "tags": [
+          "me"
         ]
       }
     },

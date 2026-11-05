@@ -33,11 +33,31 @@ export interface paths {
         };
         /**
          * Me
-         * @description The logged-in Supabase user. Proves auth works end to end.
+         * @description Who is logged in, and which profiles they have.
          */
         get: operations["me_api_me_get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/me/customer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create Customer
+         * @description Create the customer profile for the logged-in user. Email comes from the login.
+         */
+        post: operations["create_customer_api_me_customer_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -128,6 +148,27 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** CustomerCreate */
+        CustomerCreate: {
+            /** Full Name */
+            full_name: string;
+            /**
+             * Phone
+             * @example +77011234567
+             */
+            phone?: string | null;
+        };
+        /** CustomerOut */
+        CustomerOut: {
+            /** Customer Id */
+            customer_id: number;
+            /** Email */
+            email: string;
+            /** Full Name */
+            full_name: string;
+            /** Phone */
+            phone: string | null;
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -149,6 +190,7 @@ export interface components {
         };
         /** Me */
         Me: {
+            customer: components["schemas"]["CustomerOut"] | null;
             /** Email */
             email: string | null;
             /**
@@ -156,6 +198,8 @@ export interface components {
              * Format: uuid
              */
             id: string;
+            /** @description Null when the user isn't staff or is deactivated. */
+            staff: components["schemas"]["StaffOut"] | null;
         };
         /** MovieOut */
         MovieOut: {
@@ -217,6 +261,18 @@ export interface components {
              */
             start_time: string;
         };
+        /** StaffOut */
+        StaffOut: {
+            /** Full Name */
+            full_name: string;
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "cashier" | "manager" | "admin";
+            /** Staff Id */
+            staff_id: number;
+        };
         /** ValidationError */
         ValidationError: {
             /** Context */
@@ -275,6 +331,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Me"];
+                };
+            };
+        };
+    };
+    create_customer_api_me_customer_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CustomerCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomerOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
