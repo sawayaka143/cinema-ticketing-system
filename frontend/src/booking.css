@@ -354,3 +354,7 @@ select {
     grid-column: 2;
   }
 }
+
+.basket .form.profile {
+  margin: 0;
+}

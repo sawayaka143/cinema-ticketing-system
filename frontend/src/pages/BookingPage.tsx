@@ -43,7 +43,8 @@ function BookingView({ booking: initial, refresh }: { booking: Booking; refresh:
   }, [booking.status, initial.seconds_left, left, refresh]);
 
   const path = { params: { path: { booking_id: booking.booking_id } } };
-  const screeningId = booking.tickets[0]?.screening_id;
+  // From the first load: a cancelled or expired booking comes back without tickets.
+  const screeningId = initial.tickets[0]?.screening_id;
 
   async function pay(method: "card" | "kaspi", simulateDecline: boolean) {
     setBusy(true);

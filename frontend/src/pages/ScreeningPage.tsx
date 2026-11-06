@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { type FormEvent, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { api } from "../api/client";
 import { Status } from "../components/Layout";
@@ -18,6 +18,8 @@ export function ScreeningPage() {
   const [picked, setPicked] = useState<Map<number, string>>(new Map());
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<{ tone: "info" | "error"; text: string } | null>(null);
+  // A login without a customer profile (e.g. made in the Supabase dashboard) can't book yet.
+  const [needsProfile, setNeedsProfile] = useState(false);
 
   const page = useApi(async () => {
     const path = { params: { path: { screening_id: screeningId } } };
@@ -78,9 +80,26 @@ export function ScreeningPage() {
           tone: "error",
           text: `${messageOf(err)}. The map is updated, please pick again.`,
         });
+      } else if (statusOf(err) === 403 && messageOf(err).includes("customer profile")) {
+        setNeedsProfile(true);
       } else {
         setMessage({ tone: "error", text: messageOf(err) });
       }
+      setBusy(false);
+    }
+  }
+
+  async function saveProfileAndHold(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const fullName = String(new FormData(event.currentTarget).get("full_name") ?? "").trim();
+    setBusy(true);
+    setMessage(null);
+    try {
+      await api.POST("/api/me/customer", { body: { full_name: fullName } }).then(must);
+      setNeedsProfile(false);
+      await hold();
+    } catch (err) {
+      setMessage({ tone: "error", text: messageOf(err) });
       setBusy(false);
     }
   }
@@ -142,7 +161,18 @@ export function ScreeningPage() {
               . The exact total is shown after the hold.
             </p>
           )}
-          {!ready ? null : session ? (
+          {needsProfile ? (
+            <form className="form profile" onSubmit={saveProfileAndHold}>
+              <p>One more step: the name for your tickets.</p>
+              <label>
+                Full name
+                <input name="full_name" autoComplete="name" required maxLength={100} />
+              </label>
+              <button type="submit" className="solid wide" disabled={busy}>
+                {busy ? "Holding seats…" : "Save and hold seats"}
+              </button>
+            </form>
+          ) : !ready ? null : session ? (
             <button type="button" className="solid wide" disabled={busy || chosen.length === 0} onClick={hold}>
               {busy ? "Holding seats…" : chosen.length ? `Hold ${chosen.length} seat${chosen.length > 1 ? "s" : ""} for 10 min` : "Pick seats"}
             </button>
