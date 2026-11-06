@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from "react-router";
 import { api } from "../api/client";
 import { Status } from "../components/Layout";
 import { useAuth } from "../lib/auth-context";
-import { type Booking, clock, price } from "../lib/format";
+import { type Booking, clock, price, when } from "../lib/format";
 import { messageOf, must, statusOf, useApi } from "../lib/useApi";
 
 /** One booking: the live hold (countdown, total, cancel) or its final state. */
@@ -45,6 +45,21 @@ function BookingView({ booking: initial, refresh }: { booking: Booking; refresh:
   const path = { params: { path: { booking_id: booking.booking_id } } };
   const screeningId = booking.tickets[0]?.screening_id;
 
+  async function pay(method: "card" | "kaspi", simulateDecline: boolean) {
+    setBusy(true);
+    setMessage(null);
+    try {
+      const body = { method, simulate_decline: simulateDecline };
+      setBooking(await api.POST("/api/bookings/{booking_id}/pay", { ...path, body }).then(must));
+    } catch (err) {
+      const status = statusOf(err);
+      // 402: declined, the hold stays, so the customer can try again. 409: hold expired or already paid.
+      setMessage(status === 402 ? `${messageOf(err)}.` : messageOf(err));
+      if (status === 409) refresh();
+    }
+    setBusy(false);
+  }
+
   async function cancel() {
     setBusy(true);
     setMessage(null);
@@ -70,13 +85,9 @@ function BookingView({ booking: initial, refresh }: { booking: Booking; refresh:
 
       <Tickets booking={booking} />
 
-      {booking.status === "pending" && (
-        <div className="actions">
-          <button type="button" className="ghost" disabled={busy} onClick={cancel}>
-            Cancel and free the seats
-          </button>
-        </div>
-      )}
+      {booking.status === "pending" && <PayForm busy={busy} onPay={pay} onCancel={cancel} />}
+
+      {booking.status === "paid" && <PaidTickets booking={booking} />}
 
       {(booking.status === "cancelled" || booking.status === "expired") && (
         <p>
@@ -96,6 +107,86 @@ function BookingView({ booking: initial, refresh }: { booking: Booking; refresh:
       {message && <Status tone="error">{message}</Status>}
     </section>
   );
+}
+
+function PayForm({
+  busy,
+  onPay,
+  onCancel,
+}: {
+  busy: boolean;
+  onPay: (method: "card" | "kaspi", simulateDecline: boolean) => void;
+  onCancel: () => void;
+}) {
+  const [method, setMethod] = useState<"card" | "kaspi">("card");
+  const [decline, setDecline] = useState(false);
+  return (
+    <form
+      className="pay"
+      onSubmit={(e) => {
+        e.preventDefault();
+        onPay(method, decline);
+      }}
+    >
+      <fieldset>
+        <legend>Pay with</legend>
+        {(["card", "kaspi"] as const).map((m) => (
+          <label key={m} className="choice">
+            <input type="radio" name="method" checked={method === m} onChange={() => setMethod(m)} />
+            {m === "card" ? "Bank card" : "Kaspi"}
+          </label>
+        ))}
+      </fieldset>
+      <label className="choice muted small">
+        <input type="checkbox" checked={decline} onChange={(e) => setDecline(e.target.checked)} />
+        Demo: make the bank decline this payment
+      </label>
+      <p className="muted small">Payment is simulated. No real money is charged.</p>
+      <div className="actions">
+        <button type="submit" className="solid" disabled={busy}>
+          {busy ? "Please wait…" : "Pay now"}
+        </button>
+        <button type="button" className="ghost" disabled={busy} onClick={onCancel}>
+          Cancel and free the seats
+        </button>
+      </div>
+    </form>
+  );
+}
+
+function PaidTickets({ booking }: { booking: Booking }) {
+  return (
+    <div className="paid">
+      <QrCode bookingId={booking.booking_id} />
+      <div>
+        <p>Show this code at the entrance. One code lets the whole group in.</p>
+        {booking.checked_in_at && <p className="muted">Checked in at {when(booking.checked_in_at)}.</p>}
+        <Link to="/me/bookings">All my bookings</Link>
+      </div>
+    </div>
+  );
+}
+
+/** The QR image needs the login token, so it is fetched as a blob instead of a plain <img src>. */
+function QrCode({ bookingId }: { bookingId: number }) {
+  const qr = useApi(async () => {
+    const res = await api.GET("/api/bookings/{booking_id}/qr.png", {
+      params: { path: { booking_id: bookingId } },
+      parseAs: "blob",
+    });
+    if (!res.data) throw new Error("Could not load the QR code");
+    const blob = res.data;
+    return new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result));
+      reader.onerror = () => reject(new Error("Could not read the QR code"));
+      reader.readAsDataURL(blob);
+    });
+  }, bookingId);
+
+  if (qr.state === "loading") return <div className="qr" aria-busy="true" />;
+  if (qr.state === "error") return <Status tone="error">{qr.message}</Status>;
+  return <img className="qr" src={qr.data} alt={`QR code for booking ${bookingId}`} width={200} height={200} />;
 }
 
 const TITLE: Record<Booking["status"], string> = {

@@ -239,3 +239,118 @@ select {
     position: static;
   }
 }
+
+/* Payment and paid tickets */
+.pay {
+  display: grid;
+  gap: var(--s4);
+}
+
+.pay p {
+  margin: 0;
+}
+
+.pay fieldset {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s4);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.pay legend {
+  margin-bottom: var(--s2);
+  color: var(--muted);
+}
+
+.choice {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s2);
+  min-height: 2.75rem;
+}
+
+.choice input {
+  accent-color: var(--accent);
+}
+
+.paid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s6);
+  align-items: center;
+}
+
+.qr {
+  width: 200px;
+  height: 200px;
+  border-radius: var(--radius);
+  background: #fff;
+}
+
+/* My bookings */
+.my-bookings {
+  display: grid;
+  gap: var(--s2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.my-bookings li {
+  display: grid;
+  grid-template-columns: 1fr auto 6rem;
+  gap: var(--s4);
+  align-items: center;
+  padding: var(--s3) var(--s4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.my-bookings li.done {
+  background: transparent;
+  opacity: 0.7;
+}
+
+.my-bookings a {
+  display: grid;
+  text-decoration: none;
+}
+
+.my-bookings a:hover b {
+  color: var(--accent);
+}
+
+.my-bookings .num {
+  text-align: right;
+}
+
+.badge {
+  padding: 0 var(--s2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 0.8125rem;
+}
+
+.badge-paid {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.badge-pending {
+  border-color: var(--text);
+  color: var(--text);
+}
+
+@media (max-width: 40rem) {
+  .my-bookings li {
+    grid-template-columns: 1fr auto;
+  }
+
+  .my-bookings .num {
+    grid-column: 2;
+  }
+}
