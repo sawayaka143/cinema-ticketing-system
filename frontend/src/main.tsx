@@ -2,8 +2,10 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Route, Routes } from "react-router";
 import "./index.css";
+import "./booking.css";
 import { Layout, Status } from "./components/Layout";
 import { AuthProvider } from "./lib/auth";
+import { BookingPage } from "./pages/BookingPage";
 import { BookingsPage } from "./pages/BookingsPage";
 import { LoginPage } from "./pages/LoginPage";
 import { MoviePage } from "./pages/MoviePage";
@@ -19,6 +21,7 @@ createRoot(document.getElementById("root")!).render(
             <Route index element={<MoviesPage />} />
             <Route path="movies/:id" element={<MoviePage />} />
             <Route path="screenings/:id" element={<ScreeningPage />} />
+            <Route path="bookings/:id" element={<BookingPage />} />
             <Route path="login" element={<LoginPage />} />
             <Route path="me/bookings" element={<BookingsPage />} />
             <Route path="*" element={<Status>Page not found.</Status>} />

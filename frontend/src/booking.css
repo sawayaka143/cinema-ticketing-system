@@ -1,0 +1,360 @@
+/* Booking flow: seat map, basket, hold countdown, tickets. Same tokens as index.css. */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.small {
+  font-size: 0.875rem;
+}
+
+.wide {
+  width: 100%;
+}
+
+.booking-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 20rem;
+  gap: var(--s8);
+  align-items: start;
+  margin-top: var(--s6);
+}
+
+/* Hall */
+.hall {
+  overflow-x: auto;
+  padding-bottom: var(--s2);
+}
+
+.screen {
+  max-width: 32rem;
+  margin: 0 auto var(--s6);
+  padding-bottom: var(--s2);
+  border-bottom: 3px solid var(--accent);
+  border-radius: 0 0 50% 50% / 0 0 0.75rem 0.75rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+  letter-spacing: 0.3em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.seats {
+  display: grid;
+  gap: var(--s1);
+  justify-content: center;
+}
+
+.row-label {
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  font-size: 0.8125rem;
+}
+
+.seat {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  min-width: 1.75rem;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem 0.375rem 0.25rem 0.25rem;
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: 0.6875rem;
+}
+
+.seat-vip {
+  border-color: #c98b2e;
+}
+
+.seat-wheelchair {
+  border-color: #6fa8dc;
+}
+
+button.seat:not(:disabled):hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.seat[aria-pressed="true"],
+.seat.on {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 700;
+}
+
+.seat:disabled,
+.seat.taken {
+  border-color: transparent;
+  background: var(--border);
+  color: transparent;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--s2) var(--s4);
+  margin: var(--s6) 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--muted);
+  font-size: 0.8125rem;
+}
+
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+}
+
+.legend i {
+  width: 1rem;
+  min-width: 0;
+}
+
+/* Basket */
+.basket {
+  position: sticky;
+  top: var(--s4);
+  display: grid;
+  gap: var(--s4);
+  padding: var(--s4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.basket p,
+.basket .status {
+  margin: 0;
+}
+
+.picks {
+  display: grid;
+  gap: var(--s2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.picks li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s3);
+}
+
+.picks small {
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+select {
+  min-height: 2.25rem;
+  padding: 0 var(--s2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+}
+
+/* Hold and tickets */
+.countdown {
+  margin: 0 0 var(--s6);
+  color: var(--muted);
+  font-size: 1.125rem;
+}
+
+.countdown b {
+  color: var(--accent);
+  font-size: 1.75rem;
+}
+
+.countdown.urgent b {
+  color: var(--bad);
+}
+
+.tickets {
+  width: 100%;
+  margin-bottom: var(--s6);
+  border-collapse: collapse;
+}
+
+.tickets th,
+.tickets td {
+  padding: var(--s2) var(--s3);
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+.tickets thead th {
+  color: var(--muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.tickets tfoot th,
+.tickets tfoot td {
+  border-bottom: 0;
+  font-size: 1.125rem;
+}
+
+.tickets .num {
+  text-align: right;
+}
+
+.cap {
+  text-transform: capitalize;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s3);
+  align-items: center;
+}
+
+@media (max-width: 52rem) {
+  .booking-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .basket {
+    position: static;
+  }
+}
+
+/* Payment and paid tickets */
+.pay {
+  display: grid;
+  gap: var(--s4);
+}
+
+.pay p {
+  margin: 0;
+}
+
+.pay fieldset {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s4);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.pay legend {
+  margin-bottom: var(--s2);
+  color: var(--muted);
+}
+
+.choice {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s2);
+  min-height: 2.75rem;
+}
+
+.choice input {
+  accent-color: var(--accent);
+}
+
+.paid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s6);
+  align-items: center;
+}
+
+.qr {
+  width: 200px;
+  height: 200px;
+  border-radius: var(--radius);
+  background: #fff;
+}
+
+/* My bookings */
+.my-bookings {
+  display: grid;
+  gap: var(--s2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.my-bookings li {
+  display: grid;
+  grid-template-columns: 1fr auto 6rem;
+  gap: var(--s4);
+  align-items: center;
+  padding: var(--s3) var(--s4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.my-bookings li.done {
+  background: transparent;
+  opacity: 0.7;
+}
+
+.my-bookings a {
+  display: grid;
+  text-decoration: none;
+}
+
+.my-bookings a:hover b {
+  color: var(--accent);
+}
+
+.my-bookings .num {
+  text-align: right;
+}
+
+.badge {
+  padding: 0 var(--s2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 0.8125rem;
+}
+
+.badge-paid {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.badge-pending {
+  border-color: var(--text);
+  color: var(--text);
+}
+
+@media (max-width: 40rem) {
+  .my-bookings li {
+    grid-template-columns: 1fr auto;
+  }
+
+  .my-bookings .num {
+    grid-column: 2;
+  }
+}
+
+.basket .form.profile {
+  margin: 0;
+}
