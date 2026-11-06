@@ -21,7 +21,17 @@ from sqlalchemy.orm import Session
 
 from app.auth import CurrentUser, CurrentUserDep, OptionalUserDep
 from app.db import get_session
-from app.models import Booking, Customer, Movie, Payment, Screening, Seat, Ticket, TicketType
+from app.models import (
+    Booking,
+    Customer,
+    Hall,
+    Movie,
+    Payment,
+    Screening,
+    Seat,
+    Ticket,
+    TicketType,
+)
 from app.pricing import ticket_price
 from app.ticket_types import (
     DEFAULT_TYPE,
@@ -360,3 +370,50 @@ def cancel_booking(booking_id: int, user: CurrentUserDep, db: SessionDep) -> Boo
     db.execute(delete(Ticket).where(Ticket.booking_id == booking.booking_id))
     db.commit()
     return _booking_out(db, booking)
+
+
+class MyBookingOut(BookingOut):
+    movie_title: str | None = Field(description="Null once the tickets are gone (cancel/expiry)")
+    hall: str | None
+    start_time: datetime | None
+
+
+BookingStatus = Literal["pending", "paid", "cancelled", "expired"]
+
+
+@router.get("/me/bookings", response_model=list[MyBookingOut])
+def my_bookings(
+    user: CurrentUserDep,
+    db: SessionDep,
+    status_filter: Annotated[BookingStatus | None, Query(alias="status")] = None,
+) -> list[MyBookingOut]:
+    """All my bookings, newest first, with the movie and time (for the "My bookings" page)."""
+    expire_stale_holds(db)
+    query = (
+        select(Booking)
+        .join(Customer, Customer.customer_id == Booking.customer_id)
+        .where(Customer.auth_user_id == user.id)
+        .order_by(Booking.booking_time.desc(), Booking.booking_id.desc())
+    )
+    if status_filter is not None:
+        query = query.where(Booking.status == status_filter)
+    result = []
+    for booking in db.scalars(query).all():
+        out = _booking_out(db, booking)
+        show = None
+        if out.tickets:
+            show = db.execute(
+                select(Movie.title, Hall.name, Screening.start_time)
+                .join(Screening, Screening.movie_id == Movie.movie_id)
+                .join(Hall, Hall.hall_id == Screening.hall_id)
+                .where(Screening.screening_id == out.tickets[0].screening_id)
+            ).one()
+        result.append(
+            MyBookingOut(
+                **out.model_dump(),
+                movie_title=show.title if show else None,
+                hall=show.name if show else None,
+                start_time=show.start_time if show else None,
+            )
+        )
+    return result

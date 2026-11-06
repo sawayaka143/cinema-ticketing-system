@@ -1031,6 +1031,125 @@
         "title": "MovieUpdate",
         "type": "object"
       },
+      "MyBookingOut": {
+        "properties": {
+          "booking_id": {
+            "title": "Booking Id",
+            "type": "integer"
+          },
+          "booking_time": {
+            "format": "date-time",
+            "title": "Booking Time",
+            "type": "string"
+          },
+          "checked_in_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Checked In At"
+          },
+          "hall": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hall"
+          },
+          "hold_expires_at": {
+            "format": "date-time",
+            "title": "Hold Expires At",
+            "type": "string"
+          },
+          "movie_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Null once the tickets are gone (cancel/expiry)",
+            "title": "Movie Title"
+          },
+          "qr_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Set once paid: one QR code for all seats. Image: GET .../qr.png",
+            "title": "Qr Token"
+          },
+          "seconds_left": {
+            "description": "Seconds until the hold ends. 0 unless the booking is pending.",
+            "title": "Seconds Left",
+            "type": "integer"
+          },
+          "start_time": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Time"
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "paid",
+              "cancelled",
+              "expired"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "tickets": {
+            "items": {
+              "$ref": "#/components/schemas/BookingTicketOut"
+            },
+            "title": "Tickets",
+            "type": "array"
+          },
+          "total_amount": {
+            "title": "Total Amount",
+            "type": "string"
+          }
+        },
+        "required": [
+          "booking_id",
+          "status",
+          "booking_time",
+          "hold_expires_at",
+          "seconds_left",
+          "total_amount",
+          "tickets",
+          "qr_token",
+          "checked_in_at",
+          "movie_title",
+          "hall",
+          "start_time"
+        ],
+        "title": "MyBookingOut",
+        "type": "object"
+      },
       "PayIn": {
         "properties": {
           "method": {
@@ -2597,6 +2716,71 @@
         "summary": "Me",
         "tags": [
           "me"
+        ]
+      }
+    },
+    "/api/me/bookings": {
+      "get": {
+        "description": "All my bookings, newest first, with the movie and time (for the \"My bookings\" page).",
+        "operationId": "my_bookings_api_me_bookings_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "pending",
+                    "paid",
+                    "cancelled",
+                    "expired"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MyBookingOut"
+                  },
+                  "title": "Response My Bookings Api Me Bookings Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "My Bookings",
+        "tags": [
+          "bookings"
         ]
       }
     },
