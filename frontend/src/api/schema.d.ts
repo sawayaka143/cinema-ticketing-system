@@ -512,6 +512,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/staff/bookings/{booking_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Look Up Booking
+         * @description Any booking, for the desk: who bought it, for which show, and its state.
+         */
+        get: operations["look_up_booking_api_staff_bookings__booking_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/staff/bookings/{booking_id}/refund": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Refund Booking
+         * @description Cancel a paid booking and refund the whole amount, before the screening starts.
+         */
+        post: operations["refund_booking_api_staff_bookings__booking_id__refund_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/ticket-types": {
         parameters: {
             query?: never;
@@ -975,6 +1015,28 @@ export interface components {
              */
             simulate_decline: boolean;
         };
+        /** RefundIn */
+        RefundIn: {
+            /**
+             * Reason
+             * @example Customer is ill
+             */
+            reason: string;
+        };
+        /** RefundOut */
+        RefundOut: {
+            /** Booking Id */
+            booking_id: number;
+            /** Refunded Amount */
+            refunded_amount: string;
+            /**
+             * Refunded At
+             * Format: date-time
+             */
+            refunded_at: string;
+            /** Status */
+            status: string;
+        };
         /** Removed */
         Removed: {
             /**
@@ -1105,6 +1167,29 @@ export interface components {
              * @enum {string}
              */
             seat_type: "standard" | "vip" | "wheelchair";
+        };
+        /** StaffBookingOut */
+        StaffBookingOut: {
+            /** Booking Id */
+            booking_id: number;
+            /** Checked In At */
+            checked_in_at: string | null;
+            /** Customer Email */
+            customer_email: string | null;
+            /** Customer Name */
+            customer_name: string | null;
+            /** Hall */
+            hall: string | null;
+            /** Movie Title */
+            movie_title: string | null;
+            /** Start Time */
+            start_time: string | null;
+            /** Status */
+            status: string;
+            /** Tickets */
+            tickets: components["schemas"]["BookingTicketOut"][];
+            /** Total Amount */
+            total_amount: string;
         };
         /** StaffOut */
         StaffOut: {
@@ -2069,6 +2154,72 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SeatMap"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    look_up_booking_api_staff_bookings__booking_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                booking_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StaffBookingOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    refund_booking_api_staff_bookings__booking_id__refund_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                booking_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RefundIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RefundOut"];
                 };
             };
             /** @description Validation Error */
