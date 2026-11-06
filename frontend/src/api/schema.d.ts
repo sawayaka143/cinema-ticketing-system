@@ -4,6 +4,82 @@
  */
 
 export interface paths {
+    "/api/admin/halls": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Halls */
+        get: operations["list_halls_api_admin_halls_get"];
+        put?: never;
+        /**
+         * Create Hall
+         * @description A new hall with its seats generated from the layout.
+         */
+        post: operations["create_hall_api_admin_halls_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/halls/{hall_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Hall */
+        delete: operations["delete_hall_api_admin_halls__hall_id__delete"];
+        options?: never;
+        head?: never;
+        /** Update Hall */
+        patch: operations["update_hall_api_admin_halls__hall_id__patch"];
+        trace?: never;
+    };
+    "/api/admin/halls/{hall_id}/layout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Replace Layout
+         * @description Regenerate all seats. Only while no ticket has ever been sold for this hall's seats.
+         */
+        put: operations["replace_layout_api_admin_halls__hall_id__layout_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/halls/{hall_id}/seats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Hall Seats */
+        get: operations["list_hall_seats_api_admin_halls__hall_id__seats_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/movies": {
         parameters: {
             query?: never;
@@ -112,6 +188,26 @@ export interface paths {
          * @description Change price any time; movie, hall and time only while no tickets exist.
          */
         patch: operations["update_screening_api_admin_screenings__screening_id__patch"];
+        trace?: never;
+    };
+    "/api/admin/seats/{seat_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Update Seat
+         * @description Change a seat's type. Prices of tickets already sold stay as they were.
+         */
+        patch: operations["update_seat_api_admin_seats__seat_id__patch"];
         trace?: never;
     };
     "/api/bookings": {
@@ -400,6 +496,19 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AdminHallOut */
+        AdminHallOut: {
+            /** Capacity */
+            capacity: number;
+            /** Hall Id */
+            hall_id: number;
+            /** Hall Type */
+            hall_type: string;
+            /** Name */
+            name: string;
+            /** Screenings */
+            screenings: number;
+        };
         /** AdminMovieOut */
         AdminMovieOut: {
             /** Description */
@@ -447,6 +556,23 @@ export interface components {
              * @description Held or sold tickets
              */
             tickets: number;
+        };
+        /** AdminSeatOut */
+        AdminSeatOut: {
+            /** Grid Col */
+            grid_col: number;
+            /** Grid Row */
+            grid_row: number;
+            /** Hall Id */
+            hall_id: number;
+            /** Row Label */
+            row_label: string;
+            /** Seat Id */
+            seat_id: number;
+            /** Seat Number */
+            seat_number: number;
+            /** Seat Type */
+            seat_type: string;
         };
         /** BookingOut */
         BookingOut: {
@@ -562,6 +688,43 @@ export interface components {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
         };
+        /** HallIn */
+        HallIn: {
+            /**
+             * Aisle After
+             * @description An empty grid column after this seat number
+             */
+            aisle_after?: number | null;
+            /**
+             * Hall Type
+             * @enum {string}
+             */
+            hall_type: "2D" | "3D" | "IMAX";
+            /** Name */
+            name: string;
+            /**
+             * Rows
+             * @description Rows are labelled A, B, C, …
+             */
+            rows: number;
+            /** Seats Per Row */
+            seats_per_row: number;
+            /**
+             * Vip Rows
+             * @description 1-based row numbers
+             * @default []
+             */
+            vip_rows: number[];
+            /**
+             * Wheelchair Seats
+             * @default []
+             * @example [
+             *       "A1",
+             *       "A12"
+             *     ]
+             */
+            wheelchair_seats: string[];
+        };
         /** HallOut */
         HallOut: {
             /** Hall Id */
@@ -570,6 +733,13 @@ export interface components {
             hall_type: string;
             /** Name */
             name: string;
+        };
+        /** HallUpdate */
+        HallUpdate: {
+            /** Hall Type */
+            hall_type?: ("2D" | "3D" | "IMAX") | null;
+            /** Name */
+            name?: string | null;
         };
         /** Health */
         Health: {
@@ -585,6 +755,36 @@ export interface components {
              * @description 1 to 10 distinct seats of the screening's hall
              */
             seat_ids: number[];
+        };
+        /** LayoutIn */
+        LayoutIn: {
+            /**
+             * Aisle After
+             * @description An empty grid column after this seat number
+             */
+            aisle_after?: number | null;
+            /**
+             * Rows
+             * @description Rows are labelled A, B, C, …
+             */
+            rows: number;
+            /** Seats Per Row */
+            seats_per_row: number;
+            /**
+             * Vip Rows
+             * @description 1-based row numbers
+             * @default []
+             */
+            vip_rows: number[];
+            /**
+             * Wheelchair Seats
+             * @default []
+             * @example [
+             *       "A1",
+             *       "A12"
+             *     ]
+             */
+            wheelchair_seats: string[];
         };
         /** Me */
         Me: {
@@ -800,6 +1000,14 @@ export interface components {
             /** Seat Type */
             seat_type: string;
         };
+        /** SeatUpdate */
+        SeatUpdate: {
+            /**
+             * Seat Type
+             * @enum {string}
+             */
+            seat_type: "standard" | "vip" | "wheelchair";
+        };
         /** StaffOut */
         StaffOut: {
             /** Full Name */
@@ -834,6 +1042,189 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    list_halls_api_admin_halls_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminHallOut"][];
+                };
+            };
+        };
+    };
+    create_hall_api_admin_halls_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HallIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminHallOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_hall_api_admin_halls__hall_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                hall_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_hall_api_admin_halls__hall_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                hall_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HallUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminHallOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    replace_layout_api_admin_halls__hall_id__layout_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                hall_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LayoutIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminHallOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_hall_seats_api_admin_halls__hall_id__seats_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                hall_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminSeatOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_all_movies_api_admin_movies_get: {
         parameters: {
             query?: never;
@@ -1089,6 +1480,41 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AdminScreeningOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_seat_api_admin_seats__seat_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                seat_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SeatUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminSeatOut"];
                 };
             };
             /** @description Validation Error */

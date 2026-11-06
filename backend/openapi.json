@@ -1,6 +1,39 @@
 {
   "components": {
     "schemas": {
+      "AdminHallOut": {
+        "properties": {
+          "capacity": {
+            "title": "Capacity",
+            "type": "integer"
+          },
+          "hall_id": {
+            "title": "Hall Id",
+            "type": "integer"
+          },
+          "hall_type": {
+            "title": "Hall Type",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "screenings": {
+            "title": "Screenings",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "hall_id",
+          "name",
+          "hall_type",
+          "capacity",
+          "screenings"
+        ],
+        "title": "AdminHallOut",
+        "type": "object"
+      },
       "AdminMovieOut": {
         "properties": {
           "description": {
@@ -126,6 +159,49 @@
           "tickets"
         ],
         "title": "AdminScreeningOut",
+        "type": "object"
+      },
+      "AdminSeatOut": {
+        "properties": {
+          "grid_col": {
+            "title": "Grid Col",
+            "type": "integer"
+          },
+          "grid_row": {
+            "title": "Grid Row",
+            "type": "integer"
+          },
+          "hall_id": {
+            "title": "Hall Id",
+            "type": "integer"
+          },
+          "row_label": {
+            "title": "Row Label",
+            "type": "string"
+          },
+          "seat_id": {
+            "title": "Seat Id",
+            "type": "integer"
+          },
+          "seat_number": {
+            "title": "Seat Number",
+            "type": "integer"
+          },
+          "seat_type": {
+            "title": "Seat Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "seat_id",
+          "hall_id",
+          "row_label",
+          "seat_number",
+          "seat_type",
+          "grid_row",
+          "grid_col"
+        ],
+        "title": "AdminSeatOut",
         "type": "object"
       },
       "BookingOut": {
@@ -395,6 +471,82 @@
         "title": "HTTPValidationError",
         "type": "object"
       },
+      "HallIn": {
+        "properties": {
+          "aisle_after": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "An empty grid column after this seat number",
+            "title": "Aisle After"
+          },
+          "hall_type": {
+            "enum": [
+              "2D",
+              "3D",
+              "IMAX"
+            ],
+            "title": "Hall Type",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 30,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "rows": {
+            "description": "Rows are labelled A, B, C, \u2026",
+            "maximum": 26.0,
+            "minimum": 1.0,
+            "title": "Rows",
+            "type": "integer"
+          },
+          "seats_per_row": {
+            "maximum": 40.0,
+            "minimum": 1.0,
+            "title": "Seats Per Row",
+            "type": "integer"
+          },
+          "vip_rows": {
+            "default": [],
+            "description": "1-based row numbers",
+            "items": {
+              "type": "integer"
+            },
+            "title": "Vip Rows",
+            "type": "array"
+          },
+          "wheelchair_seats": {
+            "default": [],
+            "examples": [
+              [
+                "A1",
+                "A12"
+              ]
+            ],
+            "items": {
+              "type": "string"
+            },
+            "title": "Wheelchair Seats",
+            "type": "array"
+          }
+        },
+        "required": [
+          "rows",
+          "seats_per_row",
+          "name",
+          "hall_type"
+        ],
+        "title": "HallIn",
+        "type": "object"
+      },
       "HallOut": {
         "properties": {
           "hall_id": {
@@ -416,6 +568,41 @@
           "hall_type"
         ],
         "title": "HallOut",
+        "type": "object"
+      },
+      "HallUpdate": {
+        "properties": {
+          "hall_type": {
+            "anyOf": [
+              {
+                "enum": [
+                  "2D",
+                  "3D",
+                  "IMAX"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hall Type"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "maxLength": 30,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          }
+        },
+        "title": "HallUpdate",
         "type": "object"
       },
       "Health": {
@@ -451,6 +638,65 @@
           "seat_ids"
         ],
         "title": "HoldIn",
+        "type": "object"
+      },
+      "LayoutIn": {
+        "properties": {
+          "aisle_after": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "An empty grid column after this seat number",
+            "title": "Aisle After"
+          },
+          "rows": {
+            "description": "Rows are labelled A, B, C, \u2026",
+            "maximum": 26.0,
+            "minimum": 1.0,
+            "title": "Rows",
+            "type": "integer"
+          },
+          "seats_per_row": {
+            "maximum": 40.0,
+            "minimum": 1.0,
+            "title": "Seats Per Row",
+            "type": "integer"
+          },
+          "vip_rows": {
+            "default": [],
+            "description": "1-based row numbers",
+            "items": {
+              "type": "integer"
+            },
+            "title": "Vip Rows",
+            "type": "array"
+          },
+          "wheelchair_seats": {
+            "default": [],
+            "examples": [
+              [
+                "A1",
+                "A12"
+              ]
+            ],
+            "items": {
+              "type": "string"
+            },
+            "title": "Wheelchair Seats",
+            "type": "array"
+          }
+        },
+        "required": [
+          "rows",
+          "seats_per_row"
+        ],
+        "title": "LayoutIn",
         "type": "object"
       },
       "Me": {
@@ -1109,6 +1355,24 @@
         "title": "SeatOut",
         "type": "object"
       },
+      "SeatUpdate": {
+        "properties": {
+          "seat_type": {
+            "enum": [
+              "standard",
+              "vip",
+              "wheelchair"
+            ],
+            "title": "Seat Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "seat_type"
+        ],
+        "title": "SeatUpdate",
+        "type": "object"
+      },
       "StaffOut": {
         "properties": {
           "full_name": {
@@ -1191,6 +1455,285 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/admin/halls": {
+      "get": {
+        "operationId": "list_halls_api_admin_halls_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AdminHallOut"
+                  },
+                  "title": "Response List Halls Api Admin Halls Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Halls",
+        "tags": [
+          "admin"
+        ]
+      },
+      "post": {
+        "description": "A new hall with its seats generated from the layout.",
+        "operationId": "create_hall_api_admin_halls_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HallIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminHallOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Hall",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/halls/{hall_id}": {
+      "delete": {
+        "operationId": "delete_hall_api_admin_halls__hall_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "hall_id",
+            "required": true,
+            "schema": {
+              "title": "Hall Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Delete Hall",
+        "tags": [
+          "admin"
+        ]
+      },
+      "patch": {
+        "operationId": "update_hall_api_admin_halls__hall_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "hall_id",
+            "required": true,
+            "schema": {
+              "title": "Hall Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HallUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminHallOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Update Hall",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/halls/{hall_id}/layout": {
+      "put": {
+        "description": "Regenerate all seats. Only while no ticket has ever been sold for this hall's seats.",
+        "operationId": "replace_layout_api_admin_halls__hall_id__layout_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "hall_id",
+            "required": true,
+            "schema": {
+              "title": "Hall Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LayoutIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminHallOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Replace Layout",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/halls/{hall_id}/seats": {
+      "get": {
+        "operationId": "list_hall_seats_api_admin_halls__hall_id__seats_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "hall_id",
+            "required": true,
+            "schema": {
+              "title": "Hall Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AdminSeatOut"
+                  },
+                  "title": "Response List Hall Seats Api Admin Halls  Hall Id  Seats Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Hall Seats",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
     "/api/admin/movies": {
       "get": {
         "description": "All movies, archived ones included.",
@@ -1599,6 +2142,64 @@
           }
         ],
         "summary": "Update Screening",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/seats/{seat_id}": {
+      "patch": {
+        "description": "Change a seat's type. Prices of tickets already sold stay as they were.",
+        "operationId": "update_seat_api_admin_seats__seat_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "seat_id",
+            "required": true,
+            "schema": {
+              "title": "Seat Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SeatUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminSeatOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Update Seat",
         "tags": [
           "admin"
         ]
