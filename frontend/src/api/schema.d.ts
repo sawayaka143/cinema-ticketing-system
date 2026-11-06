@@ -86,6 +86,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/bookings/{booking_id}/qr.png": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Booking Qr
+         * @description The QR code of my paid booking. One code lets the whole group in.
+         */
+        get: operations["get_booking_qr_api_bookings__booking_id__qr_png_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/checkin": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Check In
+         * @description Validate a scanned QR code and let the whole booking in (once).
+         */
+        post: operations["check_in_api_checkin_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/health": {
         parameters: {
             query?: never;
@@ -259,11 +299,18 @@ export interface components {
              * Format: date-time
              */
             booking_time: string;
+            /** Checked In At */
+            checked_in_at: string | null;
             /**
              * Hold Expires At
              * Format: date-time
              */
             hold_expires_at: string;
+            /**
+             * Qr Token
+             * @description Set once paid: one QR code for all seats. Image: GET .../qr.png
+             */
+            qr_token: string | null;
             /**
              * Seconds Left
              * @description Seconds until the hold ends. 0 unless the booking is pending.
@@ -293,6 +340,43 @@ export interface components {
             seat_number: number;
             /** Ticket Id */
             ticket_id: number;
+        };
+        /** CheckinIn */
+        CheckinIn: {
+            /**
+             * Token
+             * @description The text in the QR code
+             */
+            token: string;
+        };
+        /** CheckinOut */
+        CheckinOut: {
+            /** Booking Id */
+            booking_id: number;
+            /**
+             * Checked In At
+             * Format: date-time
+             */
+            checked_in_at: string;
+            /** Hall */
+            hall: string;
+            /** Movie Title */
+            movie_title: string;
+            /** People */
+            people: number;
+            /**
+             * Seats
+             * @example [
+             *       "A5",
+             *       "A6"
+             *     ]
+             */
+            seats: string[];
+            /**
+             * Start Time
+             * Format: date-time
+             */
+            start_time: string;
         };
         /** CustomerCreate */
         CustomerCreate: {
@@ -609,6 +693,70 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["BookingOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_booking_qr_api_bookings__booking_id__qr_png_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                booking_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The QR code as PNG */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/png": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    check_in_api_checkin_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CheckinIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CheckinOut"];
                 };
             };
             /** @description Validation Error */
