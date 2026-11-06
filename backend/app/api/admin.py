@@ -118,9 +118,23 @@ def update_movie(
             movie.genres = _genres(db, value or [])
         elif value is not None or field in NULLABLE_MOVIE_FIELDS:
             setattr(movie, field, value)
+    if changes.get("duration_min") is not None:
+        _reschedule_upcoming(db, movie)
     audit(db, staff, "update", "movie", movie_id, **jsonable_encoder(changes))
     db.commit()
     return _admin_movie(_movie(db, movie_id))
+
+
+def _reschedule_upcoming(db: Session, movie: Movie) -> None:
+    """A new duration moves the end of every screening that hasn't started; a clash is a 409."""
+    upcoming = db.scalars(
+        select(Screening).where(
+            Screening.movie_id == movie.movie_id, Screening.start_time > func.now()
+        )
+    )
+    for s in upcoming:
+        s.end_time = s.start_time + timedelta(minutes=movie.duration_min) + CLEANING
+    _flush_schedule(db)
 
 
 @router.delete("/movies/{movie_id}", response_model=Removed)
@@ -310,7 +324,11 @@ def delete_screening(screening_id: int, staff: ManagerDep, db: SessionDep) -> No
     details = {"movie_id": s.movie_id, "hall_id": s.hall_id, "start_time": s.start_time}
     db.delete(s)
     audit(db, staff, "delete", "screening", screening_id, **jsonable_encoder(details))
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError as exc:  # a seat was held between the check and the delete
+        db.rollback()
+        raise HTTPException(status.HTTP_409_CONFLICT, "The screening has sold tickets") from exc
 
 
 # --- report -----------------------------------------------------------------------------------
