@@ -137,6 +137,16 @@ def test_rename_hall(client: TestClient, boss):
     assert (res.status_code, res.json()["name"]) == (200, "Hall Ä")
 
 
+def test_rename_to_an_existing_name_is_409(client: TestClient, boss):
+    _create(client)
+    other = _create(client, name="Other hall").json()["hall_id"]
+    assert client.patch(f"/api/admin/halls/{other}", json={"name": "Test hall"}).status_code == 409
+
+
+def test_seats_of_unknown_hall_is_404(client: TestClient, boss):
+    assert client.get("/api/admin/halls/999999999/seats").status_code == 404
+
+
 def test_replace_layout_while_unsold(client: TestClient, db: Session, boss):
     hall_id = _create(client).json()["hall_id"]
     _screen(db, hall_id)  # a screening alone doesn't block a new layout
@@ -187,3 +197,4 @@ def test_halls_need_a_manager(client: TestClient, db: Session):
     db.flush()
     app.dependency_overrides[get_current_user] = lambda: user
     assert _create(client).status_code == 403
+    assert client.get("/api/admin/halls").status_code == 403

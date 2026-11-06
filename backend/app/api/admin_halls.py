@@ -195,7 +195,13 @@ def replace_layout(hall_id: int, body: LayoutIn, staff: ManagerDep, db: SessionD
     db.execute(delete(Seat).where(Seat.hall_id == hall_id))
     db.add_all(seats)
     audit(db, staff, "replace_layout", "hall", hall_id, **_layout_summary(body))
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError as exc:  # a seat was held between the check and the delete
+        db.rollback()
+        raise HTTPException(
+            status.HTTP_409_CONFLICT, "Tickets exist for this hall's seats"
+        ) from exc
     return _hall_out(db, hall)
 
 

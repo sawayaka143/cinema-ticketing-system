@@ -105,6 +105,11 @@ def test_cashier_is_403(client: TestClient, w: dict):
     assert client.get("/api/admin/movies").status_code == 403
 
 
+def test_cashier_cant_list_screenings(client: TestClient, w: dict):
+    _act_as(w["cashier"])
+    assert client.get("/api/admin/screenings").status_code == 403
+
+
 def test_without_login_is_401(client: TestClient):
     assert client.get("/api/admin/report").status_code == 401
 
@@ -150,6 +155,32 @@ def test_update_unknown_movie_is_404(client: TestClient, w: dict):
 def test_delete_movie_without_screenings_deletes(client: TestClient, w: dict):
     res = client.delete(f"/api/admin/movies/{w['movie'].movie_id}")
     assert res.json() == {"result": "deleted"}
+
+
+def test_delete_unknown_movie_is_404(client: TestClient, w: dict):
+    assert client.delete("/api/admin/movies/999999999").status_code == 404
+
+
+def test_longer_movie_moves_upcoming_screening_ends(client: TestClient, w: dict):
+    sid = _new_screening(client, w).json()["screening_id"]
+
+    res = client.patch(f"/api/admin/movies/{w['movie'].movie_id}", json={"duration_min": 130})
+
+    assert res.status_code == 200
+    screening = next(
+        s for s in client.get("/api/admin/screenings").json() if s["screening_id"] == sid
+    )
+    assert datetime.fromisoformat(screening["end_time"]) == START + timedelta(minutes=145)
+
+
+def test_longer_movie_that_clashes_is_409(client: TestClient, w: dict):
+    _new_screening(client, w)
+    _new_screening(client, w, START + timedelta(minutes=120))
+
+    res = client.patch(f"/api/admin/movies/{w['movie'].movie_id}", json={"duration_min": 110})
+
+    assert res.status_code == 409
+    assert client.get(f"/api/movies/{w['movie'].movie_id}").json()["duration_min"] == 100
 
 
 def test_delete_movie_with_screenings_archives(client: TestClient, w: dict):
