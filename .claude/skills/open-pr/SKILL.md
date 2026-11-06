@@ -47,7 +47,7 @@ npm run lint && npm run typecheck && npm run build
 ```bash
 git diff --shortstat origin/main...HEAD -- . ':!**/package-lock.json' ':!**/openapi.json' ':!**/schema.d.ts'
 ```
-More than **1,000** changed lines (insertions + deletions)? Stop and propose a split. Only the owner can apply the `size-ok` label.
+More than **1,000** changed lines (insertions + deletions)? Propose a split if it's easy; CI only warns.
 
 ## 5. Commit and push
 

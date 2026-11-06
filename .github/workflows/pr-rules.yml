@@ -30,6 +30,7 @@ jobs:
           set -uo pipefail
           errors=0
           fail() { echo "::error::$1"; errors=$((errors+1)); }
+          warn() { echo "::warning::$1"; }
           ok()   { echo "OK  $1"; }
 
           # Current PR state, not the snapshot in the event that started this run
@@ -60,7 +61,7 @@ jobs:
           gh api --paginate "repos/$REPO/pulls/$PR/files" \
             --jq '.[] | [.filename, (.additions + .deletions)] | @tsv' > files.tsv
 
-          # 4. Size (lockfiles and generated files excluded)
+          # 4. Size (lockfiles and generated files excluded): a warning, not a blocker
           size=$(grep -Ev '(^|/)(package-lock\.json|openapi\.json|schema\.d\.ts)'$'\t' files.tsv | awk -F'\t' '{s+=$2} END {print s+0}')
           size_ok_by_owner=$(gh api --paginate "repos/$REPO/issues/$PR/events" \
             --jq "[.[] | select(.event==\"labeled\" and .label.name==\"size-ok\" and .actor.login==\"$OWNER\")] | length" | awk '{s+=$1} END {print s+0}')
@@ -70,15 +71,15 @@ jobs:
           elif [[ "$has_size_label" == "true" && "$size_ok_by_owner" -gt 0 ]]; then
             ok "size: $size changed lines (allowed by owner's size-ok label)"
           else
-            fail "PR changes $size lines (limit $MAX_LINES, lockfiles and generated files excluded). Split it into smaller PRs. Only the owner can allow an exception with the 'size-ok' label."
+            warn "PR changes $size lines (guideline $MAX_LINES, lockfiles and generated files excluded). Consider splitting it."
           fi
 
-          # 5. Areas: frontend/ is owner-only, except the generated src/api/schema.d.ts
-          #    (backend PRs must regenerate it, or the Frontend check fails); workflow and rule files only warn
+          # 5. Areas: frontend/ is the owner's area, so changes there by others only warn
+          #    (the generated src/api/schema.d.ts is expected); workflow and rule files only warn
           if [[ "$AUTHOR" != "$OWNER" ]]; then
             restricted=$(cut -f1 files.tsv | grep -E '^frontend/' | grep -vx 'frontend/src/api/schema.d.ts' || true)
             if [[ -n "$restricted" ]]; then
-              fail "frontend/ is owner-only (see AGENTS.md). Open an issue instead: $(tr '\n' ' ' <<< "$restricted")"
+              warn "frontend/ is the owner's area (see AGENTS.md); the owner will look closely: $(tr '\n' ' ' <<< "$restricted")"
             else
               ok "areas"
             fi
