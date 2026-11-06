@@ -4,6 +4,334 @@
  */
 
 export interface paths {
+    "/api/admin/halls": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Halls */
+        get: operations["list_halls_api_admin_halls_get"];
+        put?: never;
+        /**
+         * Create Hall
+         * @description A new hall with its seats generated from the layout.
+         */
+        post: operations["create_hall_api_admin_halls_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/halls/{hall_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Hall */
+        delete: operations["delete_hall_api_admin_halls__hall_id__delete"];
+        options?: never;
+        head?: never;
+        /** Update Hall */
+        patch: operations["update_hall_api_admin_halls__hall_id__patch"];
+        trace?: never;
+    };
+    "/api/admin/halls/{hall_id}/layout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Replace Layout
+         * @description Regenerate all seats. Only while no ticket has ever been sold for this hall's seats.
+         */
+        put: operations["replace_layout_api_admin_halls__hall_id__layout_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/halls/{hall_id}/seats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Hall Seats */
+        get: operations["list_hall_seats_api_admin_halls__hall_id__seats_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/movies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List All Movies
+         * @description All movies, archived ones included.
+         */
+        get: operations["list_all_movies_api_admin_movies_get"];
+        put?: never;
+        /** Create Movie */
+        post: operations["create_movie_api_admin_movies_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/movies/{movie_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Delete Movie
+         * @description Deletes a movie without screenings; a movie with screenings is archived instead.
+         */
+        delete: operations["delete_movie_api_admin_movies__movie_id__delete"];
+        options?: never;
+        head?: never;
+        /**
+         * Update Movie
+         * @description Change only the fields sent. `null` clears description, poster or year.
+         */
+        patch: operations["update_movie_api_admin_movies__movie_id__patch"];
+        trace?: never;
+    };
+    "/api/admin/report": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Occupancy Report
+         * @description Next 7 days: paid tickets, occupancy and revenue per screening, emptiest first.
+         */
+        get: operations["occupancy_report_api_admin_report_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/screenings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Schedule
+         * @description The schedule: screenings of one day, or the next 7 days, earliest first.
+         */
+        get: operations["list_schedule_api_admin_screenings_get"];
+        put?: never;
+        /**
+         * Create Screening
+         * @description Put a movie into a hall. The end time includes 15 minutes of cleaning.
+         */
+        post: operations["create_screening_api_admin_screenings_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/screenings/{screening_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Screening */
+        delete: operations["delete_screening_api_admin_screenings__screening_id__delete"];
+        options?: never;
+        head?: never;
+        /**
+         * Update Screening
+         * @description Change price any time; movie, hall and time only while no tickets exist.
+         */
+        patch: operations["update_screening_api_admin_screenings__screening_id__patch"];
+        trace?: never;
+    };
+    "/api/admin/seats/{seat_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Update Seat
+         * @description Change a seat's type. Prices of tickets already sold stay as they were.
+         */
+        patch: operations["update_seat_api_admin_seats__seat_id__patch"];
+        trace?: never;
+    };
+    "/api/bookings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Hold Seats
+         * @description Hold seats for 10 minutes: a pending booking with one ticket per seat (§6, step 1).
+         */
+        post: operations["hold_seats_api_bookings_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/bookings/{booking_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Booking
+         * @description One of my bookings, with the seconds left on its hold (for the countdown).
+         */
+        get: operations["get_booking_api_bookings__booking_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/bookings/{booking_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cancel Booking
+         * @description Cancel my pending hold: the booking becomes 'cancelled' and its seats are free again.
+         *
+         *     Paid bookings are cancelled (with a refund) by a cashier or manager, not here.
+         */
+        post: operations["cancel_booking_api_bookings__booking_id__cancel_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/bookings/{booking_id}/pay": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Pay Booking
+         * @description Fake payment for my pending hold (§6, step 2). A decline is stored; retry is allowed.
+         */
+        post: operations["pay_booking_api_bookings__booking_id__pay_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/bookings/{booking_id}/qr.png": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Booking Qr
+         * @description The QR code of my paid booking. One code lets the whole group in.
+         */
+        get: operations["get_booking_qr_api_bookings__booking_id__qr_png_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/checkin": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Check In
+         * @description Validate a scanned QR code and let the whole booking in (once).
+         */
+        post: operations["check_in_api_checkin_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/health": {
         parameters: {
             query?: never;
@@ -36,6 +364,26 @@ export interface paths {
          * @description Who is logged in, and which profiles they have.
          */
         get: operations["me_api_me_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/me/bookings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * My Bookings
+         * @description All my bookings, newest first, with the movie and time (for the "My bookings" page).
+         */
+        get: operations["my_bookings_api_me_bookings_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -144,10 +492,218 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/screenings/{screening_id}/seats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Seat Map
+         * @description Every seat of the screening's hall, its price and whether it is taken (held or sold).
+         */
+        get: operations["get_seat_map_api_screenings__screening_id__seats_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/ticket-types": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Ticket Types
+         * @description Price categories a customer may choose. Staff types only for logged-in active staff.
+         */
+        get: operations["list_ticket_types_api_ticket_types_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AdminHallOut */
+        AdminHallOut: {
+            /** Capacity */
+            capacity: number;
+            /** Hall Id */
+            hall_id: number;
+            /** Hall Type */
+            hall_type: string;
+            /** Name */
+            name: string;
+            /** Screenings */
+            screenings: number;
+        };
+        /** AdminMovieOut */
+        AdminMovieOut: {
+            /** Description */
+            description: string | null;
+            /** Duration Min */
+            duration_min: number;
+            /** Genres */
+            genres: string[];
+            /** Is Active */
+            is_active: boolean;
+            /** Min Age */
+            min_age: number;
+            /** Movie Id */
+            movie_id: number;
+            /** Poster Url */
+            poster_url: string | null;
+            /** Release Year */
+            release_year: number | null;
+            /** Title */
+            title: string;
+        };
+        /** AdminScreeningOut */
+        AdminScreeningOut: {
+            /** Base Price */
+            base_price: string;
+            /**
+             * End Time
+             * Format: date-time
+             */
+            end_time: string;
+            hall: components["schemas"]["HallOut"];
+            /** Movie Id */
+            movie_id: number;
+            /** Movie Title */
+            movie_title: string;
+            /** Screening Id */
+            screening_id: number;
+            /**
+             * Start Time
+             * Format: date-time
+             */
+            start_time: string;
+            /**
+             * Tickets
+             * @description Held or sold tickets
+             */
+            tickets: number;
+        };
+        /** AdminSeatOut */
+        AdminSeatOut: {
+            /** Grid Col */
+            grid_col: number;
+            /** Grid Row */
+            grid_row: number;
+            /** Hall Id */
+            hall_id: number;
+            /** Row Label */
+            row_label: string;
+            /** Seat Id */
+            seat_id: number;
+            /** Seat Number */
+            seat_number: number;
+            /** Seat Type */
+            seat_type: string;
+        };
+        /** BookingOut */
+        BookingOut: {
+            /** Booking Id */
+            booking_id: number;
+            /**
+             * Booking Time
+             * Format: date-time
+             */
+            booking_time: string;
+            /** Checked In At */
+            checked_in_at: string | null;
+            /**
+             * Hold Expires At
+             * Format: date-time
+             */
+            hold_expires_at: string;
+            /**
+             * Qr Token
+             * @description Set once paid: one QR code for all seats. Image: GET .../qr.png
+             */
+            qr_token: string | null;
+            /**
+             * Seconds Left
+             * @description Seconds until the hold ends. 0 unless the booking is pending.
+             */
+            seconds_left: number;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "pending" | "paid" | "cancelled" | "expired";
+            /** Tickets */
+            tickets: components["schemas"]["BookingTicketOut"][];
+            /** Total Amount */
+            total_amount: string;
+        };
+        /** BookingTicketOut */
+        BookingTicketOut: {
+            /** Price */
+            price: string;
+            /** Row Label */
+            row_label: string;
+            /** Screening Id */
+            screening_id: number;
+            /** Seat Id */
+            seat_id: number;
+            /** Seat Number */
+            seat_number: number;
+            /** Ticket Id */
+            ticket_id: number;
+            /** Ticket Type */
+            ticket_type: string;
+        };
+        /** CheckinIn */
+        CheckinIn: {
+            /**
+             * Token
+             * @description The text in the QR code
+             */
+            token: string;
+        };
+        /** CheckinOut */
+        CheckinOut: {
+            /** Booking Id */
+            booking_id: number;
+            /**
+             * Checked In At
+             * Format: date-time
+             */
+            checked_in_at: string;
+            /** Hall */
+            hall: string;
+            /** Movie Title */
+            movie_title: string;
+            /** People */
+            people: number;
+            /**
+             * Seats
+             * @example [
+             *       "A5",
+             *       "A6"
+             *     ]
+             */
+            seats: string[];
+            /**
+             * Start Time
+             * Format: date-time
+             */
+            start_time: string;
+        };
         /** CustomerCreate */
         CustomerCreate: {
             /** Full Name */
@@ -174,6 +730,43 @@ export interface components {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
         };
+        /** HallIn */
+        HallIn: {
+            /**
+             * Aisle After
+             * @description An empty grid column after this seat number
+             */
+            aisle_after?: number | null;
+            /**
+             * Hall Type
+             * @enum {string}
+             */
+            hall_type: "2D" | "3D" | "IMAX";
+            /** Name */
+            name: string;
+            /**
+             * Rows
+             * @description Rows are labelled A, B, C, …
+             */
+            rows: number;
+            /** Seats Per Row */
+            seats_per_row: number;
+            /**
+             * Vip Rows
+             * @description 1-based row numbers
+             * @default []
+             */
+            vip_rows: number[];
+            /**
+             * Wheelchair Seats
+             * @default []
+             * @example [
+             *       "A1",
+             *       "A12"
+             *     ]
+             */
+            wheelchair_seats: string[];
+        };
         /** HallOut */
         HallOut: {
             /** Hall Id */
@@ -183,10 +776,68 @@ export interface components {
             /** Name */
             name: string;
         };
+        /** HallUpdate */
+        HallUpdate: {
+            /** Hall Type */
+            hall_type?: ("2D" | "3D" | "IMAX") | null;
+            /** Name */
+            name?: string | null;
+        };
         /** Health */
         Health: {
             /** Status */
             status: string;
+        };
+        /** HoldIn */
+        HoldIn: {
+            /** Screening Id */
+            screening_id: number;
+            /**
+             * Seat Ids
+             * @description 1 to 10 distinct seats of the screening's hall
+             */
+            seat_ids: number[];
+            /**
+             * Ticket Types
+             * @description seat_id -> ticket type name (student, child, staff). Others are adult.
+             * @default {}
+             * @example {
+             *       "523": "child"
+             *     }
+             */
+            ticket_types: {
+                [key: string]: string;
+            };
+        };
+        /** LayoutIn */
+        LayoutIn: {
+            /**
+             * Aisle After
+             * @description An empty grid column after this seat number
+             */
+            aisle_after?: number | null;
+            /**
+             * Rows
+             * @description Rows are labelled A, B, C, …
+             */
+            rows: number;
+            /** Seats Per Row */
+            seats_per_row: number;
+            /**
+             * Vip Rows
+             * @description 1-based row numbers
+             * @default []
+             */
+            vip_rows: number[];
+            /**
+             * Wheelchair Seats
+             * @default []
+             * @example [
+             *       "A1",
+             *       "A12"
+             *     ]
+             */
+            wheelchair_seats: string[];
         };
         /** Me */
         Me: {
@@ -200,6 +851,29 @@ export interface components {
             id: string;
             /** @description Null when the user isn't staff or is deactivated. */
             staff: components["schemas"]["StaffOut"] | null;
+        };
+        /** MovieIn */
+        MovieIn: {
+            /** Description */
+            description?: string | null;
+            /** Duration Min */
+            duration_min: number;
+            /**
+             * Genres
+             * @default []
+             */
+            genres: string[];
+            /**
+             * Min Age
+             * @enum {integer}
+             */
+            min_age: 0 | 6 | 12 | 16 | 18;
+            /** Poster Url */
+            poster_url?: string | null;
+            /** Release Year */
+            release_year?: number | null;
+            /** Title */
+            title: string;
         };
         /** MovieOut */
         MovieOut: {
@@ -220,6 +894,117 @@ export interface components {
             /** Title */
             title: string;
         };
+        /** MovieUpdate */
+        MovieUpdate: {
+            /** Description */
+            description?: string | null;
+            /** Duration Min */
+            duration_min?: number | null;
+            /** Genres */
+            genres?: string[] | null;
+            /**
+             * Is Active
+             * @description false archives, true restores
+             */
+            is_active?: boolean | null;
+            /** Min Age */
+            min_age?: (0 | 6 | 12 | 16 | 18) | null;
+            /** Poster Url */
+            poster_url?: string | null;
+            /** Release Year */
+            release_year?: number | null;
+            /** Title */
+            title?: string | null;
+        };
+        /** MyBookingOut */
+        MyBookingOut: {
+            /** Booking Id */
+            booking_id: number;
+            /**
+             * Booking Time
+             * Format: date-time
+             */
+            booking_time: string;
+            /** Checked In At */
+            checked_in_at: string | null;
+            /** Hall */
+            hall: string | null;
+            /**
+             * Hold Expires At
+             * Format: date-time
+             */
+            hold_expires_at: string;
+            /**
+             * Movie Title
+             * @description Null once the tickets are gone (cancel/expiry)
+             */
+            movie_title: string | null;
+            /**
+             * Qr Token
+             * @description Set once paid: one QR code for all seats. Image: GET .../qr.png
+             */
+            qr_token: string | null;
+            /**
+             * Seconds Left
+             * @description Seconds until the hold ends. 0 unless the booking is pending.
+             */
+            seconds_left: number;
+            /** Start Time */
+            start_time: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "pending" | "paid" | "cancelled" | "expired";
+            /** Tickets */
+            tickets: components["schemas"]["BookingTicketOut"][];
+            /** Total Amount */
+            total_amount: string;
+        };
+        /** PayIn */
+        PayIn: {
+            /**
+             * Method
+             * @enum {string}
+             */
+            method: "card" | "kaspi";
+            /**
+             * Simulate Decline
+             * @description Fake provider: true makes this attempt fail (for demos/tests).
+             * @default false
+             */
+            simulate_decline: boolean;
+        };
+        /** Removed */
+        Removed: {
+            /**
+             * Result
+             * @enum {string}
+             */
+            result: "deleted" | "archived";
+        };
+        /** ReportRow */
+        ReportRow: {
+            /** Capacity */
+            capacity: number;
+            /** Hall */
+            hall: string;
+            /** Occupancy Pct */
+            occupancy_pct: string | null;
+            /** Revenue */
+            revenue: string;
+            /** Screening Id */
+            screening_id: number;
+            /**
+             * Start Time
+             * Format: date-time
+             */
+            start_time: string;
+            /** Tickets Sold */
+            tickets_sold: number;
+            /** Title */
+            title: string;
+        };
         /** ScreeningDetail */
         ScreeningDetail: {
             /** Base Price */
@@ -235,6 +1020,20 @@ export interface components {
             movie_id: number;
             /** Screening Id */
             screening_id: number;
+            /**
+             * Start Time
+             * Format: date-time
+             */
+            start_time: string;
+        };
+        /** ScreeningIn */
+        ScreeningIn: {
+            /** Base Price */
+            base_price: number | string;
+            /** Hall Id */
+            hall_id: number;
+            /** Movie Id */
+            movie_id: number;
             /**
              * Start Time
              * Format: date-time
@@ -261,6 +1060,52 @@ export interface components {
              */
             start_time: string;
         };
+        /** ScreeningUpdate */
+        ScreeningUpdate: {
+            /** Base Price */
+            base_price?: number | string | null;
+            /** Hall Id */
+            hall_id?: number | null;
+            /** Movie Id */
+            movie_id?: number | null;
+            /** Start Time */
+            start_time?: string | null;
+        };
+        /** SeatMap */
+        SeatMap: {
+            hall: components["schemas"]["HallOut"];
+            /** Screening Id */
+            screening_id: number;
+            /** Seats */
+            seats: components["schemas"]["SeatOut"][];
+        };
+        /** SeatOut */
+        SeatOut: {
+            /** Grid Col */
+            grid_col: number;
+            /** Grid Row */
+            grid_row: number;
+            /** Is Taken */
+            is_taken: boolean;
+            /** Price */
+            price: string;
+            /** Row Label */
+            row_label: string;
+            /** Seat Id */
+            seat_id: number;
+            /** Seat Number */
+            seat_number: number;
+            /** Seat Type */
+            seat_type: string;
+        };
+        /** SeatUpdate */
+        SeatUpdate: {
+            /**
+             * Seat Type
+             * @enum {string}
+             */
+            seat_type: "standard" | "vip" | "wheelchair";
+        };
         /** StaffOut */
         StaffOut: {
             /** Full Name */
@@ -272,6 +1117,17 @@ export interface components {
             role: "cashier" | "manager" | "admin";
             /** Staff Id */
             staff_id: number;
+        };
+        /** TicketTypeOut */
+        TicketTypeOut: {
+            /** Discount Pct */
+            discount_pct: string;
+            /** Max Age */
+            max_age: number | null;
+            /** Name */
+            name: string;
+            /** Staff Only */
+            staff_only: boolean;
         };
         /** ValidationError */
         ValidationError: {
@@ -295,6 +1151,686 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    list_halls_api_admin_halls_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminHallOut"][];
+                };
+            };
+        };
+    };
+    create_hall_api_admin_halls_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HallIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminHallOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_hall_api_admin_halls__hall_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                hall_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_hall_api_admin_halls__hall_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                hall_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HallUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminHallOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    replace_layout_api_admin_halls__hall_id__layout_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                hall_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LayoutIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminHallOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_hall_seats_api_admin_halls__hall_id__seats_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                hall_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminSeatOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_all_movies_api_admin_movies_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminMovieOut"][];
+                };
+            };
+        };
+    };
+    create_movie_api_admin_movies_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MovieIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminMovieOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_movie_api_admin_movies__movie_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                movie_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Removed"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_movie_api_admin_movies__movie_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                movie_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MovieUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminMovieOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    occupancy_report_api_admin_report_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReportRow"][];
+                };
+            };
+        };
+    };
+    list_schedule_api_admin_screenings_get: {
+        parameters: {
+            query?: {
+                /** @description Day in Almaty time. Omit for the next 7 days. */
+                date?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminScreeningOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_screening_api_admin_screenings_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScreeningIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminScreeningOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_screening_api_admin_screenings__screening_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                screening_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_screening_api_admin_screenings__screening_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                screening_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScreeningUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminScreeningOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_seat_api_admin_seats__seat_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                seat_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SeatUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminSeatOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    hold_seats_api_bookings_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HoldIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookingOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_booking_api_bookings__booking_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                booking_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookingOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cancel_booking_api_bookings__booking_id__cancel_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                booking_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookingOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    pay_booking_api_bookings__booking_id__pay_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                booking_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PayIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookingOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_booking_qr_api_bookings__booking_id__qr_png_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                booking_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The QR code as PNG */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/png": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    check_in_api_checkin_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CheckinIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CheckinOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     health_api_health_get: {
         parameters: {
             query?: never;
@@ -331,6 +1867,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Me"];
+                };
+            };
+        };
+    };
+    my_bookings_api_me_bookings_get: {
+        parameters: {
+            query?: {
+                status?: ("pending" | "paid" | "cancelled" | "expired") | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyBookingOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -471,6 +2038,69 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ScreeningDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_seat_map_api_screenings__screening_id__seats_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                screening_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SeatMap"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_ticket_types_api_ticket_types_get: {
+        parameters: {
+            query?: {
+                /** @description Only the types allowed for this screening's movie */
+                screening_id?: number | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TicketTypeOut"][];
                 };
             };
             /** @description Validation Error */
