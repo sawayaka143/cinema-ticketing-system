@@ -1173,6 +1173,53 @@
         "title": "PayIn",
         "type": "object"
       },
+      "RefundIn": {
+        "properties": {
+          "reason": {
+            "examples": [
+              "Customer is ill"
+            ],
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "title": "RefundIn",
+        "type": "object"
+      },
+      "RefundOut": {
+        "properties": {
+          "booking_id": {
+            "title": "Booking Id",
+            "type": "integer"
+          },
+          "refunded_amount": {
+            "title": "Refunded Amount",
+            "type": "string"
+          },
+          "refunded_at": {
+            "format": "date-time",
+            "title": "Refunded At",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "booking_id",
+          "status",
+          "refunded_amount",
+          "refunded_at"
+        ],
+        "title": "RefundOut",
+        "type": "object"
+      },
       "Removed": {
         "properties": {
           "result": {
@@ -1509,6 +1556,111 @@
           "seat_type"
         ],
         "title": "SeatUpdate",
+        "type": "object"
+      },
+      "StaffBookingOut": {
+        "properties": {
+          "booking_id": {
+            "title": "Booking Id",
+            "type": "integer"
+          },
+          "checked_in_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Checked In At"
+          },
+          "customer_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Email"
+          },
+          "customer_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Name"
+          },
+          "hall": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hall"
+          },
+          "movie_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Movie Title"
+          },
+          "start_time": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Time"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "tickets": {
+            "items": {
+              "$ref": "#/components/schemas/BookingTicketOut"
+            },
+            "title": "Tickets",
+            "type": "array"
+          },
+          "total_amount": {
+            "title": "Total Amount",
+            "type": "string"
+          }
+        },
+        "required": [
+          "booking_id",
+          "status",
+          "customer_name",
+          "customer_email",
+          "movie_title",
+          "hall",
+          "start_time",
+          "tickets",
+          "total_amount",
+          "checked_in_at"
+        ],
+        "title": "StaffBookingOut",
         "type": "object"
       },
       "StaffOut": {
@@ -3049,6 +3201,112 @@
         "summary": "Get Seat Map",
         "tags": [
           "catalog"
+        ]
+      }
+    },
+    "/api/staff/bookings/{booking_id}": {
+      "get": {
+        "description": "Any booking, for the desk: who bought it, for which show, and its state.",
+        "operationId": "look_up_booking_api_staff_bookings__booking_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "booking_id",
+            "required": true,
+            "schema": {
+              "title": "Booking Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StaffBookingOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Look Up Booking",
+        "tags": [
+          "staff"
+        ]
+      }
+    },
+    "/api/staff/bookings/{booking_id}/refund": {
+      "post": {
+        "description": "Cancel a paid booking and refund the whole amount, before the screening starts.",
+        "operationId": "refund_booking_api_staff_bookings__booking_id__refund_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "booking_id",
+            "required": true,
+            "schema": {
+              "title": "Booking Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefundIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefundOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Refund Booking",
+        "tags": [
+          "staff"
         ]
       }
     },
