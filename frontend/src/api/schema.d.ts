@@ -4,6 +4,48 @@
  */
 
 export interface paths {
+    "/api/bookings/{booking_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Booking
+         * @description One of my bookings, with the seconds left on its hold (for the countdown).
+         */
+        get: operations["get_booking_api_bookings__booking_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/bookings/{booking_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cancel Booking
+         * @description Cancel my pending hold: the booking becomes 'cancelled' and its seats are free again.
+         *
+         *     Paid bookings are cancelled (with a refund) by a cashier or manager, not here.
+         */
+        post: operations["cancel_booking_api_bookings__booking_id__cancel_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/health": {
         parameters: {
             query?: never;
@@ -148,6 +190,50 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** BookingOut */
+        BookingOut: {
+            /** Booking Id */
+            booking_id: number;
+            /**
+             * Booking Time
+             * Format: date-time
+             */
+            booking_time: string;
+            /**
+             * Hold Expires At
+             * Format: date-time
+             */
+            hold_expires_at: string;
+            /**
+             * Seconds Left
+             * @description Seconds until the hold ends. 0 unless the booking is pending.
+             */
+            seconds_left: number;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "pending" | "paid" | "cancelled" | "expired";
+            /** Tickets */
+            tickets: components["schemas"]["BookingTicketOut"][];
+            /** Total Amount */
+            total_amount: string;
+        };
+        /** BookingTicketOut */
+        BookingTicketOut: {
+            /** Price */
+            price: string;
+            /** Row Label */
+            row_label: string;
+            /** Screening Id */
+            screening_id: number;
+            /** Seat Id */
+            seat_id: number;
+            /** Seat Number */
+            seat_number: number;
+            /** Ticket Id */
+            ticket_id: number;
+        };
         /** CustomerCreate */
         CustomerCreate: {
             /** Full Name */
@@ -295,6 +381,68 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    get_booking_api_bookings__booking_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                booking_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookingOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cancel_booking_api_bookings__booking_id__cancel_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                booking_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookingOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     health_api_health_get: {
         parameters: {
             query?: never;
