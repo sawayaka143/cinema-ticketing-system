@@ -492,6 +492,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/ticket-types": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Ticket Types
+         * @description Price categories a customer may choose. Staff types only for logged-in active staff.
+         */
+        get: operations["list_ticket_types_api_ticket_types_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -624,6 +644,8 @@ export interface components {
             seat_number: number;
             /** Ticket Id */
             ticket_id: number;
+            /** Ticket Type */
+            ticket_type: string;
         };
         /** CheckinIn */
         CheckinIn: {
@@ -755,6 +777,17 @@ export interface components {
              * @description 1 to 10 distinct seats of the screening's hall
              */
             seat_ids: number[];
+            /**
+             * Ticket Types
+             * @description seat_id -> ticket type name (student, child, staff). Others are adult.
+             * @default {}
+             * @example {
+             *       "523": "child"
+             *     }
+             */
+            ticket_types: {
+                [key: string]: string;
+            };
         };
         /** LayoutIn */
         LayoutIn: {
@@ -1019,6 +1052,17 @@ export interface components {
             role: "cashier" | "manager" | "admin";
             /** Staff Id */
             staff_id: number;
+        };
+        /** TicketTypeOut */
+        TicketTypeOut: {
+            /** Discount Pct */
+            discount_pct: string;
+            /** Max Age */
+            max_age: number | null;
+            /** Name */
+            name: string;
+            /** Staff Only */
+            staff_only: boolean;
         };
         /** ValidationError */
         ValidationError: {
@@ -1929,6 +1973,38 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SeatMap"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_ticket_types_api_ticket_types_get: {
+        parameters: {
+            query?: {
+                /** @description Only the types allowed for this screening's movie */
+                screening_id?: number | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TicketTypeOut"][];
                 };
             };
             /** @description Validation Error */
