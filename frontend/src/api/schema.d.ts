@@ -750,7 +750,8 @@ export interface components {
             full_name: string;
             /**
              * Phone
-             * @example +77011234567
+             * @description Spaces, dashes, brackets and a leading 8 are fine; stored as +7XXXXXXXXXX
+             * @example 8 (701) 123-45-67
              */
             phone?: string | null;
         };
