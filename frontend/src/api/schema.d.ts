@@ -4,6 +4,116 @@
  */
 
 export interface paths {
+    "/api/admin/movies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List All Movies
+         * @description All movies, archived ones included.
+         */
+        get: operations["list_all_movies_api_admin_movies_get"];
+        put?: never;
+        /** Create Movie */
+        post: operations["create_movie_api_admin_movies_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/movies/{movie_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Delete Movie
+         * @description Deletes a movie without screenings; a movie with screenings is archived instead.
+         */
+        delete: operations["delete_movie_api_admin_movies__movie_id__delete"];
+        options?: never;
+        head?: never;
+        /**
+         * Update Movie
+         * @description Change only the fields sent. `null` clears description, poster or year.
+         */
+        patch: operations["update_movie_api_admin_movies__movie_id__patch"];
+        trace?: never;
+    };
+    "/api/admin/report": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Occupancy Report
+         * @description Next 7 days: paid tickets, occupancy and revenue per screening, emptiest first.
+         */
+        get: operations["occupancy_report_api_admin_report_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/screenings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Schedule
+         * @description The schedule: screenings of one day, or the next 7 days, earliest first.
+         */
+        get: operations["list_schedule_api_admin_screenings_get"];
+        put?: never;
+        /**
+         * Create Screening
+         * @description Put a movie into a hall. The end time includes 15 minutes of cleaning.
+         */
+        post: operations["create_screening_api_admin_screenings_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/screenings/{screening_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Screening */
+        delete: operations["delete_screening_api_admin_screenings__screening_id__delete"];
+        options?: never;
+        head?: never;
+        /**
+         * Update Screening
+         * @description Change price any time; movie, hall and time only while no tickets exist.
+         */
+        patch: operations["update_screening_api_admin_screenings__screening_id__patch"];
+        trace?: never;
+    };
     "/api/bookings": {
         parameters: {
             query?: never;
@@ -290,6 +400,54 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AdminMovieOut */
+        AdminMovieOut: {
+            /** Description */
+            description: string | null;
+            /** Duration Min */
+            duration_min: number;
+            /** Genres */
+            genres: string[];
+            /** Is Active */
+            is_active: boolean;
+            /** Min Age */
+            min_age: number;
+            /** Movie Id */
+            movie_id: number;
+            /** Poster Url */
+            poster_url: string | null;
+            /** Release Year */
+            release_year: number | null;
+            /** Title */
+            title: string;
+        };
+        /** AdminScreeningOut */
+        AdminScreeningOut: {
+            /** Base Price */
+            base_price: string;
+            /**
+             * End Time
+             * Format: date-time
+             */
+            end_time: string;
+            hall: components["schemas"]["HallOut"];
+            /** Movie Id */
+            movie_id: number;
+            /** Movie Title */
+            movie_title: string;
+            /** Screening Id */
+            screening_id: number;
+            /**
+             * Start Time
+             * Format: date-time
+             */
+            start_time: string;
+            /**
+             * Tickets
+             * @description Held or sold tickets
+             */
+            tickets: number;
+        };
         /** BookingOut */
         BookingOut: {
             /** Booking Id */
@@ -441,6 +599,29 @@ export interface components {
             /** @description Null when the user isn't staff or is deactivated. */
             staff: components["schemas"]["StaffOut"] | null;
         };
+        /** MovieIn */
+        MovieIn: {
+            /** Description */
+            description?: string | null;
+            /** Duration Min */
+            duration_min: number;
+            /**
+             * Genres
+             * @default []
+             */
+            genres: string[];
+            /**
+             * Min Age
+             * @enum {integer}
+             */
+            min_age: 0 | 6 | 12 | 16 | 18;
+            /** Poster Url */
+            poster_url?: string | null;
+            /** Release Year */
+            release_year?: number | null;
+            /** Title */
+            title: string;
+        };
         /** MovieOut */
         MovieOut: {
             /** Description */
@@ -460,6 +641,28 @@ export interface components {
             /** Title */
             title: string;
         };
+        /** MovieUpdate */
+        MovieUpdate: {
+            /** Description */
+            description?: string | null;
+            /** Duration Min */
+            duration_min?: number | null;
+            /** Genres */
+            genres?: string[] | null;
+            /**
+             * Is Active
+             * @description false archives, true restores
+             */
+            is_active?: boolean | null;
+            /** Min Age */
+            min_age?: (0 | 6 | 12 | 16 | 18) | null;
+            /** Poster Url */
+            poster_url?: string | null;
+            /** Release Year */
+            release_year?: number | null;
+            /** Title */
+            title?: string | null;
+        };
         /** PayIn */
         PayIn: {
             /**
@@ -473,6 +676,36 @@ export interface components {
              * @default false
              */
             simulate_decline: boolean;
+        };
+        /** Removed */
+        Removed: {
+            /**
+             * Result
+             * @enum {string}
+             */
+            result: "deleted" | "archived";
+        };
+        /** ReportRow */
+        ReportRow: {
+            /** Capacity */
+            capacity: number;
+            /** Hall */
+            hall: string;
+            /** Occupancy Pct */
+            occupancy_pct: string | null;
+            /** Revenue */
+            revenue: string;
+            /** Screening Id */
+            screening_id: number;
+            /**
+             * Start Time
+             * Format: date-time
+             */
+            start_time: string;
+            /** Tickets Sold */
+            tickets_sold: number;
+            /** Title */
+            title: string;
         };
         /** ScreeningDetail */
         ScreeningDetail: {
@@ -489,6 +722,20 @@ export interface components {
             movie_id: number;
             /** Screening Id */
             screening_id: number;
+            /**
+             * Start Time
+             * Format: date-time
+             */
+            start_time: string;
+        };
+        /** ScreeningIn */
+        ScreeningIn: {
+            /** Base Price */
+            base_price: number | string;
+            /** Hall Id */
+            hall_id: number;
+            /** Movie Id */
+            movie_id: number;
             /**
              * Start Time
              * Format: date-time
@@ -514,6 +761,17 @@ export interface components {
              * Format: date-time
              */
             start_time: string;
+        };
+        /** ScreeningUpdate */
+        ScreeningUpdate: {
+            /** Base Price */
+            base_price?: number | string | null;
+            /** Hall Id */
+            hall_id?: number | null;
+            /** Movie Id */
+            movie_id?: number | null;
+            /** Start Time */
+            start_time?: string | null;
         };
         /** SeatMap */
         SeatMap: {
@@ -576,6 +834,274 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    list_all_movies_api_admin_movies_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminMovieOut"][];
+                };
+            };
+        };
+    };
+    create_movie_api_admin_movies_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MovieIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminMovieOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_movie_api_admin_movies__movie_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                movie_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Removed"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_movie_api_admin_movies__movie_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                movie_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MovieUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminMovieOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    occupancy_report_api_admin_report_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReportRow"][];
+                };
+            };
+        };
+    };
+    list_schedule_api_admin_screenings_get: {
+        parameters: {
+            query?: {
+                /** @description Day in Almaty time. Omit for the next 7 days. */
+                date?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminScreeningOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_screening_api_admin_screenings_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScreeningIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminScreeningOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_screening_api_admin_screenings__screening_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                screening_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_screening_api_admin_screenings__screening_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                screening_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScreeningUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminScreeningOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     hold_seats_api_bookings_post: {
         parameters: {
             query?: never;

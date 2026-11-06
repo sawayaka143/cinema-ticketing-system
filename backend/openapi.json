@@ -1,6 +1,133 @@
 {
   "components": {
     "schemas": {
+      "AdminMovieOut": {
+        "properties": {
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "duration_min": {
+            "title": "Duration Min",
+            "type": "integer"
+          },
+          "genres": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Genres",
+            "type": "array"
+          },
+          "is_active": {
+            "title": "Is Active",
+            "type": "boolean"
+          },
+          "min_age": {
+            "title": "Min Age",
+            "type": "integer"
+          },
+          "movie_id": {
+            "title": "Movie Id",
+            "type": "integer"
+          },
+          "poster_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Poster Url"
+          },
+          "release_year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Release Year"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "movie_id",
+          "title",
+          "description",
+          "poster_url",
+          "duration_min",
+          "min_age",
+          "release_year",
+          "genres",
+          "is_active"
+        ],
+        "title": "AdminMovieOut",
+        "type": "object"
+      },
+      "AdminScreeningOut": {
+        "properties": {
+          "base_price": {
+            "title": "Base Price",
+            "type": "string"
+          },
+          "end_time": {
+            "format": "date-time",
+            "title": "End Time",
+            "type": "string"
+          },
+          "hall": {
+            "$ref": "#/components/schemas/HallOut"
+          },
+          "movie_id": {
+            "title": "Movie Id",
+            "type": "integer"
+          },
+          "movie_title": {
+            "title": "Movie Title",
+            "type": "string"
+          },
+          "screening_id": {
+            "title": "Screening Id",
+            "type": "integer"
+          },
+          "start_time": {
+            "format": "date-time",
+            "title": "Start Time",
+            "type": "string"
+          },
+          "tickets": {
+            "description": "Held or sold tickets",
+            "title": "Tickets",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "screening_id",
+          "movie_id",
+          "movie_title",
+          "hall",
+          "start_time",
+          "end_time",
+          "base_price",
+          "tickets"
+        ],
+        "title": "AdminScreeningOut",
+        "type": "object"
+      },
       "BookingOut": {
         "properties": {
           "booking_id": {
@@ -375,6 +502,85 @@
         "title": "Me",
         "type": "object"
       },
+      "MovieIn": {
+        "properties": {
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "duration_min": {
+            "maximum": 300.0,
+            "minimum": 40.0,
+            "title": "Duration Min",
+            "type": "integer"
+          },
+          "genres": {
+            "default": [],
+            "items": {
+              "maxLength": 30,
+              "minLength": 1,
+              "type": "string"
+            },
+            "title": "Genres",
+            "type": "array"
+          },
+          "min_age": {
+            "enum": [
+              0,
+              6,
+              12,
+              16,
+              18
+            ],
+            "title": "Min Age",
+            "type": "integer"
+          },
+          "poster_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Poster Url"
+          },
+          "release_year": {
+            "anyOf": [
+              {
+                "maximum": 2100.0,
+                "minimum": 1900.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Release Year"
+          },
+          "title": {
+            "maxLength": 150,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "duration_min",
+          "min_age"
+        ],
+        "title": "MovieIn",
+        "type": "object"
+      },
       "MovieOut": {
         "properties": {
           "description": {
@@ -447,6 +653,119 @@
         "title": "MovieOut",
         "type": "object"
       },
+      "MovieUpdate": {
+        "properties": {
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "duration_min": {
+            "anyOf": [
+              {
+                "maximum": 300.0,
+                "minimum": 40.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Min"
+          },
+          "genres": {
+            "anyOf": [
+              {
+                "items": {
+                  "maxLength": 30,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Genres"
+          },
+          "is_active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "false archives, true restores",
+            "title": "Is Active"
+          },
+          "min_age": {
+            "anyOf": [
+              {
+                "enum": [
+                  0,
+                  6,
+                  12,
+                  16,
+                  18
+                ],
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Min Age"
+          },
+          "poster_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Poster Url"
+          },
+          "release_year": {
+            "anyOf": [
+              {
+                "maximum": 2100.0,
+                "minimum": 1900.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Release Year"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "maxLength": 150,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          }
+        },
+        "title": "MovieUpdate",
+        "type": "object"
+      },
       "PayIn": {
         "properties": {
           "method": {
@@ -468,6 +787,79 @@
           "method"
         ],
         "title": "PayIn",
+        "type": "object"
+      },
+      "Removed": {
+        "properties": {
+          "result": {
+            "enum": [
+              "deleted",
+              "archived"
+            ],
+            "title": "Result",
+            "type": "string"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "Removed",
+        "type": "object"
+      },
+      "ReportRow": {
+        "properties": {
+          "capacity": {
+            "title": "Capacity",
+            "type": "integer"
+          },
+          "hall": {
+            "title": "Hall",
+            "type": "string"
+          },
+          "occupancy_pct": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Occupancy Pct"
+          },
+          "revenue": {
+            "title": "Revenue",
+            "type": "string"
+          },
+          "screening_id": {
+            "title": "Screening Id",
+            "type": "integer"
+          },
+          "start_time": {
+            "format": "date-time",
+            "title": "Start Time",
+            "type": "string"
+          },
+          "tickets_sold": {
+            "title": "Tickets Sold",
+            "type": "integer"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "screening_id",
+          "title",
+          "hall",
+          "start_time",
+          "capacity",
+          "tickets_sold",
+          "occupancy_pct",
+          "revenue"
+        ],
+        "title": "ReportRow",
         "type": "object"
       },
       "ScreeningDetail": {
@@ -513,6 +905,43 @@
         "title": "ScreeningDetail",
         "type": "object"
       },
+      "ScreeningIn": {
+        "properties": {
+          "base_price": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Base Price"
+          },
+          "hall_id": {
+            "title": "Hall Id",
+            "type": "integer"
+          },
+          "movie_id": {
+            "title": "Movie Id",
+            "type": "integer"
+          },
+          "start_time": {
+            "format": "date-time",
+            "title": "Start Time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "movie_id",
+          "hall_id",
+          "start_time",
+          "base_price"
+        ],
+        "title": "ScreeningIn",
+        "type": "object"
+      },
       "ScreeningOut": {
         "properties": {
           "base_price": {
@@ -550,6 +979,61 @@
           "base_price"
         ],
         "title": "ScreeningOut",
+        "type": "object"
+      },
+      "ScreeningUpdate": {
+        "properties": {
+          "base_price": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Base Price"
+          },
+          "hall_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hall Id"
+          },
+          "movie_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Movie Id"
+          },
+          "start_time": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Time"
+          }
+        },
+        "title": "ScreeningUpdate",
         "type": "object"
       },
       "SeatMap": {
@@ -707,6 +1191,419 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/admin/movies": {
+      "get": {
+        "description": "All movies, archived ones included.",
+        "operationId": "list_all_movies_api_admin_movies_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AdminMovieOut"
+                  },
+                  "title": "Response List All Movies Api Admin Movies Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List All Movies",
+        "tags": [
+          "admin"
+        ]
+      },
+      "post": {
+        "operationId": "create_movie_api_admin_movies_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MovieIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminMovieOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Movie",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/movies/{movie_id}": {
+      "delete": {
+        "description": "Deletes a movie without screenings; a movie with screenings is archived instead.",
+        "operationId": "delete_movie_api_admin_movies__movie_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "movie_id",
+            "required": true,
+            "schema": {
+              "title": "Movie Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Removed"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Delete Movie",
+        "tags": [
+          "admin"
+        ]
+      },
+      "patch": {
+        "description": "Change only the fields sent. `null` clears description, poster or year.",
+        "operationId": "update_movie_api_admin_movies__movie_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "movie_id",
+            "required": true,
+            "schema": {
+              "title": "Movie Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MovieUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminMovieOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Update Movie",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/report": {
+      "get": {
+        "description": "Next 7 days: paid tickets, occupancy and revenue per screening, emptiest first.",
+        "operationId": "occupancy_report_api_admin_report_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ReportRow"
+                  },
+                  "title": "Response Occupancy Report Api Admin Report Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Occupancy Report",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/screenings": {
+      "get": {
+        "description": "The schedule: screenings of one day, or the next 7 days, earliest first.",
+        "operationId": "list_schedule_api_admin_screenings_get",
+        "parameters": [
+          {
+            "description": "Day in Almaty time. Omit for the next 7 days.",
+            "in": "query",
+            "name": "date",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Day in Almaty time. Omit for the next 7 days.",
+              "title": "Date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AdminScreeningOut"
+                  },
+                  "title": "Response List Schedule Api Admin Screenings Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Schedule",
+        "tags": [
+          "admin"
+        ]
+      },
+      "post": {
+        "description": "Put a movie into a hall. The end time includes 15 minutes of cleaning.",
+        "operationId": "create_screening_api_admin_screenings_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScreeningIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminScreeningOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Screening",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/screenings/{screening_id}": {
+      "delete": {
+        "operationId": "delete_screening_api_admin_screenings__screening_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "screening_id",
+            "required": true,
+            "schema": {
+              "title": "Screening Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Delete Screening",
+        "tags": [
+          "admin"
+        ]
+      },
+      "patch": {
+        "description": "Change price any time; movie, hall and time only while no tickets exist.",
+        "operationId": "update_screening_api_admin_screenings__screening_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "screening_id",
+            "required": true,
+            "schema": {
+              "title": "Screening Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScreeningUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminScreeningOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Update Screening",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
     "/api/bookings": {
       "post": {
         "description": "Hold seats for 10 minutes: a pending booking with one ticket per seat (\u00a76, step 1).",
