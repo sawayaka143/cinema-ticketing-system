@@ -372,6 +372,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/me/bookings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * My Bookings
+         * @description All my bookings, newest first, with the movie and time (for the "My bookings" page).
+         */
+        get: operations["my_bookings_api_me_bookings_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/me/customer": {
         parameters: {
             query?: never;
@@ -895,6 +915,51 @@ export interface components {
             release_year?: number | null;
             /** Title */
             title?: string | null;
+        };
+        /** MyBookingOut */
+        MyBookingOut: {
+            /** Booking Id */
+            booking_id: number;
+            /**
+             * Booking Time
+             * Format: date-time
+             */
+            booking_time: string;
+            /** Checked In At */
+            checked_in_at: string | null;
+            /** Hall */
+            hall: string | null;
+            /**
+             * Hold Expires At
+             * Format: date-time
+             */
+            hold_expires_at: string;
+            /**
+             * Movie Title
+             * @description Null once the tickets are gone (cancel/expiry)
+             */
+            movie_title: string | null;
+            /**
+             * Qr Token
+             * @description Set once paid: one QR code for all seats. Image: GET .../qr.png
+             */
+            qr_token: string | null;
+            /**
+             * Seconds Left
+             * @description Seconds until the hold ends. 0 unless the booking is pending.
+             */
+            seconds_left: number;
+            /** Start Time */
+            start_time: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "pending" | "paid" | "cancelled" | "expired";
+            /** Tickets */
+            tickets: components["schemas"]["BookingTicketOut"][];
+            /** Total Amount */
+            total_amount: string;
         };
         /** PayIn */
         PayIn: {
@@ -1802,6 +1867,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Me"];
+                };
+            };
+        };
+    };
+    my_bookings_api_me_bookings_get: {
+        parameters: {
+            query?: {
+                status?: ("pending" | "paid" | "cancelled" | "expired") | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyBookingOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
