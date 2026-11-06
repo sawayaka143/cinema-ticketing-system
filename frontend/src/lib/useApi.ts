@@ -26,11 +26,31 @@ export function useApi<T>(load: () => Promise<T>, key: string | number): Loadabl
   return result?.key === key ? result.value : { state: "loading" };
 }
 
-/** Unwraps an openapi-fetch result: returns data or throws a readable error. */
+/** A failed API call. `status` lets pages react to 402 / 409 instead of only showing text. */
+export class ApiError extends Error {
+  readonly status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.status = status;
+  }
+}
+
+/** Unwraps an openapi-fetch result: returns data or throws a readable ApiError. */
 export function must<T>(res: { data?: T; error?: unknown; response: Response }): T {
   if (res.data === undefined) {
     const detail = (res.error as { detail?: unknown } | undefined)?.detail;
-    throw new Error(typeof detail === "string" ? detail : `Request failed (${res.response.status})`);
+    const status = res.response.status;
+    throw new ApiError(typeof detail === "string" ? detail : `Request failed (${status})`, status);
   }
   return res.data;
+}
+
+/** The status of an error thrown by `must`, or 0 for network and other errors. */
+export function statusOf(err: unknown) {
+  return err instanceof ApiError ? err.status : 0;
+}
+
+export function messageOf(err: unknown) {
+  return err instanceof Error ? err.message : String(err);
 }
