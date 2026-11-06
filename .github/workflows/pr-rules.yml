@@ -73,9 +73,10 @@ jobs:
             fail "PR changes $size lines (limit $MAX_LINES, lockfiles and generated files excluded). Split it into smaller PRs. Only the owner can allow an exception with the 'size-ok' label."
           fi
 
-          # 5. Areas: frontend/ is owner-only; workflow and rule files only warn
+          # 5. Areas: frontend/ is owner-only, except the generated src/api/schema.d.ts
+          #    (backend PRs must regenerate it, or the Frontend check fails); workflow and rule files only warn
           if [[ "$AUTHOR" != "$OWNER" ]]; then
-            restricted=$(cut -f1 files.tsv | grep -E '^frontend/' || true)
+            restricted=$(cut -f1 files.tsv | grep -E '^frontend/' | grep -vx 'frontend/src/api/schema.d.ts' || true)
             if [[ -n "$restricted" ]]; then
               fail "frontend/ is owner-only (see AGENTS.md). Open an issue instead: $(tr '\n' ' ' <<< "$restricted")"
             else
