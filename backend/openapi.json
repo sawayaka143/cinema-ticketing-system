@@ -12,10 +12,34 @@
             "title": "Booking Time",
             "type": "string"
           },
+          "checked_in_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Checked In At"
+          },
           "hold_expires_at": {
             "format": "date-time",
             "title": "Hold Expires At",
             "type": "string"
+          },
+          "qr_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Set once paid: one QR code for all seats. Image: GET .../qr.png",
+            "title": "Qr Token"
           },
           "seconds_left": {
             "description": "Seconds until the hold ends. 0 unless the booking is pending.",
@@ -51,7 +75,9 @@
           "hold_expires_at",
           "seconds_left",
           "total_amount",
-          "tickets"
+          "tickets",
+          "qr_token",
+          "checked_in_at"
         ],
         "title": "BookingOut",
         "type": "object"
@@ -92,6 +118,76 @@
           "price"
         ],
         "title": "BookingTicketOut",
+        "type": "object"
+      },
+      "CheckinIn": {
+        "properties": {
+          "token": {
+            "description": "The text in the QR code",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "token"
+        ],
+        "title": "CheckinIn",
+        "type": "object"
+      },
+      "CheckinOut": {
+        "properties": {
+          "booking_id": {
+            "title": "Booking Id",
+            "type": "integer"
+          },
+          "checked_in_at": {
+            "format": "date-time",
+            "title": "Checked In At",
+            "type": "string"
+          },
+          "hall": {
+            "title": "Hall",
+            "type": "string"
+          },
+          "movie_title": {
+            "title": "Movie Title",
+            "type": "string"
+          },
+          "people": {
+            "title": "People",
+            "type": "integer"
+          },
+          "seats": {
+            "examples": [
+              [
+                "A5",
+                "A6"
+              ]
+            ],
+            "items": {
+              "type": "string"
+            },
+            "title": "Seats",
+            "type": "array"
+          },
+          "start_time": {
+            "format": "date-time",
+            "title": "Start Time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "booking_id",
+          "movie_title",
+          "hall",
+          "start_time",
+          "seats",
+          "people",
+          "checked_in_at"
+        ],
+        "title": "CheckinOut",
         "type": "object"
       },
       "CustomerCreate": {
@@ -809,6 +905,97 @@
         "summary": "Pay Booking",
         "tags": [
           "bookings"
+        ]
+      }
+    },
+    "/api/bookings/{booking_id}/qr.png": {
+      "get": {
+        "description": "The QR code of my paid booking. One code lets the whole group in.",
+        "operationId": "get_booking_qr_api_bookings__booking_id__qr_png_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "booking_id",
+            "required": true,
+            "schema": {
+              "title": "Booking Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "image/png": {}
+            },
+            "description": "The QR code as PNG"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Booking Qr",
+        "tags": [
+          "bookings"
+        ]
+      }
+    },
+    "/api/checkin": {
+      "post": {
+        "description": "Validate a scanned QR code and let the whole booking in (once).",
+        "operationId": "check_in_api_checkin_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckinIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckinOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Check In",
+        "tags": [
+          "checkin"
         ]
       }
     },

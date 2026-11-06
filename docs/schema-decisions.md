@@ -123,7 +123,11 @@ Empty grid cells are aisles and gaps. The seat map draws a `max(grid_row) × max
 | booking_time | timestamptz | NOT NULL DEFAULT now() |
 | status | text | NOT NULL DEFAULT 'pending', `CHECK (status IN ('pending','paid','cancelled','expired'))` |
 | hold_expires_at | timestamptz | NOT NULL DEFAULT now() + interval '10 minutes' |
+| qr_token | text | NULL, UNIQUE. Random token set on successful payment; one QR code for all seats of the booking |
+| checked_in_at | timestamptz | NULL; when staff scanned the QR at the door (the whole group enters at once) |
+| checked_in_by_staff_id | bigint | NULL, FK → STAFF |
 | | | `CHECK (customer_id IS NOT NULL OR sold_by_staff_id IS NOT NULL)` |
+| | | `CHECK ((checked_in_at IS NULL) = (checked_in_by_staff_id IS NULL))`, `CHECK (checked_in_at IS NULL OR qr_token IS NOT NULL)` |
 
 No `total_amount` column: see view `booking_total`.
 
@@ -275,6 +279,7 @@ Bookings are never deleted; only their tickets are.
 | 20 | Report query fixed and saved as view `screening_report`; uses `hall_capacity` | Screenings with only held tickets disappeared from the report |
 | 21 | Four extra indexes | Report and common screens stay fast |
 | 22 | Booking is two steps (hold, then pay), not one transaction | Matches the seat-map + 10-minute-hold flow |
+| 23 | BOOKING + `qr_token`, `checked_in_at`, `checked_in_by_staff_id` | One QR ticket per booking; staff scan it at the door, the whole group enters once (#51) |
 
 ---
 
