@@ -208,6 +208,28 @@
         "title": "Health",
         "type": "object"
       },
+      "HoldIn": {
+        "properties": {
+          "screening_id": {
+            "title": "Screening Id",
+            "type": "integer"
+          },
+          "seat_ids": {
+            "description": "1 to 10 distinct seats of the screening's hall",
+            "items": {
+              "type": "integer"
+            },
+            "title": "Seat Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "screening_id",
+          "seat_ids"
+        ],
+        "title": "HoldIn",
+        "type": "object"
+      },
       "Me": {
         "properties": {
           "customer": {
@@ -329,6 +351,29 @@
         "title": "MovieOut",
         "type": "object"
       },
+      "PayIn": {
+        "properties": {
+          "method": {
+            "enum": [
+              "card",
+              "kaspi"
+            ],
+            "title": "Method",
+            "type": "string"
+          },
+          "simulate_decline": {
+            "default": false,
+            "description": "Fake provider: true makes this attempt fail (for demos/tests).",
+            "title": "Simulate Decline",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "method"
+        ],
+        "title": "PayIn",
+        "type": "object"
+      },
       "ScreeningDetail": {
         "properties": {
           "base_price": {
@@ -409,6 +454,79 @@
           "base_price"
         ],
         "title": "ScreeningOut",
+        "type": "object"
+      },
+      "SeatMap": {
+        "properties": {
+          "hall": {
+            "$ref": "#/components/schemas/HallOut"
+          },
+          "screening_id": {
+            "title": "Screening Id",
+            "type": "integer"
+          },
+          "seats": {
+            "items": {
+              "$ref": "#/components/schemas/SeatOut"
+            },
+            "title": "Seats",
+            "type": "array"
+          }
+        },
+        "required": [
+          "screening_id",
+          "hall",
+          "seats"
+        ],
+        "title": "SeatMap",
+        "type": "object"
+      },
+      "SeatOut": {
+        "properties": {
+          "grid_col": {
+            "title": "Grid Col",
+            "type": "integer"
+          },
+          "grid_row": {
+            "title": "Grid Row",
+            "type": "integer"
+          },
+          "is_taken": {
+            "title": "Is Taken",
+            "type": "boolean"
+          },
+          "price": {
+            "title": "Price",
+            "type": "string"
+          },
+          "row_label": {
+            "title": "Row Label",
+            "type": "string"
+          },
+          "seat_id": {
+            "title": "Seat Id",
+            "type": "integer"
+          },
+          "seat_number": {
+            "title": "Seat Number",
+            "type": "integer"
+          },
+          "seat_type": {
+            "title": "Seat Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "seat_id",
+          "row_label",
+          "seat_number",
+          "grid_row",
+          "grid_col",
+          "seat_type",
+          "price",
+          "is_taken"
+        ],
+        "title": "SeatOut",
         "type": "object"
       },
       "StaffOut": {
@@ -493,6 +611,53 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/bookings": {
+      "post": {
+        "description": "Hold seats for 10 minutes: a pending booking with one ticket per seat (\u00a76, step 1).",
+        "operationId": "hold_seats_api_bookings_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HoldIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Hold Seats",
+        "tags": [
+          "bookings"
+        ]
+      }
+    },
     "/api/bookings/{booking_id}": {
       "get": {
         "description": "One of my bookings, with the seconds left on its hold (for the countdown).",
@@ -584,6 +749,64 @@
           }
         ],
         "summary": "Cancel Booking",
+        "tags": [
+          "bookings"
+        ]
+      }
+    },
+    "/api/bookings/{booking_id}/pay": {
+      "post": {
+        "description": "Fake payment for my pending hold (\u00a76, step 2). A decline is stored; retry is allowed.",
+        "operationId": "pay_booking_api_bookings__booking_id__pay_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "booking_id",
+            "required": true,
+            "schema": {
+              "title": "Booking Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PayIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Pay Booking",
         "tags": [
           "bookings"
         ]
@@ -858,6 +1081,49 @@
           }
         },
         "summary": "Get Screening",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/api/screenings/{screening_id}/seats": {
+      "get": {
+        "description": "Every seat of the screening's hall, its price and whether it is taken (held or sold).",
+        "operationId": "get_seat_map_api_screenings__screening_id__seats_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "screening_id",
+            "required": true,
+            "schema": {
+              "title": "Screening Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SeatMap"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Seat Map",
         "tags": [
           "catalog"
         ]

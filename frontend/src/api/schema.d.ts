@@ -4,6 +4,26 @@
  */
 
 export interface paths {
+    "/api/bookings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Hold Seats
+         * @description Hold seats for 10 minutes: a pending booking with one ticket per seat (§6, step 1).
+         */
+        post: operations["hold_seats_api_bookings_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/bookings/{booking_id}": {
         parameters: {
             query?: never;
@@ -40,6 +60,26 @@ export interface paths {
          *     Paid bookings are cancelled (with a refund) by a cashier or manager, not here.
          */
         post: operations["cancel_booking_api_bookings__booking_id__cancel_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/bookings/{booking_id}/pay": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Pay Booking
+         * @description Fake payment for my pending hold (§6, step 2). A decline is stored; retry is allowed.
+         */
+        post: operations["pay_booking_api_bookings__booking_id__pay_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -186,6 +226,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/screenings/{screening_id}/seats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Seat Map
+         * @description Every seat of the screening's hall, its price and whether it is taken (held or sold).
+         */
+        get: operations["get_seat_map_api_screenings__screening_id__seats_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -274,6 +334,16 @@ export interface components {
             /** Status */
             status: string;
         };
+        /** HoldIn */
+        HoldIn: {
+            /** Screening Id */
+            screening_id: number;
+            /**
+             * Seat Ids
+             * @description 1 to 10 distinct seats of the screening's hall
+             */
+            seat_ids: number[];
+        };
         /** Me */
         Me: {
             customer: components["schemas"]["CustomerOut"] | null;
@@ -305,6 +375,20 @@ export interface components {
             release_year: number | null;
             /** Title */
             title: string;
+        };
+        /** PayIn */
+        PayIn: {
+            /**
+             * Method
+             * @enum {string}
+             */
+            method: "card" | "kaspi";
+            /**
+             * Simulate Decline
+             * @description Fake provider: true makes this attempt fail (for demos/tests).
+             * @default false
+             */
+            simulate_decline: boolean;
         };
         /** ScreeningDetail */
         ScreeningDetail: {
@@ -347,6 +431,33 @@ export interface components {
              */
             start_time: string;
         };
+        /** SeatMap */
+        SeatMap: {
+            hall: components["schemas"]["HallOut"];
+            /** Screening Id */
+            screening_id: number;
+            /** Seats */
+            seats: components["schemas"]["SeatOut"][];
+        };
+        /** SeatOut */
+        SeatOut: {
+            /** Grid Col */
+            grid_col: number;
+            /** Grid Row */
+            grid_row: number;
+            /** Is Taken */
+            is_taken: boolean;
+            /** Price */
+            price: string;
+            /** Row Label */
+            row_label: string;
+            /** Seat Id */
+            seat_id: number;
+            /** Seat Number */
+            seat_number: number;
+            /** Seat Type */
+            seat_type: string;
+        };
         /** StaffOut */
         StaffOut: {
             /** Full Name */
@@ -381,6 +492,39 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    hold_seats_api_bookings_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HoldIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookingOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     get_booking_api_bookings__booking_id__get: {
         parameters: {
             query?: never;
@@ -422,6 +566,41 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookingOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    pay_booking_api_bookings__booking_id__pay_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                booking_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PayIn"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {
@@ -619,6 +798,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ScreeningDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_seat_map_api_screenings__screening_id__seats_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                screening_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SeatMap"];
                 };
             };
             /** @description Validation Error */

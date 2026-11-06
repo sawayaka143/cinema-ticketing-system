@@ -1,4 +1,4 @@
-"""A customer's own bookings: the 10-minute hold countdown and cancelling a hold.
+"""A customer's own bookings: hold seats for 10 minutes, pay (fake), countdown, cancel.
 
 Expiry follows docs/schema-decisions.md §6: the SQL function expire_stale_holds() turns
 pending bookings past hold_expires_at into 'expired' and deletes their tickets. pg_cron runs
@@ -6,22 +6,27 @@ it every minute; the endpoints here also run it first (the lazy check), so a cli
 sees a hold that should already have ended.
 """
 
+import secrets
 from datetime import UTC, datetime
 from decimal import Decimal
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
-from sqlalchemy import delete, select, text
+from sqlalchemy import delete, func, select, text
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.auth import CurrentUser, CurrentUserDep
 from app.db import get_session
-from app.models import Booking, Customer, Seat, Ticket
+from app.models import Booking, Customer, Payment, Screening, Seat, Ticket, TicketType
+from app.pricing import ticket_price
 
 router = APIRouter(tags=["bookings"])
 
 SessionDep = Annotated[Session, Depends(get_session)]
+
+MAX_SEATS = 10
 
 
 class BookingTicketOut(BaseModel):
@@ -98,6 +103,126 @@ def _booking_out(db: Session, booking: Booking) -> BookingOut:
         total_amount=sum((t.price for t in tickets), Decimal("0.00")),
         tickets=tickets,
     )
+
+
+class HoldIn(BaseModel):
+    screening_id: int
+    seat_ids: list[int] = Field(
+        description=f"1 to {MAX_SEATS} distinct seats of the screening's hall"
+    )
+
+
+class PayIn(BaseModel):
+    method: Literal["card", "kaspi"]
+    simulate_decline: bool = Field(
+        default=False, description="Fake provider: true makes this attempt fail (for demos/tests)."
+    )
+
+
+def _my_customer(db: Session, user: CurrentUser) -> Customer:
+    customer = db.scalar(select(Customer).where(Customer.auth_user_id == user.id))
+    if customer is None:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Create a customer profile first")
+    return customer
+
+
+@router.post("/bookings", response_model=BookingOut, status_code=status.HTTP_201_CREATED)
+def hold_seats(body: HoldIn, user: CurrentUserDep, db: SessionDep) -> BookingOut:
+    """Hold seats for 10 minutes: a pending booking with one ticket per seat (§6, step 1)."""
+    customer = _my_customer(db, user)
+    ids = body.seat_ids
+    if not 1 <= len(ids) <= MAX_SEATS:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, f"Pick 1 to {MAX_SEATS} seats")
+    if len(set(ids)) != len(ids):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "A seat is listed twice")
+
+    screening = db.get(Screening, body.screening_id)
+    if screening is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Screening not found")
+    if screening.start_time <= datetime.now(UTC):
+        raise HTTPException(status.HTTP_409_CONFLICT, "The screening has already started")
+    seats = db.scalars(
+        select(Seat).where(Seat.seat_id.in_(ids), Seat.hall_id == screening.hall_id)
+    ).all()
+    if len(seats) != len(ids):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "A seat is not in this screening's hall")
+    adult = db.scalar(select(TicketType).where(TicketType.name == "adult"))
+    if adult is None:
+        raise RuntimeError("ticket type 'adult' is missing; run the migrations")
+
+    # Plain values first: the commit in the lazy check expires the ORM objects above.
+    rows = [
+        (seat.seat_id, ticket_price(screening.base_price, seat.seat_type, adult.discount_pct))
+        for seat in seats
+    ]
+    screening_id, customer_id, type_id = (
+        screening.screening_id,
+        customer.customer_id,
+        adult.ticket_type_id,
+    )
+
+    expire_stale_holds(db, screening_id)  # lazy check: frees stale holds first
+    booking = Booking(customer_id=customer_id)
+    try:
+        db.add(booking)
+        db.flush()
+        db.add_all(
+            [
+                Ticket(
+                    booking_id=booking.booking_id,
+                    screening_id=screening_id,
+                    seat_id=seat_id,
+                    ticket_type_id=type_id,
+                    price=price,
+                )
+                for seat_id, price in rows
+            ]
+        )
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        if "ticket_seat_taken" not in str(exc.orig):
+            raise
+        raise HTTPException(status.HTTP_409_CONFLICT, "A seat is already taken") from exc
+    db.refresh(booking)
+    return _booking_out(db, booking)
+
+
+@router.post("/bookings/{booking_id}/pay", response_model=BookingOut)
+def pay_booking(booking_id: int, body: PayIn, user: CurrentUserDep, db: SessionDep) -> BookingOut:
+    """Fake payment for my pending hold (§6, step 2). A decline is stored; retry is allowed."""
+    expire_stale_holds(db)
+    booking = _own_booking(db, user, booking_id, lock=True)
+    if booking.status == "expired" or (
+        booking.status == "pending" and booking.hold_expires_at <= datetime.now(UTC)
+    ):
+        db.rollback()
+        raise HTTPException(status.HTTP_409_CONFLICT, "The hold has expired")
+    if booking.status != "pending":
+        db.rollback()
+        raise HTTPException(status.HTTP_409_CONFLICT, f"The booking is already {booking.status}")
+
+    amount = db.scalar(
+        text("SELECT total_amount FROM booking_total WHERE booking_id = :id"),
+        {"id": booking.booking_id},
+    )
+    payment = Payment(
+        booking_id=booking.booking_id,
+        amount=amount,
+        method=body.method,
+        status="failed" if body.simulate_decline else "success",
+        provider_ref=f"FAKE-{secrets.token_hex(6)}",
+    )
+    db.add(payment)
+    if body.simulate_decline:
+        db.commit()
+        raise HTTPException(
+            status.HTTP_402_PAYMENT_REQUIRED, "Payment declined. Try again before the hold expires"
+        )
+    payment.paid_at = func.now()
+    booking.status = "paid"
+    db.commit()
+    return _booking_out(db, booking)
 
 
 @router.get("/bookings/{booking_id}", response_model=BookingOut)
