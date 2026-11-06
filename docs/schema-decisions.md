@@ -123,7 +123,11 @@ Empty grid cells are aisles and gaps. The seat map draws a `max(grid_row) × max
 | booking_time | timestamptz | NOT NULL DEFAULT now() |
 | status | text | NOT NULL DEFAULT 'pending', `CHECK (status IN ('pending','paid','cancelled','expired'))` |
 | hold_expires_at | timestamptz | NOT NULL DEFAULT now() + interval '10 minutes' |
+| qr_token | text | NULL, UNIQUE. Random token set on successful payment; one QR code for all seats of the booking |
+| checked_in_at | timestamptz | NULL; when staff scanned the QR at the door (the whole group enters at once) |
+| checked_in_by_staff_id | bigint | NULL, FK → STAFF |
 | | | `CHECK (customer_id IS NOT NULL OR sold_by_staff_id IS NOT NULL)` |
+| | | `CHECK ((checked_in_at IS NULL) = (checked_in_by_staff_id IS NULL))`, `CHECK (checked_in_at IS NULL OR qr_token IS NOT NULL)` |
 
 No `total_amount` column: see view `booking_total`.
 
@@ -275,15 +279,16 @@ Bookings are never deleted; only their tickets are.
 | 20 | Report query fixed and saved as view `screening_report`; uses `hall_capacity` | Screenings with only held tickets disappeared from the report |
 | 21 | Four extra indexes | Report and common screens stay fast |
 | 22 | Booking is two steps (hold, then pay), not one transaction | Matches the seat-map + 10-minute-hold flow |
+| 23 | BOOKING + `qr_token`, `checked_in_at`, `checked_in_by_staff_id` | One QR ticket per booking; staff scan it at the door, the whole group enters once (#51) |
 
 ---
 
 ## 9. Open questions
 
-- **Discount values:** exact `discount_pct` for student, child, staff (proposed staff = 50%), and the child `max_age` (proposed 11). Owner: Zhakhongir.
+- ~~**Discount values:**~~ Proposed in #57 (migration 0007), awaiting the owner's "agreed": adult 0%, student 20%, child 30% (`max_age` 11), staff 50% (`staff_only`, max 2 per booking).
 - **VIP multiplier:** proposed 1.5×. Confirm.
 - **Cleaning buffer:** proposed 15 min between shows. Confirm.
 - **Rating list:** keep 0+/6+/12+/16+/18+, or add more (e.g. 3+)?
 - **pg_cron:** confirm it can be enabled on both Supabase projects (prod and dev).
-- **Seat-hall trigger:** should it also fire when a seat's `hall_id` or a screening's `hall_id` changes? Proposed: simply forbid changing `hall_id` on seats/screenings that already have tickets.
+- ~~**Seat-hall trigger:** should it also fire when a seat's `hall_id` or a screening's `hall_id` changes?~~ Decided (#21, migration 0004): changing `hall_id` on a seat or screening that already has tickets is rejected.
 - **Task 09 talking points to update** before the demo: Sanzhar (BOOKING–PAYMENT is now 1:M), Ulan (two-step booking, hold expiry), Aldiyar (capacity and total_amount are views), Akzhol (Postgres types, phone CHECK), Zhakhongir (TICKET_TYPE).

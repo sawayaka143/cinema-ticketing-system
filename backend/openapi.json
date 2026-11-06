@@ -1,6 +1,403 @@
 {
   "components": {
     "schemas": {
+      "AdminHallOut": {
+        "properties": {
+          "capacity": {
+            "title": "Capacity",
+            "type": "integer"
+          },
+          "hall_id": {
+            "title": "Hall Id",
+            "type": "integer"
+          },
+          "hall_type": {
+            "title": "Hall Type",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "screenings": {
+            "title": "Screenings",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "hall_id",
+          "name",
+          "hall_type",
+          "capacity",
+          "screenings"
+        ],
+        "title": "AdminHallOut",
+        "type": "object"
+      },
+      "AdminMovieOut": {
+        "properties": {
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "duration_min": {
+            "title": "Duration Min",
+            "type": "integer"
+          },
+          "genres": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Genres",
+            "type": "array"
+          },
+          "is_active": {
+            "title": "Is Active",
+            "type": "boolean"
+          },
+          "min_age": {
+            "title": "Min Age",
+            "type": "integer"
+          },
+          "movie_id": {
+            "title": "Movie Id",
+            "type": "integer"
+          },
+          "poster_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Poster Url"
+          },
+          "release_year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Release Year"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "movie_id",
+          "title",
+          "description",
+          "poster_url",
+          "duration_min",
+          "min_age",
+          "release_year",
+          "genres",
+          "is_active"
+        ],
+        "title": "AdminMovieOut",
+        "type": "object"
+      },
+      "AdminScreeningOut": {
+        "properties": {
+          "base_price": {
+            "title": "Base Price",
+            "type": "string"
+          },
+          "end_time": {
+            "format": "date-time",
+            "title": "End Time",
+            "type": "string"
+          },
+          "hall": {
+            "$ref": "#/components/schemas/HallOut"
+          },
+          "movie_id": {
+            "title": "Movie Id",
+            "type": "integer"
+          },
+          "movie_title": {
+            "title": "Movie Title",
+            "type": "string"
+          },
+          "screening_id": {
+            "title": "Screening Id",
+            "type": "integer"
+          },
+          "start_time": {
+            "format": "date-time",
+            "title": "Start Time",
+            "type": "string"
+          },
+          "tickets": {
+            "description": "Held or sold tickets",
+            "title": "Tickets",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "screening_id",
+          "movie_id",
+          "movie_title",
+          "hall",
+          "start_time",
+          "end_time",
+          "base_price",
+          "tickets"
+        ],
+        "title": "AdminScreeningOut",
+        "type": "object"
+      },
+      "AdminSeatOut": {
+        "properties": {
+          "grid_col": {
+            "title": "Grid Col",
+            "type": "integer"
+          },
+          "grid_row": {
+            "title": "Grid Row",
+            "type": "integer"
+          },
+          "hall_id": {
+            "title": "Hall Id",
+            "type": "integer"
+          },
+          "row_label": {
+            "title": "Row Label",
+            "type": "string"
+          },
+          "seat_id": {
+            "title": "Seat Id",
+            "type": "integer"
+          },
+          "seat_number": {
+            "title": "Seat Number",
+            "type": "integer"
+          },
+          "seat_type": {
+            "title": "Seat Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "seat_id",
+          "hall_id",
+          "row_label",
+          "seat_number",
+          "seat_type",
+          "grid_row",
+          "grid_col"
+        ],
+        "title": "AdminSeatOut",
+        "type": "object"
+      },
+      "BookingOut": {
+        "properties": {
+          "booking_id": {
+            "title": "Booking Id",
+            "type": "integer"
+          },
+          "booking_time": {
+            "format": "date-time",
+            "title": "Booking Time",
+            "type": "string"
+          },
+          "checked_in_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Checked In At"
+          },
+          "hold_expires_at": {
+            "format": "date-time",
+            "title": "Hold Expires At",
+            "type": "string"
+          },
+          "qr_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Set once paid: one QR code for all seats. Image: GET .../qr.png",
+            "title": "Qr Token"
+          },
+          "seconds_left": {
+            "description": "Seconds until the hold ends. 0 unless the booking is pending.",
+            "title": "Seconds Left",
+            "type": "integer"
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "paid",
+              "cancelled",
+              "expired"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "tickets": {
+            "items": {
+              "$ref": "#/components/schemas/BookingTicketOut"
+            },
+            "title": "Tickets",
+            "type": "array"
+          },
+          "total_amount": {
+            "title": "Total Amount",
+            "type": "string"
+          }
+        },
+        "required": [
+          "booking_id",
+          "status",
+          "booking_time",
+          "hold_expires_at",
+          "seconds_left",
+          "total_amount",
+          "tickets",
+          "qr_token",
+          "checked_in_at"
+        ],
+        "title": "BookingOut",
+        "type": "object"
+      },
+      "BookingTicketOut": {
+        "properties": {
+          "price": {
+            "title": "Price",
+            "type": "string"
+          },
+          "row_label": {
+            "title": "Row Label",
+            "type": "string"
+          },
+          "screening_id": {
+            "title": "Screening Id",
+            "type": "integer"
+          },
+          "seat_id": {
+            "title": "Seat Id",
+            "type": "integer"
+          },
+          "seat_number": {
+            "title": "Seat Number",
+            "type": "integer"
+          },
+          "ticket_id": {
+            "title": "Ticket Id",
+            "type": "integer"
+          },
+          "ticket_type": {
+            "title": "Ticket Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ticket_id",
+          "screening_id",
+          "seat_id",
+          "row_label",
+          "seat_number",
+          "ticket_type",
+          "price"
+        ],
+        "title": "BookingTicketOut",
+        "type": "object"
+      },
+      "CheckinIn": {
+        "properties": {
+          "token": {
+            "description": "The text in the QR code",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "token"
+        ],
+        "title": "CheckinIn",
+        "type": "object"
+      },
+      "CheckinOut": {
+        "properties": {
+          "booking_id": {
+            "title": "Booking Id",
+            "type": "integer"
+          },
+          "checked_in_at": {
+            "format": "date-time",
+            "title": "Checked In At",
+            "type": "string"
+          },
+          "hall": {
+            "title": "Hall",
+            "type": "string"
+          },
+          "movie_title": {
+            "title": "Movie Title",
+            "type": "string"
+          },
+          "people": {
+            "title": "People",
+            "type": "integer"
+          },
+          "seats": {
+            "examples": [
+              [
+                "A5",
+                "A6"
+              ]
+            ],
+            "items": {
+              "type": "string"
+            },
+            "title": "Seats",
+            "type": "array"
+          },
+          "start_time": {
+            "format": "date-time",
+            "title": "Start Time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "booking_id",
+          "movie_title",
+          "hall",
+          "start_time",
+          "seats",
+          "people",
+          "checked_in_at"
+        ],
+        "title": "CheckinOut",
+        "type": "object"
+      },
       "CustomerCreate": {
         "properties": {
           "full_name": {
@@ -80,6 +477,82 @@
         "title": "HTTPValidationError",
         "type": "object"
       },
+      "HallIn": {
+        "properties": {
+          "aisle_after": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "An empty grid column after this seat number",
+            "title": "Aisle After"
+          },
+          "hall_type": {
+            "enum": [
+              "2D",
+              "3D",
+              "IMAX"
+            ],
+            "title": "Hall Type",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 30,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "rows": {
+            "description": "Rows are labelled A, B, C, \u2026",
+            "maximum": 26.0,
+            "minimum": 1.0,
+            "title": "Rows",
+            "type": "integer"
+          },
+          "seats_per_row": {
+            "maximum": 40.0,
+            "minimum": 1.0,
+            "title": "Seats Per Row",
+            "type": "integer"
+          },
+          "vip_rows": {
+            "default": [],
+            "description": "1-based row numbers",
+            "items": {
+              "type": "integer"
+            },
+            "title": "Vip Rows",
+            "type": "array"
+          },
+          "wheelchair_seats": {
+            "default": [],
+            "examples": [
+              [
+                "A1",
+                "A12"
+              ]
+            ],
+            "items": {
+              "type": "string"
+            },
+            "title": "Wheelchair Seats",
+            "type": "array"
+          }
+        },
+        "required": [
+          "rows",
+          "seats_per_row",
+          "name",
+          "hall_type"
+        ],
+        "title": "HallIn",
+        "type": "object"
+      },
       "HallOut": {
         "properties": {
           "hall_id": {
@@ -103,6 +576,41 @@
         "title": "HallOut",
         "type": "object"
       },
+      "HallUpdate": {
+        "properties": {
+          "hall_type": {
+            "anyOf": [
+              {
+                "enum": [
+                  "2D",
+                  "3D",
+                  "IMAX"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hall Type"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "maxLength": 30,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          }
+        },
+        "title": "HallUpdate",
+        "type": "object"
+      },
       "Health": {
         "properties": {
           "status": {
@@ -114,6 +622,101 @@
           "status"
         ],
         "title": "Health",
+        "type": "object"
+      },
+      "HoldIn": {
+        "properties": {
+          "screening_id": {
+            "title": "Screening Id",
+            "type": "integer"
+          },
+          "seat_ids": {
+            "description": "1 to 10 distinct seats of the screening's hall",
+            "items": {
+              "type": "integer"
+            },
+            "title": "Seat Ids",
+            "type": "array"
+          },
+          "ticket_types": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "default": {},
+            "description": "seat_id -> ticket type name (student, child, staff). Others are adult.",
+            "examples": [
+              {
+                "523": "child"
+              }
+            ],
+            "title": "Ticket Types",
+            "type": "object"
+          }
+        },
+        "required": [
+          "screening_id",
+          "seat_ids"
+        ],
+        "title": "HoldIn",
+        "type": "object"
+      },
+      "LayoutIn": {
+        "properties": {
+          "aisle_after": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "An empty grid column after this seat number",
+            "title": "Aisle After"
+          },
+          "rows": {
+            "description": "Rows are labelled A, B, C, \u2026",
+            "maximum": 26.0,
+            "minimum": 1.0,
+            "title": "Rows",
+            "type": "integer"
+          },
+          "seats_per_row": {
+            "maximum": 40.0,
+            "minimum": 1.0,
+            "title": "Seats Per Row",
+            "type": "integer"
+          },
+          "vip_rows": {
+            "default": [],
+            "description": "1-based row numbers",
+            "items": {
+              "type": "integer"
+            },
+            "title": "Vip Rows",
+            "type": "array"
+          },
+          "wheelchair_seats": {
+            "default": [],
+            "examples": [
+              [
+                "A1",
+                "A12"
+              ]
+            ],
+            "items": {
+              "type": "string"
+            },
+            "title": "Wheelchair Seats",
+            "type": "array"
+          }
+        },
+        "required": [
+          "rows",
+          "seats_per_row"
+        ],
+        "title": "LayoutIn",
         "type": "object"
       },
       "Me": {
@@ -163,6 +766,85 @@
           "staff"
         ],
         "title": "Me",
+        "type": "object"
+      },
+      "MovieIn": {
+        "properties": {
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "duration_min": {
+            "maximum": 300.0,
+            "minimum": 40.0,
+            "title": "Duration Min",
+            "type": "integer"
+          },
+          "genres": {
+            "default": [],
+            "items": {
+              "maxLength": 30,
+              "minLength": 1,
+              "type": "string"
+            },
+            "title": "Genres",
+            "type": "array"
+          },
+          "min_age": {
+            "enum": [
+              0,
+              6,
+              12,
+              16,
+              18
+            ],
+            "title": "Min Age",
+            "type": "integer"
+          },
+          "poster_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Poster Url"
+          },
+          "release_year": {
+            "anyOf": [
+              {
+                "maximum": 2100.0,
+                "minimum": 1900.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Release Year"
+          },
+          "title": {
+            "maxLength": 150,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "duration_min",
+          "min_age"
+        ],
+        "title": "MovieIn",
         "type": "object"
       },
       "MovieOut": {
@@ -237,6 +919,381 @@
         "title": "MovieOut",
         "type": "object"
       },
+      "MovieUpdate": {
+        "properties": {
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "duration_min": {
+            "anyOf": [
+              {
+                "maximum": 300.0,
+                "minimum": 40.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Min"
+          },
+          "genres": {
+            "anyOf": [
+              {
+                "items": {
+                  "maxLength": 30,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Genres"
+          },
+          "is_active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "false archives, true restores",
+            "title": "Is Active"
+          },
+          "min_age": {
+            "anyOf": [
+              {
+                "enum": [
+                  0,
+                  6,
+                  12,
+                  16,
+                  18
+                ],
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Min Age"
+          },
+          "poster_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Poster Url"
+          },
+          "release_year": {
+            "anyOf": [
+              {
+                "maximum": 2100.0,
+                "minimum": 1900.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Release Year"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "maxLength": 150,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          }
+        },
+        "title": "MovieUpdate",
+        "type": "object"
+      },
+      "MyBookingOut": {
+        "properties": {
+          "booking_id": {
+            "title": "Booking Id",
+            "type": "integer"
+          },
+          "booking_time": {
+            "format": "date-time",
+            "title": "Booking Time",
+            "type": "string"
+          },
+          "checked_in_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Checked In At"
+          },
+          "hall": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hall"
+          },
+          "hold_expires_at": {
+            "format": "date-time",
+            "title": "Hold Expires At",
+            "type": "string"
+          },
+          "movie_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Null once the tickets are gone (cancel/expiry)",
+            "title": "Movie Title"
+          },
+          "qr_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Set once paid: one QR code for all seats. Image: GET .../qr.png",
+            "title": "Qr Token"
+          },
+          "seconds_left": {
+            "description": "Seconds until the hold ends. 0 unless the booking is pending.",
+            "title": "Seconds Left",
+            "type": "integer"
+          },
+          "start_time": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Time"
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "paid",
+              "cancelled",
+              "expired"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "tickets": {
+            "items": {
+              "$ref": "#/components/schemas/BookingTicketOut"
+            },
+            "title": "Tickets",
+            "type": "array"
+          },
+          "total_amount": {
+            "title": "Total Amount",
+            "type": "string"
+          }
+        },
+        "required": [
+          "booking_id",
+          "status",
+          "booking_time",
+          "hold_expires_at",
+          "seconds_left",
+          "total_amount",
+          "tickets",
+          "qr_token",
+          "checked_in_at",
+          "movie_title",
+          "hall",
+          "start_time"
+        ],
+        "title": "MyBookingOut",
+        "type": "object"
+      },
+      "PayIn": {
+        "properties": {
+          "method": {
+            "enum": [
+              "card",
+              "kaspi"
+            ],
+            "title": "Method",
+            "type": "string"
+          },
+          "simulate_decline": {
+            "default": false,
+            "description": "Fake provider: true makes this attempt fail (for demos/tests).",
+            "title": "Simulate Decline",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "method"
+        ],
+        "title": "PayIn",
+        "type": "object"
+      },
+      "RefundIn": {
+        "properties": {
+          "reason": {
+            "examples": [
+              "Customer is ill"
+            ],
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "title": "RefundIn",
+        "type": "object"
+      },
+      "RefundOut": {
+        "properties": {
+          "booking_id": {
+            "title": "Booking Id",
+            "type": "integer"
+          },
+          "refunded_amount": {
+            "title": "Refunded Amount",
+            "type": "string"
+          },
+          "refunded_at": {
+            "format": "date-time",
+            "title": "Refunded At",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "booking_id",
+          "status",
+          "refunded_amount",
+          "refunded_at"
+        ],
+        "title": "RefundOut",
+        "type": "object"
+      },
+      "Removed": {
+        "properties": {
+          "result": {
+            "enum": [
+              "deleted",
+              "archived"
+            ],
+            "title": "Result",
+            "type": "string"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "Removed",
+        "type": "object"
+      },
+      "ReportRow": {
+        "properties": {
+          "capacity": {
+            "title": "Capacity",
+            "type": "integer"
+          },
+          "hall": {
+            "title": "Hall",
+            "type": "string"
+          },
+          "occupancy_pct": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Occupancy Pct"
+          },
+          "revenue": {
+            "title": "Revenue",
+            "type": "string"
+          },
+          "screening_id": {
+            "title": "Screening Id",
+            "type": "integer"
+          },
+          "start_time": {
+            "format": "date-time",
+            "title": "Start Time",
+            "type": "string"
+          },
+          "tickets_sold": {
+            "title": "Tickets Sold",
+            "type": "integer"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "screening_id",
+          "title",
+          "hall",
+          "start_time",
+          "capacity",
+          "tickets_sold",
+          "occupancy_pct",
+          "revenue"
+        ],
+        "title": "ReportRow",
+        "type": "object"
+      },
       "ScreeningDetail": {
         "properties": {
           "base_price": {
@@ -280,6 +1337,43 @@
         "title": "ScreeningDetail",
         "type": "object"
       },
+      "ScreeningIn": {
+        "properties": {
+          "base_price": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Base Price"
+          },
+          "hall_id": {
+            "title": "Hall Id",
+            "type": "integer"
+          },
+          "movie_id": {
+            "title": "Movie Id",
+            "type": "integer"
+          },
+          "start_time": {
+            "format": "date-time",
+            "title": "Start Time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "movie_id",
+          "hall_id",
+          "start_time",
+          "base_price"
+        ],
+        "title": "ScreeningIn",
+        "type": "object"
+      },
       "ScreeningOut": {
         "properties": {
           "base_price": {
@@ -319,6 +1413,257 @@
         "title": "ScreeningOut",
         "type": "object"
       },
+      "ScreeningUpdate": {
+        "properties": {
+          "base_price": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Base Price"
+          },
+          "hall_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hall Id"
+          },
+          "movie_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Movie Id"
+          },
+          "start_time": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Time"
+          }
+        },
+        "title": "ScreeningUpdate",
+        "type": "object"
+      },
+      "SeatMap": {
+        "properties": {
+          "hall": {
+            "$ref": "#/components/schemas/HallOut"
+          },
+          "screening_id": {
+            "title": "Screening Id",
+            "type": "integer"
+          },
+          "seats": {
+            "items": {
+              "$ref": "#/components/schemas/SeatOut"
+            },
+            "title": "Seats",
+            "type": "array"
+          }
+        },
+        "required": [
+          "screening_id",
+          "hall",
+          "seats"
+        ],
+        "title": "SeatMap",
+        "type": "object"
+      },
+      "SeatOut": {
+        "properties": {
+          "grid_col": {
+            "title": "Grid Col",
+            "type": "integer"
+          },
+          "grid_row": {
+            "title": "Grid Row",
+            "type": "integer"
+          },
+          "is_taken": {
+            "title": "Is Taken",
+            "type": "boolean"
+          },
+          "price": {
+            "title": "Price",
+            "type": "string"
+          },
+          "row_label": {
+            "title": "Row Label",
+            "type": "string"
+          },
+          "seat_id": {
+            "title": "Seat Id",
+            "type": "integer"
+          },
+          "seat_number": {
+            "title": "Seat Number",
+            "type": "integer"
+          },
+          "seat_type": {
+            "title": "Seat Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "seat_id",
+          "row_label",
+          "seat_number",
+          "grid_row",
+          "grid_col",
+          "seat_type",
+          "price",
+          "is_taken"
+        ],
+        "title": "SeatOut",
+        "type": "object"
+      },
+      "SeatUpdate": {
+        "properties": {
+          "seat_type": {
+            "enum": [
+              "standard",
+              "vip",
+              "wheelchair"
+            ],
+            "title": "Seat Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "seat_type"
+        ],
+        "title": "SeatUpdate",
+        "type": "object"
+      },
+      "StaffBookingOut": {
+        "properties": {
+          "booking_id": {
+            "title": "Booking Id",
+            "type": "integer"
+          },
+          "checked_in_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Checked In At"
+          },
+          "customer_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Email"
+          },
+          "customer_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Name"
+          },
+          "hall": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hall"
+          },
+          "movie_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Movie Title"
+          },
+          "start_time": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Time"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "tickets": {
+            "items": {
+              "$ref": "#/components/schemas/BookingTicketOut"
+            },
+            "title": "Tickets",
+            "type": "array"
+          },
+          "total_amount": {
+            "title": "Total Amount",
+            "type": "string"
+          }
+        },
+        "required": [
+          "booking_id",
+          "status",
+          "customer_name",
+          "customer_email",
+          "movie_title",
+          "hall",
+          "start_time",
+          "tickets",
+          "total_amount",
+          "checked_in_at"
+        ],
+        "title": "StaffBookingOut",
+        "type": "object"
+      },
       "StaffOut": {
         "properties": {
           "full_name": {
@@ -345,6 +1690,41 @@
           "role"
         ],
         "title": "StaffOut",
+        "type": "object"
+      },
+      "TicketTypeOut": {
+        "properties": {
+          "discount_pct": {
+            "title": "Discount Pct",
+            "type": "string"
+          },
+          "max_age": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Age"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "staff_only": {
+            "title": "Staff Only",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "discount_pct",
+          "max_age",
+          "staff_only"
+        ],
+        "title": "TicketTypeOut",
         "type": "object"
       },
       "ValidationError": {
@@ -401,6 +1781,1048 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/admin/halls": {
+      "get": {
+        "operationId": "list_halls_api_admin_halls_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AdminHallOut"
+                  },
+                  "title": "Response List Halls Api Admin Halls Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Halls",
+        "tags": [
+          "admin"
+        ]
+      },
+      "post": {
+        "description": "A new hall with its seats generated from the layout.",
+        "operationId": "create_hall_api_admin_halls_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HallIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminHallOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Hall",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/halls/{hall_id}": {
+      "delete": {
+        "operationId": "delete_hall_api_admin_halls__hall_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "hall_id",
+            "required": true,
+            "schema": {
+              "title": "Hall Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Delete Hall",
+        "tags": [
+          "admin"
+        ]
+      },
+      "patch": {
+        "operationId": "update_hall_api_admin_halls__hall_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "hall_id",
+            "required": true,
+            "schema": {
+              "title": "Hall Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HallUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminHallOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Update Hall",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/halls/{hall_id}/layout": {
+      "put": {
+        "description": "Regenerate all seats. Only while no ticket has ever been sold for this hall's seats.",
+        "operationId": "replace_layout_api_admin_halls__hall_id__layout_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "hall_id",
+            "required": true,
+            "schema": {
+              "title": "Hall Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LayoutIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminHallOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Replace Layout",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/halls/{hall_id}/seats": {
+      "get": {
+        "operationId": "list_hall_seats_api_admin_halls__hall_id__seats_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "hall_id",
+            "required": true,
+            "schema": {
+              "title": "Hall Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AdminSeatOut"
+                  },
+                  "title": "Response List Hall Seats Api Admin Halls  Hall Id  Seats Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Hall Seats",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/movies": {
+      "get": {
+        "description": "All movies, archived ones included.",
+        "operationId": "list_all_movies_api_admin_movies_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AdminMovieOut"
+                  },
+                  "title": "Response List All Movies Api Admin Movies Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List All Movies",
+        "tags": [
+          "admin"
+        ]
+      },
+      "post": {
+        "operationId": "create_movie_api_admin_movies_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MovieIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminMovieOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Movie",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/movies/{movie_id}": {
+      "delete": {
+        "description": "Deletes a movie without screenings; a movie with screenings is archived instead.",
+        "operationId": "delete_movie_api_admin_movies__movie_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "movie_id",
+            "required": true,
+            "schema": {
+              "title": "Movie Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Removed"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Delete Movie",
+        "tags": [
+          "admin"
+        ]
+      },
+      "patch": {
+        "description": "Change only the fields sent. `null` clears description, poster or year.",
+        "operationId": "update_movie_api_admin_movies__movie_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "movie_id",
+            "required": true,
+            "schema": {
+              "title": "Movie Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MovieUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminMovieOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Update Movie",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/report": {
+      "get": {
+        "description": "Next 7 days: paid tickets, occupancy and revenue per screening, emptiest first.",
+        "operationId": "occupancy_report_api_admin_report_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ReportRow"
+                  },
+                  "title": "Response Occupancy Report Api Admin Report Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Occupancy Report",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/screenings": {
+      "get": {
+        "description": "The schedule: screenings of one day, or the next 7 days, earliest first.",
+        "operationId": "list_schedule_api_admin_screenings_get",
+        "parameters": [
+          {
+            "description": "Day in Almaty time. Omit for the next 7 days.",
+            "in": "query",
+            "name": "date",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Day in Almaty time. Omit for the next 7 days.",
+              "title": "Date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AdminScreeningOut"
+                  },
+                  "title": "Response List Schedule Api Admin Screenings Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Schedule",
+        "tags": [
+          "admin"
+        ]
+      },
+      "post": {
+        "description": "Put a movie into a hall. The end time includes 15 minutes of cleaning.",
+        "operationId": "create_screening_api_admin_screenings_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScreeningIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminScreeningOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Screening",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/screenings/{screening_id}": {
+      "delete": {
+        "operationId": "delete_screening_api_admin_screenings__screening_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "screening_id",
+            "required": true,
+            "schema": {
+              "title": "Screening Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Delete Screening",
+        "tags": [
+          "admin"
+        ]
+      },
+      "patch": {
+        "description": "Change price any time; movie, hall and time only while no tickets exist.",
+        "operationId": "update_screening_api_admin_screenings__screening_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "screening_id",
+            "required": true,
+            "schema": {
+              "title": "Screening Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScreeningUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminScreeningOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Update Screening",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/seats/{seat_id}": {
+      "patch": {
+        "description": "Change a seat's type. Prices of tickets already sold stay as they were.",
+        "operationId": "update_seat_api_admin_seats__seat_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "seat_id",
+            "required": true,
+            "schema": {
+              "title": "Seat Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SeatUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminSeatOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Update Seat",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/bookings": {
+      "post": {
+        "description": "Hold seats for 10 minutes: a pending booking with one ticket per seat (\u00a76, step 1).",
+        "operationId": "hold_seats_api_bookings_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HoldIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Hold Seats",
+        "tags": [
+          "bookings"
+        ]
+      }
+    },
+    "/api/bookings/{booking_id}": {
+      "get": {
+        "description": "One of my bookings, with the seconds left on its hold (for the countdown).",
+        "operationId": "get_booking_api_bookings__booking_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "booking_id",
+            "required": true,
+            "schema": {
+              "title": "Booking Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Booking",
+        "tags": [
+          "bookings"
+        ]
+      }
+    },
+    "/api/bookings/{booking_id}/cancel": {
+      "post": {
+        "description": "Cancel my pending hold: the booking becomes 'cancelled' and its seats are free again.\n\nPaid bookings are cancelled (with a refund) by a cashier or manager, not here.",
+        "operationId": "cancel_booking_api_bookings__booking_id__cancel_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "booking_id",
+            "required": true,
+            "schema": {
+              "title": "Booking Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Cancel Booking",
+        "tags": [
+          "bookings"
+        ]
+      }
+    },
+    "/api/bookings/{booking_id}/pay": {
+      "post": {
+        "description": "Fake payment for my pending hold (\u00a76, step 2). A decline is stored; retry is allowed.",
+        "operationId": "pay_booking_api_bookings__booking_id__pay_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "booking_id",
+            "required": true,
+            "schema": {
+              "title": "Booking Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PayIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Pay Booking",
+        "tags": [
+          "bookings"
+        ]
+      }
+    },
+    "/api/bookings/{booking_id}/qr.png": {
+      "get": {
+        "description": "The QR code of my paid booking. One code lets the whole group in.",
+        "operationId": "get_booking_qr_api_bookings__booking_id__qr_png_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "booking_id",
+            "required": true,
+            "schema": {
+              "title": "Booking Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "image/png": {}
+            },
+            "description": "The QR code as PNG"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Booking Qr",
+        "tags": [
+          "bookings"
+        ]
+      }
+    },
+    "/api/checkin": {
+      "post": {
+        "description": "Validate a scanned QR code and let the whole booking in (once).",
+        "operationId": "check_in_api_checkin_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckinIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckinOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Check In",
+        "tags": [
+          "checkin"
+        ]
+      }
+    },
     "/api/health": {
       "get": {
         "description": "Liveness check used after every deploy.",
@@ -447,6 +2869,71 @@
         "summary": "Me",
         "tags": [
           "me"
+        ]
+      }
+    },
+    "/api/me/bookings": {
+      "get": {
+        "description": "All my bookings, newest first, with the movie and time (for the \"My bookings\" page).",
+        "operationId": "my_bookings_api_me_bookings_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "pending",
+                    "paid",
+                    "cancelled",
+                    "expired"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MyBookingOut"
+                  },
+                  "title": "Response My Bookings Api Me Bookings Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "My Bookings",
+        "tags": [
+          "bookings"
         ]
       }
     },
@@ -672,6 +3159,216 @@
         "summary": "Get Screening",
         "tags": [
           "catalog"
+        ]
+      }
+    },
+    "/api/screenings/{screening_id}/seats": {
+      "get": {
+        "description": "Every seat of the screening's hall, its price and whether it is taken (held or sold).",
+        "operationId": "get_seat_map_api_screenings__screening_id__seats_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "screening_id",
+            "required": true,
+            "schema": {
+              "title": "Screening Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SeatMap"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Seat Map",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
+    "/api/staff/bookings/{booking_id}": {
+      "get": {
+        "description": "Any booking, for the desk: who bought it, for which show, and its state.",
+        "operationId": "look_up_booking_api_staff_bookings__booking_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "booking_id",
+            "required": true,
+            "schema": {
+              "title": "Booking Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StaffBookingOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Look Up Booking",
+        "tags": [
+          "staff"
+        ]
+      }
+    },
+    "/api/staff/bookings/{booking_id}/refund": {
+      "post": {
+        "description": "Cancel a paid booking and refund the whole amount, before the screening starts.",
+        "operationId": "refund_booking_api_staff_bookings__booking_id__refund_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "booking_id",
+            "required": true,
+            "schema": {
+              "title": "Booking Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefundIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefundOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Refund Booking",
+        "tags": [
+          "staff"
+        ]
+      }
+    },
+    "/api/ticket-types": {
+      "get": {
+        "description": "Price categories a customer may choose. Staff types only for logged-in active staff.",
+        "operationId": "list_ticket_types_api_ticket_types_get",
+        "parameters": [
+          {
+            "description": "Only the types allowed for this screening's movie",
+            "in": "query",
+            "name": "screening_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Only the types allowed for this screening's movie",
+              "title": "Screening Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TicketTypeOut"
+                  },
+                  "title": "Response List Ticket Types Api Ticket Types Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Ticket Types",
+        "tags": [
+          "bookings"
         ]
       }
     }

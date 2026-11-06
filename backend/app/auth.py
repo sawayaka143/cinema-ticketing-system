@@ -57,3 +57,13 @@ def get_current_user(
 
 
 CurrentUserDep = Annotated[CurrentUser, Depends(get_current_user)]
+
+
+def get_optional_user(
+    creds: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer)],
+) -> CurrentUser | None:
+    """The logged-in user, or None for anonymous requests (a bad token is still 401)."""
+    return None if creds is None else get_current_user(creds)
+
+
+OptionalUserDep = Annotated[CurrentUser | None, Depends(get_optional_user)]
