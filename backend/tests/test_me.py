@@ -66,7 +66,20 @@ def test_second_customer_profile_is_409(client: TestClient, login):
 def test_bad_phone_is_rejected(client: TestClient, login):
     login()
     res = client.post("/api/me/customer", json={"full_name": "A", "phone": "8 701 123"})
-    assert res.status_code == 422
+    assert res.status_code == 400
+    assert "+7" in res.json()["detail"]
+
+
+def test_phone_is_normalized_on_create(client: TestClient, login):
+    login()
+    res = client.post("/api/me/customer", json={"full_name": "A", "phone": "8 (701) 123-45-67"})
+    assert (res.status_code, res.json()["phone"]) == (201, "+77011234567")
+
+
+def test_blank_phone_is_stored_as_null(client: TestClient, login):
+    login()
+    res = client.post("/api/me/customer", json={"full_name": "A", "phone": "  "})
+    assert (res.status_code, res.json()["phone"]) == (201, None)
 
 
 def test_create_customer_without_token_is_401(client: TestClient):

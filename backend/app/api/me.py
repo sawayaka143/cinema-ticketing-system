@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 from app.auth import CurrentUserDep
 from app.db import get_session
 from app.models import Customer, Staff
+from app.phone import InvalidPhone, normalize_phone
 
 router = APIRouter(tags=["me"])
 
@@ -40,7 +41,12 @@ class Me(BaseModel):
 
 class CustomerCreate(BaseModel):
     full_name: str = Field(min_length=1, max_length=100)
-    phone: str | None = Field(default=None, pattern=r"^\+7[0-9]{10}$", examples=["+77011234567"])
+    phone: str | None = Field(
+        default=None,
+        max_length=30,
+        description="Spaces, dashes, brackets and a leading 8 are fine; stored as +7XXXXXXXXXX",
+        examples=["8 (701) 123-45-67"],
+    )
 
 
 def _customer_out(c: Customer) -> CustomerOut:
@@ -69,8 +75,14 @@ def create_customer(body: CustomerCreate, user: CurrentUserDep, db: SessionDep) 
     """Create the customer profile for the logged-in user. Email comes from the login."""
     if not user.email:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "The login has no email address")
+    phone = None
+    if body.phone and body.phone.strip():
+        try:
+            phone = normalize_phone(body.phone)
+        except InvalidPhone as exc:
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, str(exc)) from exc
     customer = Customer(
-        auth_user_id=user.id, full_name=body.full_name.strip(), email=user.email, phone=body.phone
+        auth_user_id=user.id, full_name=body.full_name.strip(), email=user.email, phone=phone
     )
     db.add(customer)
     try:
