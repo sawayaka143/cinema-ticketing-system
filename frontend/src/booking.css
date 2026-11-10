@@ -75,11 +75,11 @@
 }
 
 .seat-vip {
-  border-color: #c98b2e;
+  border-color: var(--vip);
 }
 
 .seat-wheelchair {
-  border-color: #6fa8dc;
+  border-color: var(--wheelchair);
 }
 
 button.seat:not(:disabled):hover {
@@ -286,7 +286,7 @@ select {
   width: 200px;
   height: 200px;
   border-radius: var(--radius);
-  background: #fff;
+  background: var(--text);
 }
 
 /* My bookings */
