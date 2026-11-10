@@ -87,6 +87,22 @@ def _active_movie(db: Session, movie_id: int) -> Movie:
     return movie
 
 
+DayQuery = Annotated[
+    date | None,
+    Query(alias="date", description="Day in Almaty time (YYYY-MM-DD). Omit for the next 7 days."),
+]
+
+
+def _window(day: date | None) -> tuple[datetime, datetime]:
+    """The [start, end) range to list: the next 7 days, or one Almaty day. Never the past."""
+    now = datetime.now(UTC)
+    if day is None:
+        return now, now + timedelta(days=7)
+    start = max(now, datetime.combine(day, time.min, ALMATY))
+    end = datetime.combine(day + timedelta(days=1), time.min, ALMATY)
+    return start, end
+
+
 @router.get("/movies", response_model=list[MovieOut])
 def list_movies(db: SessionDep) -> list[MovieOut]:
     """Active movies, by title."""
@@ -109,21 +125,11 @@ def get_movie(movie_id: int, db: SessionDep) -> MovieOut:
 def list_movie_screenings(
     movie_id: int,
     db: SessionDep,
-    day: Annotated[
-        date | None,
-        Query(
-            alias="date", description="Day in Almaty time (YYYY-MM-DD). Omit for the next 7 days."
-        ),
-    ] = None,
+    day: DayQuery = None,
 ) -> list[ScreeningOut]:
     """Upcoming screenings of one movie, earliest first. Past screenings are never listed."""
     _active_movie(db, movie_id)
-    now = datetime.now(UTC)
-    if day is None:
-        start, end = now, now + timedelta(days=7)
-    else:
-        start = max(now, datetime.combine(day, time.min, ALMATY))
-        end = datetime.combine(day + timedelta(days=1), time.min, ALMATY)
+    start, end = _window(day)
     screenings = db.scalars(
         select(Screening)
         .where(
@@ -135,6 +141,33 @@ def list_movie_screenings(
         .order_by(Screening.start_time)
     )
     return [_screening_out(s) for s in screenings]
+
+
+@router.get("/screenings", response_model=list[ScreeningDetail])
+def list_screenings(db: SessionDep, day: DayQuery = None) -> list[ScreeningDetail]:
+    """Upcoming screenings of all active movies, earliest first, with movie and hall.
+
+    One request for the whole program page. Past screenings are never listed.
+    """
+    start, end = _window(day)
+    screenings = db.scalars(
+        select(Screening)
+        .join(Screening.movie)
+        .where(
+            Movie.is_active,
+            Screening.start_time >= start,
+            Screening.start_time < end,
+        )
+        .options(
+            selectinload(Screening.hall),
+            selectinload(Screening.movie).selectinload(Movie.genres),
+        )
+        .order_by(Screening.start_time, Screening.screening_id)
+    )
+    return [
+        ScreeningDetail(**_screening_out(s).model_dump(), movie=_movie_out(s.movie))
+        for s in screenings
+    ]
 
 
 class SeatOut(BaseModel):
