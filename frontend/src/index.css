@@ -1,15 +1,17 @@
-/* Dark cinema theme (from the #18 placeholder): near-black ground, warm surfaces, amber accent.
+/* Dark cinema theme: neutral obsidian ground and surfaces, amber accent.
    Flat colour, no gradients or shadows; times and prices use tabular figures. */
 :root {
-  --bg: #14110f;
-  --surface: #1f1a17;
-  --surface-2: #2a231f;
-  --border: #3a322d;
-  --text: #f4ede6;
-  --muted: #b9ada3;
+  --bg: #0b0c0e;
+  --surface: #131519;
+  --surface-2: #1b1e24;
+  --border: #262a33;
+  --text: #e6e8ec;
+  --muted: #9ba1ad;
   --accent: #f0a53a;
-  --on-accent: #14110f;
+  --on-accent: #0b0c0e;
   --bad: #ff8a7a;
+  --vip: #c98b2e;
+  --wheelchair: #6fa8dc;
 
   --s1: 0.25rem;
   --s2: 0.5rem;
