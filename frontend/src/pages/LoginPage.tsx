@@ -2,6 +2,9 @@ import { type FormEvent, useState } from "react";
 import { useNavigate } from "react-router";
 import { api } from "../api/client";
 import { Status } from "../components/Layout";
+import { Button } from "../components/ui/Button";
+import { Card } from "../components/ui/Card";
+import { FadeIn } from "../components/ui/FadeIn";
 import { supabase } from "../lib/supabase";
 
 type Mode = "login" | "signup";
@@ -47,40 +50,45 @@ export function LoginPage() {
   }
 
   return (
-    <section className="panel narrow">
-      <h1>{mode === "login" ? "Log in" : "Create an account"}</h1>
-      <form className="form" onSubmit={submit}>
-        {mode === "signup" && (
+    <FadeIn direction="up">
+      <Card as="section" elevated className="panel narrow">
+        <h1>{mode === "login" ? "Log in" : "Create an account"}</h1>
+        <form className="form" onSubmit={submit}>
+          {mode === "signup" && (
+            <label>
+              Full name
+              <input name="full_name" autoComplete="name" required maxLength={100} />
+            </label>
+          )}
           <label>
-            Full name
-            <input name="full_name" autoComplete="name" required maxLength={100} />
+            Email
+            <input name="email" type="email" autoComplete="email" required />
           </label>
-        )}
-        <label>
-          Email
-          <input name="email" type="email" autoComplete="email" required />
-        </label>
-        <label>
-          Password
-          <input
-            name="password"
-            type="password"
-            autoComplete={mode === "login" ? "current-password" : "new-password"}
-            minLength={6}
-            required
-          />
-        </label>
-        <button type="submit" className="solid" disabled={busy}>
-          {busy ? "Please wait…" : mode === "login" ? "Log in" : "Sign up"}
-        </button>
-      </form>
-      {message && <Status tone={message.tone}>{message.text}</Status>}
-      <p className="switch">
-        {mode === "login" ? "New here?" : "Already have an account?"}{" "}
-        <button type="button" className="link" onClick={() => setMode(mode === "login" ? "signup" : "login")}>
-          {mode === "login" ? "Create an account" : "Log in"}
-        </button>
-      </p>
-    </section>
+          <label>
+            Password
+            <input
+              name="password"
+              type="password"
+              autoComplete={mode === "login" ? "current-password" : "new-password"}
+              minLength={6}
+              required
+            />
+          </label>
+          <Button type="submit" variant="solid" size="lg" loading={busy} disabled={busy}>
+            {busy ? "Please wait…" : mode === "login" ? "Log in" : "Sign up"}
+          </Button>
+        </form>
+        {message && <Status tone={message.tone}>{message.text}</Status>}
+        <p className="switch">
+          {mode === "login" ? "New here?" : "Already have an account?"}{" "}
+          <Button
+            variant="link"
+            onClick={() => setMode(mode === "login" ? "signup" : "login")}
+          >
+            {mode === "login" ? "Create an account" : "Log in"}
+          </Button>
+        </p>
+      </Card>
+    </FadeIn>
   );
 }

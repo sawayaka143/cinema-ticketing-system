@@ -102,3 +102,61 @@ def test_get_screening_includes_movie_and_hall(client: TestClient, catalog: dict
 
 def test_unknown_screening_is_404(client: TestClient, catalog: dict):
     assert client.get("/api/screenings/999999999").status_code == 404
+
+
+def test_list_screenings_default_to_next_7_days(client: TestClient, catalog: dict):
+    res = client.get("/api/screenings")
+    assert res.status_code == 200
+    items = res.json()
+    ids = [s["screening_id"] for s in items]
+    assert catalog["screenings"]["tomorrow"].screening_id in ids
+    assert catalog["screenings"]["in_10_days"].screening_id not in ids
+    assert catalog["screenings"]["past"].screening_id not in ids
+    tomorrow_item = next(
+        s for s in items if s["screening_id"] == catalog["screenings"]["tomorrow"].screening_id
+    )
+    assert tomorrow_item["movie"]["title"] == "Test movie"
+    assert tomorrow_item["movie"]["genres"] == ["test-drama"]
+    assert tomorrow_item["hall"]["name"] == "Test hall"
+    assert tomorrow_item["hall"]["hall_type"] == "IMAX"
+
+
+def test_list_screenings_for_one_day(client: TestClient, catalog: dict):
+    res = client.get("/api/screenings", params={"date": str(catalog["day"])})
+    assert res.status_code == 200
+    items = res.json()
+    ids = [s["screening_id"] for s in items]
+    assert catalog["screenings"]["tomorrow"].screening_id in ids
+    assert catalog["screenings"]["in_10_days"].screening_id not in ids
+    assert catalog["screenings"]["past"].screening_id not in ids
+    for s in items:
+        show_date = datetime.fromisoformat(s["start_time"]).astimezone(ALMATY).date()
+        assert show_date == catalog["day"]
+
+
+def test_list_screenings_with_a_bad_date_are_422(client: TestClient):
+    res = client.get("/api/screenings", params={"date": "soon"})
+    assert res.status_code == 422
+
+
+def test_list_screenings_excludes_archived_movies(client: TestClient, catalog: dict, db: Session):
+    catalog["movie"].is_active = False
+    db.flush()
+    res = client.get("/api/screenings")
+    assert res.status_code == 200
+    ids = [s["screening_id"] for s in res.json()]
+    assert catalog["screenings"]["tomorrow"].screening_id not in ids
+
+
+def test_list_screenings_past_day_returns_empty(client: TestClient):
+    yesterday = datetime.now(ALMATY).date() - timedelta(days=1)
+    res = client.get("/api/screenings", params={"date": str(yesterday)})
+    assert res.status_code == 200
+    assert res.json() == []
+
+
+def test_list_screenings_beyond_7_days_returns_empty(client: TestClient):
+    far_future = datetime.now(ALMATY).date() + timedelta(days=14)
+    res = client.get("/api/screenings", params={"date": str(far_future)})
+    assert res.status_code == 200
+    assert res.json() == []

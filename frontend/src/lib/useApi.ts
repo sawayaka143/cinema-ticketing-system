@@ -1,29 +1,52 @@
-import { useEffect, useEffectEvent, useState } from "react";
+import { useCallback, useEffect, useEffectEvent, useState } from "react";
 
-export type Loadable<T> =
+export type LoadableState<T> =
   | { state: "loading" }
   | { state: "error"; message: string }
   | { state: "ready"; data: T };
 
-/** Runs `load` whenever `key` changes and tracks loading / error / ready for that key. */
+export type Loadable<T> = LoadableState<T> & {
+  reload: () => void;
+};
+
+/** Runs `load` whenever `key` changes or `reload()` is called, and tracks loading / error / ready with in-memory caching. */
 export function useApi<T>(load: () => Promise<T>, key: string | number): Loadable<T> {
-  const [result, setResult] = useState<{ key: string | number; value: Loadable<T> } | null>(null);
+  const [tick, setTick] = useState(0);
+  const reload = useCallback(() => setTick((t) => t + 1), []);
+  const [cache, setCache] = useState<
+    Record<string | number, { tick: number; value: LoadableState<T> }>
+  >({});
   const run = useEffectEvent(load);
 
   useEffect(() => {
     let live = true;
     run()
-      .then((data) => live && setResult({ key, value: { state: "ready", data } }))
+      .then((data) => {
+        if (live) {
+          setCache((prev) => ({
+            ...prev,
+            [key]: { tick, value: { state: "ready" as const, data } },
+          }));
+        }
+      })
       .catch((err: unknown) => {
         const message = err instanceof Error ? err.message : String(err);
-        if (live) setResult({ key, value: { state: "error", message } });
+        if (live) {
+          setCache((prev) => ({
+            ...prev,
+            [key]: { tick, value: { state: "error" as const, message } },
+          }));
+        }
       });
     return () => {
       live = false;
     };
-  }, [key]);
+  }, [key, tick]);
 
-  return result?.key === key ? result.value : { state: "loading" };
+  const entry = cache[key];
+  const current: LoadableState<T> =
+    entry && entry.tick === tick ? entry.value : { state: "loading" };
+  return { ...current, reload };
 }
 
 /** Unwraps an openapi-fetch result: returns data or throws a readable error. */

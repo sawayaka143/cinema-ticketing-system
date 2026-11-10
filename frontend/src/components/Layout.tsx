@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 import { Link, NavLink, Outlet } from "react-router";
 import { useAuth } from "../lib/auth-context";
 import { supabase } from "../lib/supabase";
+import { BrandMark } from "./ui/BrandMark";
+import { Button } from "./ui/Button";
 
 export function Layout() {
   const { session, ready } = useAuth();
@@ -9,9 +11,9 @@ export function Layout() {
   return (
     <>
       <header className="rail">
-        <Link to="/" className="mark">
-          <i aria-hidden="true" />
-          Alatau Cinema
+        <Link to="/" className="mark" aria-label="Alatau Cinema Home">
+          <BrandMark size="md" />
+          <span>Alatau Cinema</span>
         </Link>
         <nav aria-label="Main">
           <NavLink to="/" end>
@@ -23,24 +25,24 @@ export function Layout() {
           {!ready ? null : session ? (
             <>
               <span className="who">{session.user.email}</span>
-              <button type="button" className="ghost" onClick={() => supabase.auth.signOut()}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => supabase.auth.signOut()}
+              >
                 Log out
-              </button>
+              </Button>
             </>
           ) : (
-            <Link to="/login" className="ghost">
+            <Button as={Link} to="/login" variant="ghost" size="sm">
               Log in
-            </Link>
+            </Button>
           )}
         </div>
       </header>
       <main className="page">
         <Outlet />
       </main>
-      <footer className="foot">
-        <p>Alatau Cinema is a fictional cinema. University project, KBTU.</p>
-        <p>Times are Almaty time. Prices in tenge.</p>
-      </footer>
     </>
   );
 }

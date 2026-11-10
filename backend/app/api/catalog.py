@@ -7,7 +7,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel
 from sqlalchemy import select
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.orm import Session, contains_eager, joinedload, selectinload
 
 from app.db import get_session
 from app.models import Movie, Screening
@@ -115,13 +115,20 @@ def list_movie_screenings(
     ] = None,
 ) -> list[ScreeningOut]:
     """Upcoming screenings of one movie, earliest first. Past screenings are never listed."""
-    _active_movie(db, movie_id)
+    active = db.scalar(select(Movie.movie_id).where(Movie.movie_id == movie_id, Movie.is_active))
+    if active is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Movie not found")
     now = datetime.now(UTC)
     if day is None:
         start, end = now, now + timedelta(days=7)
     else:
+        today_almaty = datetime.now(ALMATY).date()
+        if day < today_almaty or day > today_almaty + timedelta(days=7):
+            return []
         start = max(now, datetime.combine(day, time.min, ALMATY))
         end = datetime.combine(day + timedelta(days=1), time.min, ALMATY)
+        if start >= end:
+            return []
     screenings = db.scalars(
         select(Screening)
         .where(
@@ -129,10 +136,59 @@ def list_movie_screenings(
             Screening.start_time >= start,
             Screening.start_time < end,
         )
-        .options(selectinload(Screening.hall))
+        .options(joinedload(Screening.hall))
         .order_by(Screening.start_time)
     )
     return [_screening_out(s) for s in screenings]
+
+
+@router.get("/screenings", response_model=list[ScreeningDetail])
+def list_screenings(
+    db: SessionDep,
+    day: Annotated[
+        date | None,
+        Query(
+            alias="date", description="Day in Almaty time (YYYY-MM-DD). Omit for the next 7 days."
+        ),
+    ] = None,
+) -> list[ScreeningDetail]:
+    """Upcoming screenings across all active movies, earliest first.
+
+    Past screenings are never listed.
+    """
+    now = datetime.now(UTC)
+    if day is None:
+        start, end = now, now + timedelta(days=7)
+    else:
+        today_almaty = datetime.now(ALMATY).date()
+        if day < today_almaty or day > today_almaty + timedelta(days=7):
+            return []
+        start = max(now, datetime.combine(day, time.min, ALMATY))
+        end = datetime.combine(day + timedelta(days=1), time.min, ALMATY)
+        if start >= end:
+            return []
+    screenings = (
+        db.scalars(
+            select(Screening)
+            .join(Screening.movie)
+            .where(
+                Movie.is_active,
+                Screening.start_time >= start,
+                Screening.start_time < end,
+            )
+            .options(
+                joinedload(Screening.hall),
+                contains_eager(Screening.movie).selectinload(Movie.genres),
+            )
+            .order_by(Screening.start_time)
+        )
+        .unique()
+        .all()
+    )
+    return [
+        ScreeningDetail(**_screening_out(s).model_dump(), movie=_movie_out(s.movie))
+        for s in screenings
+    ]
 
 
 @router.get("/screenings/{screening_id}", response_model=ScreeningDetail)
@@ -142,8 +198,8 @@ def get_screening(screening_id: int, db: SessionDep) -> ScreeningDetail:
         select(Screening)
         .where(Screening.screening_id == screening_id)
         .options(
-            selectinload(Screening.hall),
-            selectinload(Screening.movie).selectinload(Movie.genres),
+            joinedload(Screening.hall),
+            joinedload(Screening.movie).selectinload(Movie.genres),
         )
     )
     if s is None:
