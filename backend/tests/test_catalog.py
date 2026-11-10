@@ -102,3 +102,52 @@ def test_get_screening_includes_movie_and_hall(client: TestClient, catalog: dict
 
 def test_unknown_screening_is_404(client: TestClient, catalog: dict):
     assert client.get("/api/screenings/999999999").status_code == 404
+
+
+def _ids(res) -> list[int]:
+    return [s["screening_id"] for s in res.json()]
+
+
+def test_all_screenings_default_to_next_7_days(client: TestClient, catalog: dict):
+    res = client.get("/api/screenings")
+    assert res.status_code == 200
+    shows = catalog["screenings"]
+    assert shows["tomorrow"].screening_id in _ids(res)
+    assert shows["past"].screening_id not in _ids(res)
+    assert shows["in_10_days"].screening_id not in _ids(res)
+    item = next(s for s in res.json() if s["screening_id"] == shows["tomorrow"].screening_id)
+    assert item["movie"]["title"] == "Test movie"
+    assert item["movie"]["genres"] == ["test-drama"]
+    assert item["hall"]["hall_type"] == "IMAX"
+
+
+def test_all_screenings_for_one_day(client: TestClient, catalog: dict):
+    res = client.get("/api/screenings", params={"date": str(catalog["day"])})
+    assert res.status_code == 200
+    assert catalog["screenings"]["tomorrow"].screening_id in _ids(res)
+    for s in res.json():
+        assert datetime.fromisoformat(s["start_time"]).astimezone(ALMATY).date() == catalog["day"]
+
+
+def test_all_screenings_skip_archived_movies(client: TestClient, catalog: dict, db: Session):
+    hidden = Screening(
+        movie_id=catalog["archived"].movie_id,
+        hall_id=catalog["screenings"]["tomorrow"].hall_id,
+        start_time=catalog["screenings"]["tomorrow"].start_time + timedelta(hours=3),
+        end_time=catalog["screenings"]["tomorrow"].start_time + timedelta(hours=5),
+        base_price=Decimal("2000.00"),
+    )
+    db.add(hidden)
+    db.flush()
+    assert hidden.screening_id not in _ids(client.get("/api/screenings"))
+
+
+def test_all_screenings_for_a_past_day_are_empty(client: TestClient, catalog: dict):
+    yesterday = datetime.now(ALMATY).date() - timedelta(days=1)
+    res = client.get("/api/screenings", params={"date": str(yesterday)})
+    assert res.status_code == 200
+    assert res.json() == []
+
+
+def test_all_screenings_with_a_bad_date_are_422(client: TestClient, catalog: dict):
+    assert client.get("/api/screenings", params={"date": "soon"}).status_code == 422

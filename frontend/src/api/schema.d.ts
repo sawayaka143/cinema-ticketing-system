@@ -472,6 +472,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/screenings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Screenings
+         * @description Upcoming screenings of all active movies, earliest first, with movie and hall.
+         *
+         *     One request for the whole program page. Past screenings are never listed.
+         */
+        get: operations["list_screenings_api_screenings_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/screenings/{screening_id}": {
         parameters: {
             query?: never;
@@ -2093,6 +2115,38 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ScreeningOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_screenings_api_screenings_get: {
+        parameters: {
+            query?: {
+                /** @description Day in Almaty time (YYYY-MM-DD). Omit for the next 7 days. */
+                date?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScreeningDetail"][];
                 };
             };
             /** @description Validation Error */

@@ -3119,6 +3119,63 @@
         ]
       }
     },
+    "/api/screenings": {
+      "get": {
+        "description": "Upcoming screenings of all active movies, earliest first, with movie and hall.\n\nOne request for the whole program page. Past screenings are never listed.",
+        "operationId": "list_screenings_api_screenings_get",
+        "parameters": [
+          {
+            "description": "Day in Almaty time (YYYY-MM-DD). Omit for the next 7 days.",
+            "in": "query",
+            "name": "date",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Day in Almaty time (YYYY-MM-DD). Omit for the next 7 days.",
+              "title": "Date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ScreeningDetail"
+                  },
+                  "title": "Response List Screenings Api Screenings Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Screenings",
+        "tags": [
+          "catalog"
+        ]
+      }
+    },
     "/api/screenings/{screening_id}": {
       "get": {
         "description": "One screening with its movie and hall.",
