@@ -88,13 +88,31 @@ h2 {
   flex-direction: column;
 }
 
+.rail-tier-brand {
+  width: 100%;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.rail-tier-nav {
+  width: 100%;
+  border-bottom: 1px solid var(--border);
+}
+
+.rail-content {
+  width: 100%;
+  max-width: 72rem;
+  margin: 0 auto;
+  padding-left: var(--gutter);
+  padding-right: var(--gutter);
+}
+
 .rail-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--s4);
-  padding: var(--s3) var(--gutter);
-  border-bottom: 1px solid var(--border-subtle);
+  padding-top: var(--s3);
+  padding-bottom: var(--s3);
 }
 
 .mark {
@@ -121,8 +139,8 @@ h2 {
   align-items: center;
   justify-content: flex-start;
   gap: var(--s1);
-  padding: 0 var(--gutter);
-  border-bottom: 1px solid var(--border);
+  padding-top: var(--s2);
+  padding-bottom: var(--s2);
 }
 
 .rail nav a {
@@ -356,7 +374,7 @@ button {
   gap: var(--s2);
   overflow-x: auto;
   margin: calc(-1 * var(--s8)) calc(50% - 50vw) var(--s8);
-  padding: var(--s3) calc(50vw - 50%);
+  padding: var(--s4) calc(50vw - 50%);
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   scrollbar-width: thin;

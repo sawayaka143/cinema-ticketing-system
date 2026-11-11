@@ -11,36 +11,40 @@ export function Layout() {
   return (
     <>
       <header className="rail">
-        <div className="rail-top">
-          <Link to="/" className="mark" aria-label="Alatau Cinema Home">
-            <BrandMark size="md" />
-            <span>Alatau Cinema</span>
-          </Link>
-          <div className="account">
-            {!ready ? null : session ? (
-              <>
-                <span className="who">{session.user.email}</span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => supabase.auth.signOut()}
-                >
-                  Log out
+        <div className="rail-tier rail-tier-brand">
+          <div className="rail-content rail-top">
+            <Link to="/" className="mark" aria-label="Alatau Cinema Home">
+              <BrandMark size="md" />
+              <span>Alatau Cinema</span>
+            </Link>
+            <div className="account">
+              {!ready ? null : session ? (
+                <>
+                  <span className="who">{session.user.email}</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => supabase.auth.signOut()}
+                  >
+                    Log out
+                  </Button>
+                </>
+              ) : (
+                <Button as={Link} to="/login" variant="ghost" size="sm">
+                  Log in
                 </Button>
-              </>
-            ) : (
-              <Button as={Link} to="/login" variant="ghost" size="sm">
-                Log in
-              </Button>
-            )}
+              )}
+            </div>
           </div>
         </div>
-        <nav className="rail-nav" aria-label="Main">
-          <NavLink to="/" end>
-            What&apos;s on
-          </NavLink>
-          <NavLink to="/me/bookings">My bookings</NavLink>
-        </nav>
+        <div className="rail-tier rail-tier-nav">
+          <nav className="rail-content rail-nav" aria-label="Main">
+            <NavLink to="/" end>
+              What&apos;s on
+            </NavLink>
+            <NavLink to="/me/bookings">My bookings</NavLink>
+          </nav>
+        </div>
       </header>
       <main className="page">
         <Outlet />
