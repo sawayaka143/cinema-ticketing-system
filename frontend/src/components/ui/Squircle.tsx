@@ -1,4 +1,5 @@
 import {
+  type CSSProperties,
   type ElementType,
   type HTMLAttributes,
   type ReactNode,
@@ -19,6 +20,8 @@ export interface SquircleProps extends HTMLAttributes<HTMLElement> {
   strokeWidth?: number;
   shadow?: "none" | "subtle" | "elevated";
   clipContent?: boolean;
+  innerClassName?: string;
+  innerStyle?: CSSProperties;
   children?: ReactNode;
   to?: string;
   disabled?: boolean;
@@ -35,6 +38,8 @@ export const Squircle = forwardRef<HTMLElement, SquircleProps>(function Squircle
     strokeWidth = 1,
     shadow = "none",
     clipContent = false,
+    innerClassName = "",
+    innerStyle,
     className = "",
     style,
     children,
@@ -130,7 +135,7 @@ export const Squircle = forwardRef<HTMLElement, SquircleProps>(function Squircle
       )}
 
       <span
-        className="squircle-inner"
+        className={`squircle-inner ${innerClassName}`.trim()}
         style={{
           position: "relative",
           zIndex: 1,
@@ -139,6 +144,7 @@ export const Squircle = forwardRef<HTMLElement, SquircleProps>(function Squircle
           height: "100%",
           clipPath: clipContent && path ? `url(#${clipId})` : undefined,
           borderRadius: `${radius}px`,
+          ...innerStyle,
         }}
       >
         {children}
