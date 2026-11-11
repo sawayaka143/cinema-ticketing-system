@@ -37,6 +37,54 @@
   color-scheme: dark;
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
+/* Custom sleek scrollbar across the entire application:
+   thin 6px track, dark gray thumb, transparent background, never shifts layout */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-subtle);
+}
+
+.scroll-area {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.scroll-area-vertical {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.scroll-area-horizontal {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.scroll-area-both {
+  overflow: auto;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -82,14 +130,37 @@ h2 {
   font-size: clamp(1.25rem, 2.5vw, 1.5rem);
 }
 
-/* Top bar */
+/* Top bar — two-tier header layout */
 .rail {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--s3) var(--s8);
-  padding: var(--s4) var(--gutter);
+  flex-direction: column;
+}
+
+.rail-tier-brand {
+  width: 100%;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.rail-tier-nav {
+  width: 100%;
   border-bottom: 1px solid var(--border);
+}
+
+.rail-content {
+  width: 100%;
+  max-width: 72rem;
+  margin: 0 auto;
+  padding-left: var(--gutter);
+  padding-right: var(--gutter);
+}
+
+.rail-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s4);
+  padding-top: var(--s3);
+  padding-bottom: var(--s3);
 }
 
 .mark {
@@ -110,9 +181,14 @@ h2 {
   background: var(--accent);
 }
 
+.rail-nav,
 .rail nav {
   display: flex;
+  align-items: center;
+  justify-content: flex-start;
   gap: var(--s1);
+  padding-top: var(--s2);
+  padding-bottom: var(--s2);
 }
 
 .rail nav a {
@@ -346,20 +422,21 @@ button {
   gap: var(--s2);
   overflow-x: auto;
   margin: calc(-1 * var(--s8)) calc(50% - 50vw) var(--s8);
-  padding: var(--s3) calc(50vw - 50%);
+  padding: var(--s4) calc(50vw - 50%);
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   scrollbar-width: thin;
 }
 
 .day-tab {
-  flex: none;
+  flex: 1 1 0;
+  min-width: 4.5rem;
   cursor: pointer;
 }
 
 .day-tab .squircle-inner {
-  padding: var(--s2) var(--s4);
-  text-align: left;
+  padding: var(--s2) var(--s3);
+  text-align: center;
   user-select: none;
 }
 
@@ -844,10 +921,6 @@ button {
 }
 
 @media (max-width: 40rem) {
-  .account {
-    margin-left: 0;
-  }
-
   .card-body {
     padding: var(--s4);
   }

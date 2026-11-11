@@ -51,6 +51,17 @@ import { FadeIn } from "../components/ui/FadeIn";
 </FadeIn>
 ```
 
+#### `<ScrollArea>`
+Standard scroll container applying the cinema-theme sleek 6px dark scrollbar without layout shifts.
+
+```tsx
+import { ScrollArea } from "../components/ui/ScrollArea";
+
+<ScrollArea orientation="vertical">
+  <div style={{ maxHeight: 300 }}>Long content...</div>
+</ScrollArea>
+```
+
 ---
 
 ### 2. Actions & Navigation
