@@ -56,7 +56,7 @@ export function MoviePage() {
     <FadeIn direction="up">
       <Card as="article" elevated className="movie-card">
         <div className="movie-layout">
-          <Poster movie={movie} />
+          <Poster movie={movie} priority />
           <div className="movie-info">
             <div className="title">
               <h1>{movie.title}</h1>

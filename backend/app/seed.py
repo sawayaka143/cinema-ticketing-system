@@ -138,9 +138,12 @@ MOVIES = [
 ]
 
 
+OLD_POSTER_PREFIX = "https://picsum.photos/seed/"
+
+
 def _poster(title: str) -> str:
-    slug = "-".join(title.lower().split())
-    return f"https://picsum.photos/seed/{slug}/400/600"
+    slug = "-".join(title.lower().replace("'", "").split())
+    return f"/posters/{slug}.svg"
 
 
 def _seat_grid(hall: Hall, plan: HallPlan) -> list[Seat]:
@@ -175,6 +178,9 @@ def seed(db: Session) -> dict[str, int]:
     movies = {m.title: m for m in db.scalars(select(Movie))}
     for title, duration, age, year, genre_names, description in MOVIES:
         if title in movies:
+            # Move the old placeholder posters to the local files; keep a poster a manager set.
+            if (movies[title].poster_url or "").startswith(OLD_POSTER_PREFIX):
+                movies[title].poster_url = _poster(title)
             continue
         for name in genre_names:
             genres.setdefault(name, Genre(name=name))

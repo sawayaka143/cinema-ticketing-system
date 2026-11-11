@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600" width="100%" height="100%">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#050d1a"/>
+      <stop offset="45%" stop-color="#0d2342"/>
+      <stop offset="70%" stop-color="#1b4965"/>
+      <stop offset="100%" stop-color="#2a6f97"/>
+    </linearGradient>
+    <linearGradient id="beam" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ffd166" stop-opacity="0.95"/>
+      <stop offset="40%" stop-color="#ffe49e" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0a192f"/>
+      <stop offset="100%" stop-color="#020c1b"/>
+    </linearGradient>
+    <radialGradient id="beaconGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fff275" stop-opacity="1"/>
+      <stop offset="40%" stop-color="#ffd166" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#ffd166" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Sky -->
+  <rect width="400" height="600" fill="url(#sky)"/>
+
+  <!-- Stars -->
+  <g fill="#e0f2fe" opacity="0.6">
+    <circle cx="45" cy="48" r="1.2"/>
+    <circle cx="88" cy="85" r="1"/>
+    <circle cx="140" cy="35" r="1.5"/>
+    <circle cx="210" cy="72" r="1"/>
+    <circle cx="280" cy="40" r="1.4"/>
+    <circle cx="345" cy="90" r="1.2"/>
+    <circle cx="320" cy="140" r="1"/>
+    <circle cx="70" cy="150" r="1.2"/>
+    <circle cx="160" cy="110" r="0.8"/>
+  </g>
+
+  <!-- Distant mist -->
+  <ellipse cx="200" cy="340" rx="220" ry="40" fill="#62b6cb" opacity="0.18"/>
+
+  <!-- Light beam -->
+  <polygon points="120,270 400,180 400,320" fill="url(#beam)"/>
+
+  <!-- Sea -->
+  <rect y="330" width="400" height="270" fill="url(#sea)"/>
+  <ellipse cx="260" cy="336" rx="90" ry="4" fill="#ffd166" opacity="0.35"/>
+  <ellipse cx="280" cy="348" rx="70" ry="3" fill="#ffd166" opacity="0.2"/>
+  <ellipse cx="300" cy="362" rx="50" ry="2" fill="#ffd166" opacity="0.15"/>
+  <!-- Sea wave lines -->
+  <path d="M 0 350 Q 100 345, 200 352 T 400 350" stroke="#1b4965" stroke-width="1.5" fill="none" opacity="0.5"/>
+  <path d="M 0 380 Q 90 376, 180 382 T 400 380" stroke="#1b4965" stroke-width="1.2" fill="none" opacity="0.4"/>
+  <path d="M 0 415 Q 120 410, 240 416 T 400 415" stroke="#0d2342" stroke-width="1.2" fill="none" opacity="0.6"/>
+
+  <!-- Coast cliff and rocks -->
+  <path d="M 0 450 Q 80 430, 130 380 L 145 385 L 160 360 L 170 365 L 150 440 Q 130 470, 0 520 Z" fill="#050a12"/>
+  <path d="M 0 360 Q 60 350, 120 380 L 0 460 Z" fill="#081426"/>
+
+  <!-- Lighthouse structure -->
+  <polygon points="112,380 128,380 124,275 116,275" fill="#e2e8f0"/>
+  <!-- Red stripe -->
+  <polygon points="114,330 126,330 125,310 115,310" fill="#991b1b"/>
+  <!-- Lighthouse base & lantern room -->
+  <rect x="110" y="375" width="20" height="10" fill="#0f172a"/>
+  <rect x="114" y="265" width="12" height="10" fill="#1e293b"/>
+  <!-- Lantern glow -->
+  <circle cx="120" cy="270" r="14" fill="url(#beaconGlow)"/>
+  <circle cx="120" cy="270" r="4" fill="#ffffff"/>
+  <!-- Dome top -->
+  <path d="M 114 265 Q 120 258, 126 265 Z" fill="#0f172a"/>
+
+  <!-- Poster typography vignette overlay -->
+  <rect width="400" height="600" fill="url(#sea)" opacity="0.25"/>
+
+  <!-- Titles and credits -->
+  <text x="200" y="70" text-anchor="middle" font-family="'Inter', -apple-system, sans-serif" font-size="11" font-weight="600" fill="#62b6cb" letter-spacing="4">ALATAU PREMIERE</text>
+  
+  <text x="200" y="500" text-anchor="middle" font-family="'Georgia', serif" font-size="28" font-weight="700" fill="#ffffff" letter-spacing="3">THE SILENT</text>
+  <text x="200" y="534" text-anchor="middle" font-family="'Georgia', serif" font-size="34" font-weight="700" fill="#ffd166" letter-spacing="5">COAST</text>
+  
+  <rect x="160" y="550" width="80" height="1" fill="#62b6cb" opacity="0.6"/>
+  <text x="200" y="572" text-anchor="middle" font-family="'Inter', -apple-system, sans-serif" font-size="10" font-weight="500" fill="#94a3b8" letter-spacing="3">DRAMA · MYSTERY · 2025</text>
+</svg>

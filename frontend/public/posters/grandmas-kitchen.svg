@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600" width="100%" height="100%">
+  <defs>
+    <linearGradient id="warmBg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fffbeb"/>
+      <stop offset="35%" stop-color="#fef3c7"/>
+      <stop offset="70%" stop-color="#fde68a"/>
+      <stop offset="100%" stop-color="#fcd34d"/>
+    </linearGradient>
+    <linearGradient id="potGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#b91c1c"/>
+      <stop offset="50%" stop-color="#dc2626"/>
+      <stop offset="100%" stop-color="#991b1b"/>
+    </linearGradient>
+    <radialGradient id="steamGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="400" height="600" fill="url(#warmBg)"/>
+
+  <!-- Checkered Retro Apron/Tablecloth Pattern at Top & Bottom -->
+  <g fill="#f87171" opacity="0.25">
+    <rect x="0" y="0" width="25" height="25"/>
+    <rect x="50" y="0" width="25" height="25"/>
+    <rect x="100" y="0" width="25" height="25"/>
+    <rect x="150" y="0" width="25" height="25"/>
+    <rect x="200" y="0" width="25" height="25"/>
+    <rect x="250" y="0" width="25" height="25"/>
+    <rect x="300" y="0" width="25" height="25"/>
+    <rect x="350" y="0" width="25" height="25"/>
+    <rect x="25" y="25" width="25" height="25"/>
+    <rect x="75" y="25" width="25" height="25"/>
+    <rect x="125" y="25" width="25" height="25"/>
+    <rect x="175" y="25" width="25" height="25"/>
+    <rect x="225" y="25" width="25" height="25"/>
+    <rect x="275" y="25" width="25" height="25"/>
+    <rect x="325" y="25" width="25" height="25"/>
+    <rect x="375" y="25" width="25" height="25"/>
+  </g>
+
+  <!-- Warm Sunburst rays behind pot -->
+  <g opacity="0.2" stroke="#f59e0b" stroke-width="3">
+    <line x1="200" y1="270" x2="60" y2="130"/>
+    <line x1="200" y1="270" x2="100" y2="100"/>
+    <line x1="200" y1="270" x2="150" y2="80"/>
+    <line x1="200" y1="270" x2="200" y2="70"/>
+    <line x1="200" y1="270" x2="250" y2="80"/>
+    <line x1="200" y1="270" x2="300" y2="100"/>
+    <line x1="200" y1="270" x2="340" y2="130"/>
+  </g>
+
+  <!-- Swirling Aroma / Steam clouds -->
+  <path d="M 170 200 C 150 160, 200 130, 180 90" stroke="#f59e0b" stroke-width="4" stroke-linecap="round" fill="none" opacity="0.6"/>
+  <path d="M 200 190 C 220 150, 180 120, 210 75" stroke="#f59e0b" stroke-width="5" stroke-linecap="round" fill="none" opacity="0.7"/>
+  <path d="M 230 200 C 250 160, 210 130, 235 95" stroke="#f59e0b" stroke-width="4" stroke-linecap="round" fill="none" opacity="0.6"/>
+  
+  <!-- Hearts floating from steam -->
+  <g fill="#ef4444" opacity="0.8">
+    <path d="M 180 80 C 180 75, 172 70, 168 76 C 164 70, 156 75, 156 80 C 156 90, 168 98, 168 98 C 168 98, 180 90, 180 80 Z" transform="scale(0.8) translate(30,-10)"/>
+    <path d="M 230 65 C 230 60, 222 55, 218 61 C 214 55, 206 60, 206 65 C 206 75, 218 83, 218 83 C 218 83, 230 75, 230 65 Z" transform="scale(0.6) translate(160,10)"/>
+  </g>
+
+  <!-- Rolling Pin Crossed Behind Pot -->
+  <g transform="translate(200, 280) rotate(-28)">
+    <rect x="-110" y="-8" width="220" height="16" rx="8" fill="#d97706"/>
+    <rect x="-130" y="-5" width="20" height="10" rx="3" fill="#b45309"/>
+    <rect x="110" y="-5" width="20" height="10" rx="3" fill="#b45309"/>
+  </g>
+  <!-- Wooden Spoon Crossed -->
+  <g transform="translate(200, 280) rotate(28)">
+    <rect x="-110" y="-5" width="210" height="10" rx="4" fill="#d97706"/>
+    <ellipse cx="105" cy="0" rx="18" ry="12" fill="#b45309"/>
+  </g>
+
+  <!-- Big Red Cooking Pot -->
+  <g transform="translate(200, 285)">
+    <!-- Pot handles -->
+    <rect x="-95" y="-12" width="25" height="14" rx="6" fill="#78350f"/>
+    <rect x="70" y="-12" width="25" height="14" rx="6" fill="#78350f"/>
+    
+    <!-- Pot body -->
+    <path d="M -75 -20 L 75 -20 L 68 65 C 65 85, -65 85, -68 65 Z" fill="url(#potGrad)"/>
+    <!-- Pot rim -->
+    <ellipse cx="0" cy="-20" rx="78" ry="12" fill="#ef4444"/>
+    <ellipse cx="0" cy="-20" rx="72" ry="9" fill="#991b1b"/>
+    
+    <!-- Bubbling Stew -->
+    <ellipse cx="0" cy="-20" rx="66" ry="7" fill="#fbbf24"/>
+    <circle cx="-25" cy="-20" r="4" fill="#f59e0b"/>
+    <circle cx="15" cy="-21" r="5" fill="#f59e0b"/>
+    <circle cx="35" cy="-19" r="3" fill="#f59e0b"/>
+
+    <!-- Polka dots on pot -->
+    <circle cx="-40" cy="15" r="7" fill="#ffffff" opacity="0.9"/>
+    <circle cx="0" cy="25" r="7" fill="#ffffff" opacity="0.9"/>
+    <circle cx="40" cy="15" r="7" fill="#ffffff" opacity="0.9"/>
+    <circle cx="-20" cy="50" r="6" fill="#ffffff" opacity="0.9"/>
+    <circle cx="20" cy="50" r="6" fill="#ffffff" opacity="0.9"/>
+  </g>
+
+  <!-- Table Platter / Cloth at bottom -->
+  <path d="M 0 430 L 400 430 L 400 600 L 0 600 Z" fill="#78350f"/>
+  <rect x="0" y="420" width="400" height="15" fill="#92400e"/>
+
+  <!-- Typography -->
+  <text x="200" y="475" text-anchor="middle" font-family="'Georgia', serif" font-style="italic" font-size="16" font-weight="700" fill="#fde68a" letter-spacing="1">Too Many Cooks. Zero Common Sense.</text>
+
+  <text x="200" y="520" text-anchor="middle" font-family="'Arial Rounded MT Bold', 'Nunito', sans-serif" font-size="32" font-weight="900" fill="#ffffff" letter-spacing="1">GRANDMA'S</text>
+  <text x="200" y="555" text-anchor="middle" font-family="'Arial Rounded MT Bold', 'Nunito', sans-serif" font-size="34" font-weight="900" fill="#fbbf24" letter-spacing="2">KITCHEN</text>
+
+  <rect x="150" y="568" width="100" height="1" fill="#fde68a" opacity="0.4"/>
+  <text x="200" y="585" text-anchor="middle" font-family="'Inter', -apple-system, sans-serif" font-size="10" font-weight="700" fill="#fef3c7" letter-spacing="3">COMEDY · FAMILY · 0+</text>
+</svg>
