@@ -82,14 +82,19 @@ h2 {
   font-size: clamp(1.25rem, 2.5vw, 1.5rem);
 }
 
-/* Top bar */
+/* Top bar — two-tier header layout */
 .rail {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+}
+
+.rail-top {
+  display: flex;
   align-items: center;
-  gap: var(--s3) var(--s8);
-  padding: var(--s4) var(--gutter);
-  border-bottom: 1px solid var(--border);
+  justify-content: space-between;
+  gap: var(--s4);
+  padding: var(--s3) var(--gutter);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .mark {
@@ -110,9 +115,14 @@ h2 {
   background: var(--accent);
 }
 
+.rail-nav,
 .rail nav {
   display: flex;
+  align-items: center;
+  justify-content: center;
   gap: var(--s1);
+  padding: 0 var(--gutter);
+  border-bottom: 1px solid var(--border);
 }
 
 .rail nav a {
@@ -844,10 +854,6 @@ button {
 }
 
 @media (max-width: 40rem) {
-  .account {
-    margin-left: 0;
-  }
-
   .card-body {
     padding: var(--s4);
   }
