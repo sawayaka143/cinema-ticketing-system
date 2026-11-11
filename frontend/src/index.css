@@ -119,7 +119,7 @@ h2 {
 .rail nav {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: var(--s1);
   padding: 0 var(--gutter);
   border-bottom: 1px solid var(--border);
@@ -363,13 +363,14 @@ button {
 }
 
 .day-tab {
-  flex: none;
+  flex: 1 1 0;
+  min-width: 4.5rem;
   cursor: pointer;
 }
 
 .day-tab .squircle-inner {
-  padding: var(--s2) var(--s4);
-  text-align: left;
+  padding: var(--s2) var(--s3);
+  text-align: center;
   user-select: none;
 }
 
