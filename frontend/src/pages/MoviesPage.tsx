@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useSearchParams } from "react-router";
 import { api } from "../api/client";
 import { MovieRow } from "../components/MovieRow";
-import { EmptyState, ErrorState, ProgramSkeleton } from "../components/ui";
+import { EmptyState, ErrorState, FadeIn, ProgramSkeleton, Squircle } from "../components/ui";
 import {
   type Movie,
   type Screening,
@@ -50,39 +50,55 @@ export function MoviesPage() {
   return (
     <>
       <div className="days" role="group" aria-label="Day">
-        {days.map((d) => (
-          <button
-            key={d.iso}
-            type="button"
-            aria-pressed={d.iso === day.iso}
-            className="day"
-            onClick={() => setParams(d.iso === days[0].iso ? {} : { day: d.iso })}
-          >
-            {d.weekday}
-            <b>{d.date}</b>
-          </button>
-        ))}
+        {days.map((d) => {
+          const isSelected = d.iso === day.iso;
+          return (
+            <Squircle
+              key={d.iso}
+              as="button"
+              type="button"
+              radius={12}
+              smoothing={0.65}
+              fill={isSelected ? "var(--accent)" : "var(--surface)"}
+              stroke={isSelected ? "transparent" : "var(--border)"}
+              strokeWidth={1}
+              shadow="none"
+              aria-pressed={isSelected}
+              className={`day-tab ${isSelected ? "day-tab-active" : ""}`}
+              onClick={() => setParams(d.iso === days[0].iso ? {} : { day: d.iso })}
+            >
+              <span className="day-tab-label">{d.weekday}</span>
+              <b className="day-tab-date">{d.date}</b>
+            </Squircle>
+          );
+        })}
       </div>
       <h1>{day.weekday === "Today" ? "Today at Alatau" : `${day.weekday}, ${day.date}`}</h1>
       {week.state === "loading" && <ProgramSkeleton count={3} />}
       {week.state === "error" && (
-        <ErrorState
-          title="Couldn't load the program"
-          message="We had trouble reaching the box office. Check your connection and try again."
-          details={week.message}
-          onRetry={week.reload}
-        />
+        <FadeIn direction="up">
+          <ErrorState
+            title="Couldn't load the program"
+            message="We had trouble reaching the box office. Check your connection and try again."
+            details={week.message}
+            onRetry={week.reload}
+          />
+        </FadeIn>
       )}
       {week.state === "ready" && rows.length === 0 && (
-        <EmptyState
-          title="No screenings left on this day"
-          description="All screenings for this date have passed or none are scheduled. Pick another day above."
-        />
+        <FadeIn direction="up">
+          <EmptyState
+            title="No screenings left on this day"
+            description="All screenings for this date have passed or none are scheduled. Pick another day above."
+          />
+        </FadeIn>
       )}
       {week.state === "ready" && rows.length > 0 && (
         <div className="films-stack">
-          {rows.map(({ movie, screenings }) => (
-            <MovieRow key={movie.movie_id} movie={movie} screenings={screenings} />
+          {rows.map(({ movie, screenings }, index) => (
+            <FadeIn key={movie.movie_id} delay={index * 50} direction="up">
+              <MovieRow movie={movie} screenings={screenings} />
+            </FadeIn>
           ))}
         </div>
       )}
