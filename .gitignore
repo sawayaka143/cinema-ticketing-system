@@ -30,3 +30,7 @@ Thumbs.db
 
 # claude: personal settings stay local, shared ones are committed
 .claude/settings.local.json
+.claude/launch.json
+
+# impeccable working files
+.impeccable/
