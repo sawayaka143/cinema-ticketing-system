@@ -316,49 +316,6 @@ button {
   color: var(--accent);
 }
 
-.ghost,
-.solid {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 2.75rem;
-  padding: 0 var(--s4);
-  border-radius: var(--radius);
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.ghost {
-  border: 1px solid var(--muted);
-  background: transparent;
-  color: var(--text);
-}
-
-.ghost:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
-.solid {
-  border: 1px solid var(--accent);
-  background: var(--accent);
-  color: var(--on-accent);
-}
-
-.solid:disabled {
-  opacity: 0.6;
-  cursor: progress;
-}
-
-.link {
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--accent);
-  font-weight: 600;
-  text-decoration: underline;
-}
-
 /* Page */
 .page {
   flex: 1;
@@ -386,42 +343,51 @@ button {
 /* Day tabs: full-bleed band under the top bar; tabs line up with the page content. */
 .days {
   display: flex;
-  gap: var(--s1);
+  gap: var(--s2);
   overflow-x: auto;
   margin: calc(-1 * var(--s8)) calc(50% - 50vw) var(--s8);
-  padding: var(--s2) calc(50vw - 50%);
+  padding: var(--s3) calc(50vw - 50%);
   background: var(--surface);
   border-bottom: 1px solid var(--border);
+  scrollbar-width: thin;
 }
 
-.day {
+.day-tab {
   flex: none;
+  cursor: pointer;
+}
+
+.day-tab .squircle-inner {
   padding: var(--s2) var(--s4);
-  border: 1px solid transparent;
-  border-radius: var(--radius);
-  background: transparent;
-  color: var(--muted);
-  font-size: 0.875rem;
   text-align: left;
+  user-select: none;
 }
 
-.day b {
+.day-tab-label {
   display: block;
-  color: var(--text);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.day-tab-date {
+  display: block;
   font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text);
 }
 
-.day:hover {
-  border-color: var(--border);
-}
-
-.day[aria-pressed="true"] {
-  background: var(--accent);
+.day-tab-active .day-tab-label,
+.day-tab-active .day-tab-date {
   color: var(--on-accent);
 }
 
-.day[aria-pressed="true"] b {
-  color: var(--on-accent);
+.day-tab:hover:not(.day-tab-active) {
+  transform: translateY(-1px);
+}
+
+.day-tab:active {
+  transform: scale(0.96);
 }
 
 /* Movie rows */
@@ -509,29 +475,24 @@ button {
   transform: scale(0.96);
 }
 
-.film,
-.movie {
+/* Movie Details Page */
+.movie-card {
+  margin-top: var(--s2);
+}
+
+.movie-layout {
   display: grid;
-  grid-template-columns: 6.5rem 1fr;
-  gap: var(--s6);
-  padding: var(--s6) 0;
-  border-top: 1px solid var(--border);
+  grid-template-columns: minmax(8rem, 14rem) minmax(0, 1fr);
+  gap: var(--s8);
+  align-items: start;
 }
 
-.movie {
-  grid-template-columns: minmax(8rem, 14rem) 1fr;
-  border-top: 0;
-  padding-top: 0;
+.movie-info {
+  min-width: 0;
 }
 
-.poster {
-  display: block;
-  width: 100%;
-  aspect-ratio: 2 / 3;
-  height: auto;
-  object-fit: cover;
-  border-radius: var(--radius);
-  background: var(--surface-2);
+.movie-info h2 {
+  margin-bottom: var(--s4);
 }
 
 .title {
@@ -553,29 +514,17 @@ button {
   color: var(--accent);
 }
 
-.age {
-  padding: 0 var(--s2);
-  border: 1px solid var(--muted);
-  border-radius: 999px;
-  color: var(--muted);
-  font-size: 0.8125rem;
-  font-weight: 600;
-}
-
 .meta {
   margin: var(--s2) 0 var(--s4);
   color: var(--muted);
 }
 
 .lead {
-  max-width: 40rem;
+  max-width: 44rem;
   margin: 0 0 var(--s8);
   font-size: 1.125rem;
+  line-height: 1.6;
   color: var(--muted);
-}
-
-.movie h2 {
-  margin-bottom: var(--s4);
 }
 
 .day-group {
@@ -593,30 +542,6 @@ button {
   display: flex;
   flex-wrap: wrap;
   gap: var(--s3);
-}
-
-.chip {
-  padding: var(--s2) var(--s3);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface);
-  color: var(--muted);
-  font-size: 0.875rem;
-  text-decoration: none;
-}
-
-.chip b {
-  display: block;
-  color: var(--text);
-  font-size: 1.125rem;
-}
-
-.chip:hover {
-  border-color: var(--accent);
-}
-
-.chip:hover b {
-  color: var(--accent);
 }
 
 /* Panels, forms, states */
@@ -903,6 +828,7 @@ button {
   .squircle-container,
   .btn,
   .card-hoverable,
+  .day-tab,
   .showtime-chip,
   .spinner {
     transition: none !important;
@@ -919,18 +845,17 @@ button {
     padding: var(--s4);
   }
 
-  .film,
   .film-layout {
     grid-template-columns: 4.5rem minmax(0, 1fr);
     gap: var(--s4);
   }
 
-  .movie {
+  .movie-layout {
     grid-template-columns: 1fr;
+    gap: var(--s6);
   }
 
-  .movie .poster,
-  .movie .poster-squircle {
+  .movie-layout .poster-squircle {
     max-width: 12rem;
   }
 }

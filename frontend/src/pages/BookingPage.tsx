@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { api } from "../api/client";
 import { Status } from "../components/Layout";
+import { Button, Card, EmptyState, ErrorState, FadeIn, Skeleton } from "../components/ui";
 import { useAuth } from "../lib/auth-context";
 import { type Booking, clock, price, when } from "../lib/format";
 import { messageOf, must, statusOf, useApi } from "../lib/useApi";
@@ -16,15 +17,54 @@ export function BookingPage() {
     `${bookingId}:${reload}:${session ? 1 : 0}`,
   );
 
-  if (!ready) return <Status>Loading…</Status>;
-  if (!session)
+  if (!ready) {
     return (
-      <Status>
-        <Link to="/login">Log in</Link> to see this booking.
-      </Status>
+      <Card as="section" elevated className="panel" aria-busy="true">
+        <Skeleton width="7rem" height="1rem" radius={6} />
+        <Skeleton width="16rem" height="2rem" radius={8} style={{ marginTop: "0.5rem" }} />
+        <Skeleton width="100%" height="8rem" radius={10} style={{ marginTop: "1.5rem" }} />
+      </Card>
     );
-  if (page.state === "loading") return <Status>Loading…</Status>;
-  if (page.state === "error") return <Status tone="error">{page.message}</Status>;
+  }
+
+  if (!session) {
+    return (
+      <FadeIn direction="up">
+        <EmptyState
+          title="Log in to see this booking"
+          description="Please sign in with the account that placed this booking."
+          action={
+            <Button as={Link} to="/login" variant="solid">
+              Log in
+            </Button>
+          }
+        />
+      </FadeIn>
+    );
+  }
+
+  if (page.state === "loading") {
+    return (
+      <Card as="section" elevated className="panel" aria-busy="true">
+        <Skeleton width="7rem" height="1rem" radius={6} />
+        <Skeleton width="16rem" height="2rem" radius={8} style={{ marginTop: "0.5rem" }} />
+        <Skeleton width="100%" height="8rem" radius={10} style={{ marginTop: "1.5rem" }} />
+      </Card>
+    );
+  }
+
+  if (page.state === "error") {
+    return (
+      <FadeIn direction="up">
+        <ErrorState
+          title="Couldn't load this booking"
+          message="We couldn't retrieve the booking details. Please try again."
+          details={page.message}
+          onRetry={page.reload}
+        />
+      </FadeIn>
+    );
+  }
 
   return <BookingView key={reload} booking={page.data} refresh={() => setReload((n) => n + 1)} />;
 }
@@ -74,39 +114,41 @@ function BookingView({ booking: initial, refresh }: { booking: Booking; refresh:
   }
 
   return (
-    <section className="panel">
-      <p className="kicker">Booking #{booking.booking_id}</p>
-      <h1>{TITLE[booking.status]}</h1>
+    <FadeIn direction="up">
+      <Card as="section" elevated className="panel">
+        <p className="kicker">Booking #{booking.booking_id}</p>
+        <h1>{TITLE[booking.status]}</h1>
 
-      {booking.status === "pending" && (
-        <p className={`countdown${left <= 60 ? " urgent" : ""}`} role="timer" aria-live="off">
-          Seats held for <b>{clock(left)}</b>
-        </p>
-      )}
+        {booking.status === "pending" && (
+          <p className={`countdown${left <= 60 ? " urgent" : ""}`} role="timer" aria-live="off">
+            Seats held for <b>{clock(left)}</b>
+          </p>
+        )}
 
-      <Tickets booking={booking} />
+        <Tickets booking={booking} />
 
-      {booking.status === "pending" && <PayForm busy={busy} onPay={pay} onCancel={cancel} />}
+        {booking.status === "pending" && <PayForm busy={busy} onPay={pay} onCancel={cancel} />}
 
-      {booking.status === "paid" && <PaidTickets booking={booking} />}
+        {booking.status === "paid" && <PaidTickets booking={booking} />}
 
-      {(booking.status === "cancelled" || booking.status === "expired") && (
-        <p>
-          {booking.status === "expired"
-            ? "The 10 minutes ran out, so the seats are free again."
-            : "The seats are free again."}{" "}
-          {screeningId ? (
-            <button type="button" className="link" onClick={() => navigate(`/screenings/${screeningId}`)}>
-              Pick seats again
-            </button>
-          ) : (
-            <Link to="/">Back to what&apos;s on</Link>
-          )}
-        </p>
-      )}
+        {(booking.status === "cancelled" || booking.status === "expired") && (
+          <p>
+            {booking.status === "expired"
+              ? "The 10 minutes ran out, so the seats are free again."
+              : "The seats are free again."}{" "}
+            {screeningId ? (
+              <Button variant="link" onClick={() => navigate(`/screenings/${screeningId}`)}>
+                Pick seats again
+              </Button>
+            ) : (
+              <Link to="/">Back to what&apos;s on</Link>
+            )}
+          </p>
+        )}
 
-      {message && <Status tone="error">{message}</Status>}
-    </section>
+        {message && <Status tone="error">{message}</Status>}
+      </Card>
+    </FadeIn>
   );
 }
 
@@ -144,12 +186,12 @@ function PayForm({
       </label>
       <p className="muted small">Payment is simulated. No real money is charged.</p>
       <div className="actions">
-        <button type="submit" className="solid" disabled={busy}>
+        <Button type="submit" variant="solid" loading={busy} disabled={busy}>
           {busy ? "Please wait…" : "Pay now"}
-        </button>
-        <button type="button" className="ghost" disabled={busy} onClick={onCancel}>
+        </Button>
+        <Button type="button" variant="ghost" disabled={busy} onClick={onCancel}>
           Cancel and free the seats
-        </button>
+        </Button>
       </div>
     </form>
   );
@@ -168,7 +210,7 @@ function PaidTickets({ booking }: { booking: Booking }) {
   );
 }
 
-/** The QR image needs the login token, so it is fetched as a blob instead of a plain <img src>. */
+/** The QR image needs the login token, so it is fetched as a blob instead of a plain image URL. */
 function QrCode({ bookingId }: { bookingId: number }) {
   const qr = useApi(async () => {
     const res = await api.GET("/api/bookings/{booking_id}/qr.png", {
@@ -185,8 +227,16 @@ function QrCode({ bookingId }: { bookingId: number }) {
     });
   }, bookingId);
 
-  if (qr.state === "loading") return <div className="qr" aria-busy="true" />;
-  if (qr.state === "error") return <Status tone="error">{qr.message}</Status>;
+  if (qr.state === "loading") return <Skeleton width={200} height={200} radius={12} />;
+  if (qr.state === "error") {
+    return (
+      <ErrorState
+        title="Couldn't load QR code"
+        message={qr.message}
+        onRetry={qr.reload}
+      />
+    );
+  }
   return <img className="qr" src={qr.data} alt={`QR code for booking ${bookingId}`} width={200} height={200} />;
 }
 
