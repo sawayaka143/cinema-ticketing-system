@@ -37,6 +37,54 @@
   color-scheme: dark;
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
+/* Custom sleek scrollbar across the entire application:
+   thin 6px track, dark gray thumb, transparent background, never shifts layout */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-subtle);
+}
+
+.scroll-area {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.scroll-area-vertical {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.scroll-area-horizontal {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.scroll-area-both {
+  overflow: auto;
+}
+
 * {
   box-sizing: border-box;
 }
