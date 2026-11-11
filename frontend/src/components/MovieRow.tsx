@@ -5,7 +5,7 @@ import { Card } from "./ui/Card";
 import { ShowtimeChip } from "./ui/ShowtimeChip";
 import { Squircle } from "./ui/Squircle";
 
-export function Poster({ movie }: { movie: Movie }) {
+export function Poster({ movie, priority = false }: { movie: Movie; priority?: boolean }) {
   return (
     <Squircle
       radius={14}
@@ -19,7 +19,9 @@ export function Poster({ movie }: { movie: Movie }) {
           className="poster-img"
           src={movie.poster_url}
           alt={movie.title}
-          loading="lazy"
+          loading={priority ? "eager" : "lazy"}
+          fetchPriority={priority ? "high" : "auto"}
+          decoding="async"
           width={104}
           height={150}
         />
@@ -45,11 +47,11 @@ export function Age({ minAge }: { minAge: number }) {
 
 export { ShowtimeChip } from "./ui/ShowtimeChip";
 
-export function MovieRow({ movie, screenings }: { movie: Movie; screenings: Screening[] }) {
+export function MovieRow({ movie, screenings, priority = false }: { movie: Movie; screenings: Screening[]; priority?: boolean }) {
   return (
     <Card hoverable className="film-card">
       <div className="film-layout">
-        <Poster movie={movie} />
+        <Poster movie={movie} priority={priority} />
         <div className="film-details">
           <div className="title">
             <h2>

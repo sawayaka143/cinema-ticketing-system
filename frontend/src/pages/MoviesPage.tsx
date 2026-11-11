@@ -97,7 +97,7 @@ export function MoviesPage() {
         <div className="films-stack">
           {rows.map(({ movie, screenings }, index) => (
             <FadeIn key={movie.movie_id} delay={index * 50} direction="up">
-              <MovieRow movie={movie} screenings={screenings} />
+              <MovieRow movie={movie} screenings={screenings} priority={index < 2} />
             </FadeIn>
           ))}
         </div>

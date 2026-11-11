@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600" width="100%" height="100%">
+  <defs>
+    <linearGradient id="noirBg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#050508"/>
+      <stop offset="45%" stop-color="#0a0c16"/>
+      <stop offset="70%" stop-color="#120e1e"/>
+      <stop offset="100%" stop-color="#07070a"/>
+    </linearGradient>
+    <linearGradient id="neonGlowMagenta" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f43f5e" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#ec4899" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="neonCyan" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#06b6d4"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+    <linearGradient id="headlightBeam" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fef08a" stop-opacity="0.9"/>
+      <stop offset="40%" stop-color="#fef08a" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#fef08a" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="400" height="600" fill="url(#noirBg)"/>
+
+  <!-- Almaty TV Tower & Mountains in distant rain night -->
+  <g opacity="0.35" stroke="#312e81" stroke-width="1.5">
+    <!-- Mountain outline -->
+    <path d="M 0 250 L 70 200 L 150 230 L 250 170 L 320 220 L 400 180" fill="none"/>
+    <!-- Kok-Tobe / TV Tower silhouette -->
+    <line x1="250" y1="170" x2="250" y2="90" stroke="#f43f5e" stroke-width="2"/>
+    <circle cx="250" cy="90" r="2.5" fill="#f43f5e"/>
+    <ellipse cx="250" cy="120" rx="8" ry="3" fill="#f43f5e"/>
+  </g>
+
+  <!-- Rainy vertical streaks -->
+  <g stroke="#38bdf8" stroke-width="1" opacity="0.25">
+    <line x1="40" y1="20" x2="30" y2="70"/>
+    <line x1="120" y1="50" x2="110" y2="120"/>
+    <line x1="220" y1="30" x2="210" y2="90"/>
+    <line x1="310" y1="60" x2="300" y2="130"/>
+    <line x1="80" y1="160" x2="70" y2="230"/>
+    <line x1="180" y1="140" x2="170" y2="210"/>
+    <line x1="290" y1="150" x2="280" y2="220"/>
+    <line x1="370" y1="110" x2="360" y2="170"/>
+  </g>
+
+  <!-- Wet asphalt / street horizon -->
+  <rect y="310" width="400" height="290" fill="#090a0f"/>
+
+  <!-- Wet Street Neon Light Reflections on Asphalt -->
+  <ellipse cx="140" cy="380" rx="45" ry="4" fill="#06b6d4" opacity="0.35"/>
+  <ellipse cx="260" cy="380" rx="45" ry="4" fill="#f43f5e" opacity="0.35"/>
+  <ellipse cx="200" cy="420" rx="110" ry="8" fill="#eab308" opacity="0.25"/>
+
+  <!-- Car Headlight Beams shooting forward -->
+  <polygon points="152,325 90,460 170,460" fill="url(#headlightBeam)"/>
+  <polygon points="248,325 230,460 310,460" fill="url(#headlightBeam)"/>
+
+  <!-- Sedan Taxi Front/Perspective Silhouette -->
+  <g transform="translate(200, 310)">
+    <!-- Taxi Roof Sign glowing yellow -->
+    <path d="M -22 -35 L 22 -35 L 18 -22 L -18 -22 Z" fill="#facc15" stroke="#ca8a04" stroke-width="1.5"/>
+    <text x="0" y="-25" text-anchor="middle" font-family="'Arial Black', sans-serif" font-size="8" font-weight="900" fill="#000000" letter-spacing="1">TAXI</text>
+
+    <!-- Windshield & Roof -->
+    <path d="M -35 -20 L 35 -20 L 52 0 L -52 0 Z" fill="#18181b" stroke="#3f3f46" stroke-width="1.5"/>
+    <!-- Passengers in cab silhouette -->
+    <circle cx="-16" cy="-8" r="6" fill="#09090b"/>
+    <circle cx="16" cy="-8" r="6" fill="#09090b"/>
+
+    <!-- Hood & Front Grill -->
+    <path d="M -56 0 L 56 0 L 64 25 L -64 25 Z" fill="#09090b" stroke="#27272a" stroke-width="2"/>
+    <rect x="-42" y="8" width="84" height="12" rx="2" fill="#18181b"/>
+    <line x1="-35" y1="14" x2="35" y2="14" stroke="#52525b" stroke-width="1.5"/>
+
+    <!-- Headlights -->
+    <ellipse cx="-48" cy="12" rx="8" ry="5" fill="#fef08a"/>
+    <circle cx="-48" cy="12" r="10" fill="#fef08a" opacity="0.4"/>
+    <ellipse cx="48" cy="12" rx="8" ry="5" fill="#fef08a"/>
+    <circle cx="48" cy="12" r="10" fill="#fef08a" opacity="0.4"/>
+
+    <!-- Tires / Bumper -->
+    <rect x="-65" y="24" width="130" height="7" rx="3" fill="#18181b"/>
+    <rect x="-60" y="28" width="16" height="14" rx="3" fill="#000000"/>
+    <rect x="44" y="28" width="16" height="14" rx="3" fill="#000000"/>
+  </g>
+
+  <!-- Typography -->
+  <text x="200" y="80" text-anchor="middle" font-family="'Courier New', monospace" font-size="11" font-weight="700" fill="#f43f5e" letter-spacing="4">ALMATY · 03:14 AM</text>
+
+  <text x="200" y="505" text-anchor="middle" font-family="'Impact', 'Arial Black', sans-serif" font-size="42" font-weight="900" fill="#ffffff" letter-spacing="4">NIGHT</text>
+  <text x="200" y="542" text-anchor="middle" font-family="'Impact', 'Arial Black', sans-serif" font-size="40" font-weight="900" fill="#06b6d4" letter-spacing="6">SHIFT</text>
+
+  <rect x="150" y="556" width="100" height="1.5" fill="#f43f5e" opacity="0.8"/>
+  <text x="200" y="575" text-anchor="middle" font-family="'Inter', -apple-system, sans-serif" font-size="10" font-weight="600" fill="#a1a1aa" letter-spacing="3">CRIME · THRILLER · 16+</text>
+</svg>

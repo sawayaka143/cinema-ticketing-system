@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600" width="100%" height="100%">
+  <defs>
+    <linearGradient id="rosePlum" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1e0a16"/>
+      <stop offset="45%" stop-color="#3b0d27"/>
+      <stop offset="75%" stop-color="#581c3f"/>
+      <stop offset="100%" stop-color="#16050f"/>
+    </linearGradient>
+    <linearGradient id="goldPage" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fff1f2"/>
+      <stop offset="50%" stop-color="#ffe4e6"/>
+      <stop offset="100%" stop-color="#fecdd3"/>
+    </linearGradient>
+    <linearGradient id="heartGrad1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fb7185"/>
+      <stop offset="100%" stop-color="#e11d48"/>
+    </linearGradient>
+    <linearGradient id="heartGrad2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fda4af"/>
+      <stop offset="100%" stop-color="#f43f5e"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="400" height="600" fill="url(#rosePlum)"/>
+
+  <!-- Subtle literary lines / book page textures -->
+  <g opacity="0.1" stroke="#fecdd3" stroke-width="1">
+    <line x1="80" y1="100" x2="320" y2="100"/>
+    <line x1="100" y1="120" x2="300" y2="120"/>
+    <line x1="120" y1="140" x2="280" y2="140"/>
+  </g>
+
+  <!-- Floating Origami Paper Hearts -->
+  <!-- Big Heart (Center) -->
+  <g transform="translate(200, 180) scale(1.1)">
+    <!-- Left origami facet -->
+    <path d="M 0 35 L -35 -15 C -45 -35, -25 -50, -5 -40 L 0 -30 Z" fill="url(#heartGrad1)"/>
+    <!-- Right origami facet -->
+    <path d="M 0 35 L 35 -15 C 45 -35, 25 -50, 5 -40 L 0 -30 Z" fill="url(#heartGrad2)"/>
+    <!-- Center fold shadow line -->
+    <line x1="0" y1="-30" x2="0" y2="35" stroke="#9f1239" stroke-width="1.5"/>
+  </g>
+
+  <!-- Medium Heart (Left floating up) -->
+  <g transform="translate(110, 130) rotate(-18) scale(0.65)">
+    <path d="M 0 35 L -35 -15 C -45 -35, -25 -50, -5 -40 L 0 -30 Z" fill="url(#heartGrad2)"/>
+    <path d="M 0 35 L 35 -15 C 45 -35, 25 -50, 5 -40 L 0 -30 Z" fill="#fda4af"/>
+  </g>
+
+  <!-- Medium Heart (Right floating up) -->
+  <g transform="translate(290, 120) rotate(15) scale(0.7)">
+    <path d="M 0 35 L -35 -15 C -45 -35, -25 -50, -5 -40 L 0 -30 Z" fill="url(#heartGrad1)"/>
+    <path d="M 0 35 L 35 -15 C 45 -35, 25 -50, 5 -40 L 0 -30 Z" fill="url(#heartGrad2)"/>
+  </g>
+
+  <!-- Tiny fluttering hearts -->
+  <g transform="translate(150, 80) rotate(25) scale(0.35)" fill="#fecdd3" opacity="0.8">
+    <path d="M 0 35 L -35 -15 C -45 -35, -25 -50, -5 -40 L 0 -30 Z"/>
+    <path d="M 0 35 L 35 -15 C 45 -35, 25 -50, 5 -40 L 0 -30 Z"/>
+  </g>
+  <g transform="translate(250, 65) rotate(-30) scale(0.4)" fill="#fb7185" opacity="0.75">
+    <path d="M 0 35 L -35 -15 C -45 -35, -25 -50, -5 -40 L 0 -30 Z"/>
+    <path d="M 0 35 L 35 -15 C 45 -35, 25 -50, 5 -40 L 0 -30 Z"/>
+  </g>
+
+  <!-- Open Book Spreading Pages at Bottom Center -->
+  <g transform="translate(200, 310)">
+    <!-- Book spine shadow -->
+    <ellipse cx="0" cy="40" rx="140" ry="20" fill="#000000" opacity="0.4"/>
+    
+    <!-- Hardcover base -->
+    <path d="M -130 38 Q 0 45, 130 38 L 125 45 Q 0 52, -125 45 Z" fill="#4c0519"/>
+
+    <!-- Left Book Pages -->
+    <path d="M 0 28 C -40 25, -90 15, -120 22 L -122 36 C -90 30, -40 36, 0 38 Z" fill="#e2e8f0"/>
+    <path d="M 0 20 C -40 18, -85 5, -118 12 L -120 26 C -85 20, -40 28, 0 30 Z" fill="url(#goldPage)"/>
+    
+    <!-- Right Book Pages -->
+    <path d="M 0 28 C 40 25, 90 15, 120 22 L 122 36 C 90 30, 40 36, 0 38 Z" fill="#e2e8f0"/>
+    <path d="M 0 20 C 40 18, 85 5, 118 12 L 120 26 C 85 20, 40 28, 0 30 Z" fill="url(#goldPage)"/>
+
+    <!-- Subtle text lines in open book -->
+    <g stroke="#9f1239" stroke-width="1" opacity="0.3">
+      <line x1="-100" y1="20" x2="-20" y2="24"/>
+      <line x1="-95" y1="24" x2="-25" y2="28"/>
+      <line x1="20" y1="24" x2="100" y2="20"/>
+      <line x1="25" y1="28" x2="95" y2="24"/>
+    </g>
+
+    <!-- Center spine crease -->
+    <line x1="0" y1="12" x2="0" y2="40" stroke="#be123c" stroke-width="2"/>
+  </g>
+
+  <!-- Typography -->
+  <text x="200" y="445" text-anchor="middle" font-family="'Georgia', serif" font-style="italic" font-size="14" fill="#fecdd3" letter-spacing="1">Some words are never translated.</text>
+
+  <text x="200" y="498" text-anchor="middle" font-family="'Georgia', serif" font-size="34" font-weight="700" fill="#ffffff" letter-spacing="4">PAPER</text>
+  <text x="200" y="536" text-anchor="middle" font-family="'Georgia', serif" font-size="38" font-weight="700" fill="#fb7185" letter-spacing="5">HEARTS</text>
+
+  <rect x="150" y="555" width="100" height="1" fill="#f43f5e" opacity="0.6"/>
+  <text x="200" y="575" text-anchor="middle" font-family="'Inter', -apple-system, sans-serif" font-size="10" font-weight="600" fill="#fda4af" letter-spacing="3">ROMANCE · DRAMA · 2026</text>
+</svg>

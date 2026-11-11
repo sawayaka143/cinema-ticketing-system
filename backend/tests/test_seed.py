@@ -5,7 +5,7 @@ from sqlalchemy import create_engine, func, select
 from sqlalchemy.orm import Session
 
 from app import seed as seed_module
-from app.models import Screening, Seat
+from app.models import Movie, Screening, Seat
 
 
 def test_seed_twice_adds_nothing_the_second_time(db: Session):
@@ -19,6 +19,26 @@ def test_seed_twice_adds_nothing_the_second_time(db: Session):
     assert second == {"halls": 0, "seats": 0, "movies": 0, "screenings": 0}
     assert db.scalar(select(func.count()).select_from(Seat)) == seats
     assert db.scalar(select(func.count()).select_from(Screening)) == screenings
+
+
+def test_seed_moves_old_placeholder_posters_to_local_files(db: Session):
+    seed_module.seed(db)
+    movie = db.scalar(select(Movie).where(Movie.title == "Grandma's Kitchen"))
+    movie.poster_url = "https://picsum.photos/seed/grandma's-kitchen/400/600"
+
+    seed_module.seed(db)
+
+    assert movie.poster_url == "/posters/grandmas-kitchen.svg"
+
+
+def test_seed_keeps_a_poster_set_by_a_manager(db: Session):
+    seed_module.seed(db)
+    movie = db.scalar(select(Movie).where(Movie.title == "Orbit Nine"))
+    movie.poster_url = "https://example.com/orbit.jpg"
+
+    seed_module.seed(db)
+
+    assert movie.poster_url == "https://example.com/orbit.jpg"
 
 
 def _fake_env(monkeypatch: pytest.MonkeyPatch, app_env: str) -> list[Session]:
