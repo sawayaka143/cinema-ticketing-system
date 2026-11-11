@@ -10,6 +10,9 @@ class Settings(BaseSettings):
 
     database_url: str = ""
     supabase_url: str = ""
+    # Dev-only, for python -m app.seed_users (test logins). Never set in production.
+    supabase_service_role_key: str = ""
+    seed_user_password: str = ""
     app_env: str = "development"
     cors_origins: str = "http://localhost:5173"
 
