@@ -6,6 +6,7 @@ import { SeatMap } from "../components/SeatMap";
 import { Button, Card, ErrorState, FadeIn, Skeleton } from "../components/ui";
 import { useAuth } from "../lib/auth-context";
 import { price, span, type Seat } from "../lib/format";
+import { screeningKey } from "../lib/catalogCache";
 import { messageOf, must, statusOf, useApi } from "../lib/useApi";
 
 const MAX_SEATS = 10;
@@ -22,14 +23,17 @@ export function ScreeningPage() {
   // A login without a customer profile (e.g. made in the Supabase dashboard) can't book yet.
   const [needsProfile, setNeedsProfile] = useState(false);
 
-  const page = useApi(async () => {
-    const path = { params: { path: { screening_id: screeningId } } };
-    const [detail, map] = await Promise.all([
-      api.GET("/api/screenings/{screening_id}", path).then(must),
-      api.GET("/api/screenings/{screening_id}/seats", path).then(must),
-    ]);
-    return { detail, map };
-  }, `${screeningId}:${reload}`);
+  const path = { params: { path: { screening_id: screeningId } } };
+  // Film, hall and time rarely change, so they come from the cache first; seats never do.
+  const detail = useApi(
+    () => api.GET("/api/screenings/{screening_id}", path).then(must),
+    screeningId,
+    screeningKey(screeningId),
+  );
+  const seats = useApi(
+    () => api.GET("/api/screenings/{screening_id}/seats", path).then(must),
+    `${screeningId}:${reload}`,
+  );
 
   // Ticket types allowed for this movie (age limit) and this user (staff); depends on login.
   const types = useApi(
@@ -38,20 +42,21 @@ export function ScreeningPage() {
     `${screeningId}:${session?.user.id ?? "anon"}`,
   );
 
-  if (page.state === "error") {
+  if (detail.state === "error" || seats.state === "error") {
+    const failed = detail.state === "error" ? detail : seats;
     return (
       <FadeIn direction="up">
         <ErrorState
           title="Couldn't load the hall"
           message="We couldn't load the seat map for this screening. Please try again."
-          details={page.message}
-          onRetry={page.reload}
+          details={failed.state === "error" ? failed.message : undefined}
+          onRetry={failed.reload}
         />
       </FadeIn>
     );
   }
 
-  if (page.state === "loading") {
+  if (detail.state === "loading") {
     return (
       <section aria-busy="true">
         <Skeleton width="10rem" height="1rem" radius={6} />
@@ -69,8 +74,9 @@ export function ScreeningPage() {
     );
   }
 
-  const { detail: s, map } = page.data;
-  const seatById = new Map(map.seats.map((seat) => [seat.seat_id, seat]));
+  const s = detail.data;
+  const map = seats.state === "ready" ? seats.data : null;
+  const seatById = new Map((map?.seats ?? []).map((seat) => [seat.seat_id, seat]));
   const chosen = [...picked.keys()].map((id) => seatById.get(id)).filter((x): x is Seat => !!x && !x.is_taken);
   const typeNames = types.state === "ready" ? types.data.map((t) => t.name) : ["adult"];
 
@@ -148,7 +154,11 @@ export function ScreeningPage() {
         </p>
 
         <div className="booking-layout">
-          <SeatMap seats={map.seats} picked={new Set(picked.keys())} onToggle={toggle} disabled={busy} />
+          {map ? (
+            <SeatMap seats={map.seats} picked={new Set(picked.keys())} onToggle={toggle} disabled={busy} />
+          ) : (
+            <Skeleton width="100%" height="18rem" radius={14} aria-busy="true" />
+          )}
 
           <Card as="aside" elevated className="basket" aria-label="Your seats">
             <h2>Your seats</h2>

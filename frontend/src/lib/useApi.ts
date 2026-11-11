@@ -9,8 +9,25 @@ export type Loadable<T> = LoadableState<T> & {
   reload: () => void;
 };
 
-/** Runs `load` whenever `key` changes or `reload()` is called, tracking loading / error / ready. */
-export function useApi<T>(load: () => Promise<T>, key: string | number): Loadable<T> {
+/** Responses kept while the tab is open, so a page seen before paints at once on the next visit. */
+const cache = new Map<string, unknown>();
+
+/** Stores data another request already returned under the `cacheKey` a later page will ask for. */
+export function primeCache<T>(cacheKey: string, data: T) {
+  cache.set(cacheKey, data);
+}
+
+/**
+ * Runs `load` whenever `key` changes or `reload()` is called, tracking loading / error / ready.
+ *
+ * With a `cacheKey`, the last known data is shown at once and refreshed in the background.
+ * Use it for catalog data only; seat maps and bookings must always come from the network.
+ */
+export function useApi<T>(
+  load: () => Promise<T>,
+  key: string | number,
+  cacheKey?: string,
+): Loadable<T> {
   const [tick, setTick] = useState(0);
   const reload = useCallback(() => setTick((t) => t + 1), []);
   const requestKey = `${key}:${tick}`;
@@ -20,18 +37,27 @@ export function useApi<T>(load: () => Promise<T>, key: string | number): Loadabl
   useEffect(() => {
     let live = true;
     run()
-      .then((data) => live && setResult({ key: requestKey, value: { state: "ready", data } }))
+      .then((data) => {
+        if (cacheKey) cache.set(cacheKey, data);
+        if (live) setResult({ key: requestKey, value: { state: "ready", data } });
+      })
       .catch((err: unknown) => {
+        // A failed background refresh keeps the cached data on screen.
+        if (!live || (cacheKey && cache.has(cacheKey))) return;
         const message = err instanceof Error ? err.message : String(err);
-        if (live) setResult({ key: requestKey, value: { state: "error", message } });
+        setResult({ key: requestKey, value: { state: "error", message } });
       });
     return () => {
       live = false;
     };
-  }, [requestKey]);
+  }, [requestKey, cacheKey]);
 
   const current: LoadableState<T> =
-    result?.key === requestKey ? result.value : { state: "loading" };
+    result?.key === requestKey
+      ? result.value
+      : cacheKey && cache.has(cacheKey)
+        ? { state: "ready", data: cache.get(cacheKey) as T }
+        : { state: "loading" };
   return { ...current, reload };
 }
 

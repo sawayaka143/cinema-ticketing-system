@@ -10,6 +10,7 @@ import {
   dayOf,
   nextDays,
 } from "../lib/format";
+import { WEEK_KEY, primeFromWeek, toScreening } from "../lib/catalogCache";
 import { must, useApi } from "../lib/useApi";
 
 type DayMovieRow = { movie: Movie; screenings: Screening[] };
@@ -23,14 +24,7 @@ function groupByMovieForDay(screenings: ScreeningDetail[], dayIso: string): DayM
       entry = { movie: s.movie, screenings: [] };
       byMovie.set(s.movie.movie_id, entry);
     }
-    entry.screenings.push({
-      screening_id: s.screening_id,
-      movie_id: s.movie_id,
-      hall: s.hall,
-      start_time: s.start_time,
-      end_time: s.end_time,
-      base_price: s.base_price,
-    });
+    entry.screenings.push(toScreening(s));
   }
   return Array.from(byMovie.values()).sort((a, b) => a.movie.title.localeCompare(b.movie.title));
 }
@@ -40,7 +34,15 @@ export function MoviesPage() {
   const [params, setParams] = useSearchParams();
   const day = days.find((d) => d.iso === params.get("day")) ?? days[0];
 
-  const week = useApi(async () => must(await api.GET("/api/screenings")), "week");
+  const week = useApi(
+    async () => {
+      const data = must(await api.GET("/api/screenings"));
+      primeFromWeek(data);
+      return data;
+    },
+    "week",
+    WEEK_KEY,
+  );
 
   const rows = useMemo(
     () => (week.state === "ready" ? groupByMovieForDay(week.data, day.iso) : []),
