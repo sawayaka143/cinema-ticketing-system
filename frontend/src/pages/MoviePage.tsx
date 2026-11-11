@@ -3,18 +3,19 @@ import { api } from "../api/client";
 import { Age, Poster, ShowtimeChip } from "../components/MovieRow";
 import { Card, EmptyState, ErrorState, FadeIn, Skeleton } from "../components/ui";
 import { type Screening, dayOf, nextDays, runtime } from "../lib/format";
+import { type MovieWithScreenings, movieKey } from "../lib/catalogCache";
 import { must, useApi } from "../lib/useApi";
 
 export function MoviePage() {
   const movieId = Number(useParams().id);
-  const page = useApi(async () => {
+  const page = useApi<MovieWithScreenings>(async () => {
     const path = { path: { movie_id: movieId } };
     const [movie, screenings] = await Promise.all([
       api.GET("/api/movies/{movie_id}", { params: path }).then(must),
       api.GET("/api/movies/{movie_id}/screenings", { params: path }).then(must),
     ]);
     return { movie, screenings };
-  }, movieId);
+  }, movieId, movieKey(movieId));
 
   if (page.state === "loading") {
     return (
