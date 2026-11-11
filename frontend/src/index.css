@@ -760,6 +760,13 @@ button {
   line-height: 0;
 }
 
+.brand-mark .squircle-inner,
+.brand-lockup .squircle-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .brand-lockup {
   display: inline-flex;
   align-items: center;

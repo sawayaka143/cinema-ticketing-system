@@ -41,6 +41,11 @@ export function BrandMark({
         justifyContent: "center",
         flexShrink: 0,
       }}
+      innerStyle={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
       aria-hidden="true"
     >
       <svg
@@ -49,16 +54,17 @@ export function BrandMark({
         viewBox="0 0 24 24"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
+        style={{ display: "block" }}
       >
         <path
-          d="M2.5 18.5L9.5 7.5L14.5 15L17.5 10.5L21.5 18.5H2.5Z"
+          d="M2.5 19L9.5 8L14.5 15.5L17.5 11L21.5 19H2.5Z"
           fill="var(--accent)"
           fillOpacity="0.25"
           stroke="var(--accent)"
           strokeWidth="2"
           strokeLinejoin="round"
         />
-        <circle cx="9.5" cy="5" r="1.5" fill="var(--accent)" />
+        <circle cx="9.5" cy="5.5" r="1.5" fill="var(--accent)" />
       </svg>
     </Squircle>
   );
