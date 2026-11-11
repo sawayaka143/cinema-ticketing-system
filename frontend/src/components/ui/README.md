@@ -2,7 +2,7 @@
 
 All frontend UI in this repository uses the standardized primitives located in `frontend/src/components/ui/`.
 
-Every agent and human working on frontend pages **must use these components** rather than hand-crafting ad-hoc HTML buttons or custom containers.
+Every agent and human working on frontend pages **must use these components** rather than hand-crafting ad-hoc HTML buttons, empty paragraphs, or custom loading strings.
 
 ---
 
@@ -38,6 +38,17 @@ import { Card } from "../components/ui/Card";
   <h3>Title</h3>
   <p>Body</p>
 </Card>
+```
+
+#### `<FadeIn>`
+Accessible entrance animation with physics-based spring curves. Automatically disables when the user prefers reduced motion.
+
+```tsx
+import { FadeIn } from "../components/ui/FadeIn";
+
+<FadeIn direction="up" delay={50}>
+  <Card>Smooth enter</Card>
+</FadeIn>
 ```
 
 ---
@@ -84,3 +95,74 @@ import { Badge } from "../components/ui/Badge";
 <Badge tone="neutral" variant="outline">16+</Badge>
 <Badge tone="accent">VIP</Badge>
 ```
+
+---
+
+### 3. States & Feedback
+
+#### `<Skeleton>` & `<ProgramSkeleton>`
+Shimmering placeholder loaders that prevent layout shifts during async data fetching. **Never use raw `<p>Loading…</p>` text.**
+
+```tsx
+import { Skeleton, ProgramSkeleton } from "../components/ui/Skeleton";
+
+// Full cinema program loading
+{program.state === "loading" && <ProgramSkeleton count={3} />}
+
+// Custom block loading
+<Skeleton width="60%" height="2rem" radius={8} />
+```
+
+#### `<EmptyState>`
+Honest, friendly zero-state presentation for dates without screenings, empty bookings, or search results.
+
+```tsx
+import { EmptyState } from "../components/ui/EmptyState";
+
+<EmptyState
+  title="No screenings remaining today"
+  description="All screenings for this date have concluded. Please select another day above."
+  action={<Button onClick={goToTomorrow}>View tomorrow</Button>}
+/>
+```
+
+#### `<ErrorState>`
+Domain-aware error presentation with an in-app "Try again" recovery action and collapsible technical details. **Never show unhandled raw exception strings to users.**
+
+```tsx
+import { ErrorState } from "../components/ui/ErrorState";
+
+<ErrorState
+  title="Couldn't load schedule"
+  message="We had trouble reaching the ticketing box office. Please check your connection."
+  details={error.message}
+  onRetry={program.reload}
+/>
+```
+
+---
+
+### 4. Brand & Identity
+
+#### `<BrandMark>`
+Official geometric emblem of Alatau Cinema (Alatau mountain peaks + projector light) in a squircle container.
+
+```tsx
+import { BrandMark } from "../components/ui/BrandMark";
+
+// Header icon
+<BrandMark size="md" />
+
+// Lockup with text
+<BrandMark size="md" withText />
+```
+
+---
+
+## Golden Rules for Agents
+
+1. **Import from UI barrel**: Always import from `../components/ui` or `../components/ui/index`.
+2. **Always offer recovery**: Any `ErrorState` must include `onRetry` whenever data fetching can be re-attempted.
+3. **No raw loading text**: Use `<Skeleton>` or pre-composed skeleton layouts (`<ProgramSkeleton>`).
+4. **No raw exception leaks**: Use `<ErrorState details={err.message}>` so errors are courteous to users and helpful to developers.
+5. **Continuous corners**: Always use `<Squircle>` or `<Card>` for cards, buttons, badges, and image frames.

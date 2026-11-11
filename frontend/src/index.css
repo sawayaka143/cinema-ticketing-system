@@ -679,7 +679,227 @@ button {
   color: var(--bad);
 }
 
+/* Skeleton loader */
+@keyframes shimmer {
+  0% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0.45;
+  }
+}
+
+.skeleton {
+  background: var(--surface-2);
+  position: relative;
+  overflow: hidden;
+  animation: shimmer 1.8s ease-in-out infinite;
+}
+
+.skeleton-text {
+  border-radius: 0.25rem;
+}
+
+.skeleton-circular {
+  border-radius: 50%;
+}
+
+.skeleton-rectangular {
+  border-radius: var(--radius);
+}
+
+.skeleton-film-card {
+  pointer-events: none;
+  border-color: var(--border-subtle);
+  margin-bottom: var(--s4);
+}
+
+/* Empty State */
+.empty-state {
+  margin: var(--s6) 0;
+}
+
+.empty-state .card-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--s8) var(--s6);
+}
+
+.empty-state-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  background: var(--surface-2);
+  color: var(--muted);
+  margin-bottom: var(--s4);
+}
+
+.empty-state-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 var(--s2);
+  color: var(--text);
+}
+
+.empty-state-desc {
+  color: var(--muted);
+  max-width: 28rem;
+  margin: 0 0 var(--s4);
+}
+
+.empty-state-action {
+  margin-top: var(--s2);
+}
+
+/* Error State */
+.error-state {
+  margin: var(--s6) 0;
+}
+
+.error-state .card-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--s8) var(--s6);
+}
+
+.error-state-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--bad) 12%, var(--surface-2));
+  margin: 0 auto var(--s4);
+}
+
+.error-state-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 var(--s2);
+  color: var(--text);
+  text-align: center;
+  margin-inline: auto;
+}
+
+.error-state-message {
+  color: var(--muted);
+  width: 100%;
+  max-width: 32rem;
+  min-width: 0;
+  margin: 0 auto var(--s4);
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.error-state-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: var(--s3);
+  width: 100%;
+}
+
+.error-state-details,
+.error-state pre {
+  align-self: stretch;
+  width: 100%;
+  max-width: 100%;
+  text-align: left;
+  overflow-x: auto;
+  margin-top: var(--s4);
+  padding: var(--s3) var(--s4);
+  border-radius: 0.5rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  font-family: monospace;
+  font-size: 0.8125rem;
+  color: var(--bad);
+}
+
+/* Brand Mark & Lockup */
+.brand-mark {
+  display: inline-flex;
+  align-items: center;
+  line-height: 0;
+}
+
+.brand-lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s3);
+}
+
+.brand-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--text);
+}
+
+/* Animations & Keyframes */
+.fade-in-wrapper {
+  animation-fill-mode: both;
+  animation-timing-function: var(--ease-spring);
+}
+
+.fade-in-up {
+  animation-name: fadeInUp;
+}
+
+.fade-in-down {
+  animation-name: fadeInDown;
+}
+
+.fade-in-only {
+  animation-name: fadeIn;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .fade-in-wrapper,
+  .skeleton,
   .squircle-container,
   .btn,
   .card-hoverable,

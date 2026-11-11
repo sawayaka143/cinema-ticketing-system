@@ -1,29 +1,38 @@
-import { useEffect, useEffectEvent, useState } from "react";
+import { useCallback, useEffect, useEffectEvent, useState } from "react";
 
-export type Loadable<T> =
+export type LoadableState<T> =
   | { state: "loading" }
   | { state: "error"; message: string }
   | { state: "ready"; data: T };
 
-/** Runs `load` whenever `key` changes and tracks loading / error / ready for that key. */
+export type Loadable<T> = LoadableState<T> & {
+  reload: () => void;
+};
+
+/** Runs `load` whenever `key` changes or `reload()` is called, tracking loading / error / ready. */
 export function useApi<T>(load: () => Promise<T>, key: string | number): Loadable<T> {
-  const [result, setResult] = useState<{ key: string | number; value: Loadable<T> } | null>(null);
+  const [tick, setTick] = useState(0);
+  const reload = useCallback(() => setTick((t) => t + 1), []);
+  const requestKey = `${key}:${tick}`;
+  const [result, setResult] = useState<{ key: string; value: LoadableState<T> } | null>(null);
   const run = useEffectEvent(load);
 
   useEffect(() => {
     let live = true;
     run()
-      .then((data) => live && setResult({ key, value: { state: "ready", data } }))
+      .then((data) => live && setResult({ key: requestKey, value: { state: "ready", data } }))
       .catch((err: unknown) => {
         const message = err instanceof Error ? err.message : String(err);
-        if (live) setResult({ key, value: { state: "error", message } });
+        if (live) setResult({ key: requestKey, value: { state: "error", message } });
       });
     return () => {
       live = false;
     };
-  }, [key]);
+  }, [requestKey]);
 
-  return result?.key === key ? result.value : { state: "loading" };
+  const current: LoadableState<T> =
+    result?.key === requestKey ? result.value : { state: "loading" };
+  return { ...current, reload };
 }
 
 /** A failed API call. `status` lets pages react to 402 / 409 instead of only showing text. */
