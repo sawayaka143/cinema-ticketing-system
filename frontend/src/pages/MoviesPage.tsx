@@ -1,29 +1,51 @@
+import { useMemo } from "react";
 import { useSearchParams } from "react-router";
 import { api } from "../api/client";
-import { Status } from "../components/Layout";
 import { MovieRow } from "../components/MovieRow";
-import { nextDays } from "../lib/format";
+import { EmptyState, ErrorState, ProgramSkeleton } from "../components/ui";
+import {
+  type Movie,
+  type Screening,
+  type ScreeningDetail,
+  dayOf,
+  nextDays,
+} from "../lib/format";
 import { must, useApi } from "../lib/useApi";
 
+type DayMovieRow = { movie: Movie; screenings: Screening[] };
+
+function groupByMovieForDay(screenings: ScreeningDetail[], dayIso: string): DayMovieRow[] {
+  const byMovie = new Map<number, DayMovieRow>();
+  for (const s of screenings) {
+    if (dayOf(s.start_time) !== dayIso) continue;
+    let entry = byMovie.get(s.movie.movie_id);
+    if (!entry) {
+      entry = { movie: s.movie, screenings: [] };
+      byMovie.set(s.movie.movie_id, entry);
+    }
+    entry.screenings.push({
+      screening_id: s.screening_id,
+      movie_id: s.movie_id,
+      hall: s.hall,
+      start_time: s.start_time,
+      end_time: s.end_time,
+      base_price: s.base_price,
+    });
+  }
+  return Array.from(byMovie.values()).sort((a, b) => a.movie.title.localeCompare(b.movie.title));
+}
+
 export function MoviesPage() {
-  const days = nextDays();
+  const days = useMemo(() => nextDays(), []);
   const [params, setParams] = useSearchParams();
   const day = days.find((d) => d.iso === params.get("day")) ?? days[0];
 
-  const program = useApi(async () => {
-    const movies = must(await api.GET("/api/movies"));
-    const rows = await Promise.all(
-      movies.map(async (movie) => ({
-        movie,
-        screenings: must(
-          await api.GET("/api/movies/{movie_id}/screenings", {
-            params: { path: { movie_id: movie.movie_id }, query: { date: day.iso } },
-          }),
-        ),
-      })),
-    );
-    return rows.filter((r) => r.screenings.length > 0);
-  }, day.iso);
+  const week = useApi(async () => must(await api.GET("/api/screenings")), "week");
+
+  const rows = useMemo(
+    () => (week.state === "ready" ? groupByMovieForDay(week.data, day.iso) : []),
+    [week, day.iso],
+  );
 
   return (
     <>
@@ -42,19 +64,28 @@ export function MoviesPage() {
         ))}
       </div>
       <h1>{day.weekday === "Today" ? "Today at Alatau" : `${day.weekday}, ${day.date}`}</h1>
-      {program.state === "loading" && <Status>Loading the program…</Status>}
-      {program.state === "error" && (
-        <Status tone="error">
-          Couldn&apos;t load the program: {program.message}. Try again in a minute.
-        </Status>
+      {week.state === "loading" && <ProgramSkeleton count={3} />}
+      {week.state === "error" && (
+        <ErrorState
+          title="Couldn't load the program"
+          message="We had trouble reaching the box office. Check your connection and try again."
+          details={week.message}
+          onRetry={week.reload}
+        />
       )}
-      {program.state === "ready" && program.data.length === 0 && (
-        <Status>No screenings left on this day. Pick another day above.</Status>
+      {week.state === "ready" && rows.length === 0 && (
+        <EmptyState
+          title="No screenings left on this day"
+          description="All screenings for this date have passed or none are scheduled. Pick another day above."
+        />
       )}
-      {program.state === "ready" &&
-        program.data.map(({ movie, screenings }) => (
-          <MovieRow key={movie.movie_id} movie={movie} screenings={screenings} />
-        ))}
+      {week.state === "ready" && rows.length > 0 && (
+        <div className="films-stack">
+          {rows.map(({ movie, screenings }) => (
+            <MovieRow key={movie.movie_id} movie={movie} screenings={screenings} />
+          ))}
+        </div>
+      )}
     </>
   );
 }
