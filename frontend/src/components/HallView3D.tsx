@@ -23,9 +23,12 @@ export default function HallView3D({
   picked,
   onToggle,
   disabled,
+  hallType,
   fallback,
 }: {
   seats: Seat[];
+  /** "IMAX" halls get the wall-to-wall screen and steeper rows. */
+  hallType: string;
   picked: Set<number>;
   onToggle: (seat: Seat) => void;
   disabled?: boolean;
@@ -51,6 +54,7 @@ export default function HallView3D({
     let scene: HallScene;
     try {
       scene = new HallScene(el, initial.seats, {
+        hallType,
         reducedMotion: window.matchMedia("(prefers-reduced-motion: reduce)").matches,
         onHover: (seat, x, y) => {
           const box = el.getBoundingClientRect();
@@ -70,7 +74,7 @@ export default function HallView3D({
       scene.dispose();
       sceneRef.current = null;
     };
-  }, [layout, failed]);
+  }, [layout, hallType, failed]);
 
   // Taken seats and picks change often; they only recolour the existing model.
   useEffect(() => {

@@ -73,6 +73,8 @@ const COLORS = {
 };
 
 export interface HallSceneOptions {
+  /** "IMAX" gets a wall-to-wall, taller, more curved screen and steeper rows. */
+  hallType: string;
   reducedMotion: boolean;
   /** The pointer is over a seat (client coordinates), or over nothing. */
   onHover: (seat: Seat | null, x: number, y: number) => void;
@@ -110,6 +112,7 @@ export class HallScene {
   private tween: gsap.core.Tween | null = null;
   private readonly screenCenter: Vector3;
   private readonly bounds: { min: Vector3; max: Vector3 };
+  private readonly screenTop: Vector3[]; // the screen's upper corners, kept in the hall view
   private readonly overviewPosition = new Vector3();
   private readonly overviewTarget = new Vector3();
   private overviewDistance = 20;
@@ -135,9 +138,20 @@ export class HallScene {
     const rowIndex = new Map(rows.map((r, i) => [r, i]));
     const maxCol = Math.max(1, ...seats.map((s) => s.grid_col));
     const lastRow = Math.max(0, rows.length - 1);
+    const seatsWidth = maxCol * SEAT_PITCH;
+    const hallWidth = seatsWidth + 2 * SIDE_AISLE;
+
+    // IMAX: the screen fills the front wall, is taller and more curved, and the rows climb steeper.
+    const imax = options.hallType === "IMAX";
+    const rise = imax ? 0.42 : RISE;
+    const screenWidth = imax ? hallWidth - 0.6 : seatsWidth * 0.95 + 0.4;
+    const screenHeight = screenWidth / (imax ? 1.9 : 2.3);
+    const screenBottom = imax ? 0.6 : SCREEN_BOTTOM;
+    const firstRow = imax ? Math.max(FIRST_ROW, screenWidth * 0.4) : FIRST_ROW;
+
     const xOf = (col: number) => (col - (maxCol + 1) / 2) * SEAT_PITCH;
-    const zOf = (i: number) => FIRST_ROW + i * ROW_PITCH;
-    const floorOf = (i: number) => i * RISE;
+    const zOf = (i: number) => firstRow + i * ROW_PITCH;
+    const floorOf = (i: number) => i * rise;
 
     this.placed = seats.map((seat) => {
       const i = rowIndex.get(seat.grid_row) ?? 0;
@@ -145,17 +159,14 @@ export class HallScene {
     });
     this.indexById = new Map(this.placed.map((p, i) => [p.seat.seat_id, i]));
 
-    const seatsWidth = maxCol * SEAT_PITCH;
-    const hallWidth = seatsWidth + 2 * SIDE_AISLE;
     const backZ = zOf(lastRow) + 1.2;
-    const wallTop = floorOf(lastRow) + 3.2;
+    const wallTop = Math.max(floorOf(lastRow) + 3.2, screenBottom + screenHeight + 0.4);
 
     // --- curved screen, plain gradient ---------------------------------------------------------------
-    const screenWidth = seatsWidth * 0.95 + 0.4;
-    const screenHeight = screenWidth / 2.3;
-    const radius = FIRST_ROW + rows.length * ROW_PITCH; // gentle curve, centred behind the rows
+    // A gentle curve centred behind the rows; IMAX wraps around the audience more.
+    const radius = firstRow + rows.length * ROW_PITCH * (imax ? 0.6 : 1);
     const arc = screenWidth / radius;
-    const screenY = SCREEN_BOTTOM + screenHeight / 2;
+    const screenY = screenBottom + screenHeight / 2;
     this.screenCenter = new Vector3(0, screenY, 0);
 
     const screen = new Mesh(
@@ -173,7 +184,7 @@ export class HallScene {
 
     // --- room: stepped floor, walls, aisle lights -----------------------------------------------------
     const steps: BufferGeometry[] = [];
-    const frontEnd = FIRST_ROW - ROW_PITCH / 2;
+    const frontEnd = firstRow - ROW_PITCH / 2;
     const front = new BoxGeometry(hallWidth, 0.2, frontEnd + 1.2);
     front.translate(0, -0.1, (frontEnd - 1.2) / 2);
     steps.push(front);
@@ -253,9 +264,10 @@ export class HallScene {
     this.scene.add(top, top.target, glow, glow.target);
 
     // The box the hall view has to fit: floor, seats and screen.
+    this.screenTop = [-1, 1].map((side) => new Vector3((side * screenWidth) / 2, screenBottom + screenHeight, 0));
     this.bounds = {
       min: new Vector3(-hallWidth / 2, 0, -0.6),
-      max: new Vector3(hallWidth / 2, Math.max(floorOf(lastRow) + 1.2, SCREEN_BOTTOM + 0.6), backZ),
+      max: new Vector3(hallWidth / 2, Math.max(floorOf(lastRow) + 1.2, screenBottom + 0.6), backZ),
     };
 
     // --- camera and the hall view ---------------------------------------------------------------------
@@ -399,10 +411,13 @@ export class HallScene {
       this.probe.position.copy(target).addScaledVector(up, distance);
       this.probe.lookAt(target);
       this.probe.updateMatrixWorld();
-      return corners.every((c) => {
-        const p = c.clone().project(this.probe);
-        return Math.abs(p.x) <= 0.94 && Math.abs(p.y) <= 0.9;
-      });
+      const inside = (points: Vector3[], x: number, y: number) =>
+        points.every((c) => {
+          const p = c.clone().project(this.probe);
+          return Math.abs(p.x) <= x && Math.abs(p.y) <= y;
+        });
+      // The seats keep a margin; the screen may reach the very edge, so the seats stay big.
+      return inside(corners, 0.94, 0.9) && inside(this.screenTop, 1, 1);
     };
     let lo = 1;
     let hi = 200;

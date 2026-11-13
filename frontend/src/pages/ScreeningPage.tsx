@@ -167,6 +167,7 @@ export function ScreeningPage() {
                   picked={new Set(picked.keys())}
                   onToggle={toggle}
                   disabled={busy}
+                  hallType={s.hall.hall_type}
                   fallback={
                     <SeatMap seats={map.seats} picked={new Set(picked.keys())} onToggle={toggle} disabled={busy} />
                   }
