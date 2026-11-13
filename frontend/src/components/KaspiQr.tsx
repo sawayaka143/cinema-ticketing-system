@@ -86,7 +86,10 @@ export function KaspiQr({
           <b>Scan with your phone camera</b> to pay in the demo Kaspi app.
         </p>
         <p className="kaspi-qr-hint">
-          <TapIcon /> On your phone? <b>Tap the code</b> to open the payment page.
+          <TapIcon />
+          <span>
+            On your phone? <b>Tap the code</b> to open the payment page.
+          </span>
         </p>
         <p className="muted small" role="status" aria-live="polite">
           <span className="kaspi-qr-pulse" aria-hidden="true" /> Waiting for the payment… this page

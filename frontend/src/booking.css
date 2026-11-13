@@ -414,8 +414,13 @@ select {
 .kaspi-qr-hint {
   display: flex;
   gap: 0.4rem;
-  align-items: center;
+  align-items: flex-start;
   color: var(--accent);
+}
+
+.kaspi-qr-hint svg {
+  flex: none;
+  margin-top: 0.15em;
 }
 
 .kaspi-qr-pulse {
