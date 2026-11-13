@@ -2,6 +2,8 @@
 
 Run from backend/:  python -m app.seed
 Safe to run again: existing halls, movies and screenings are skipped, not duplicated.
+`python -m app.seed --relayout "Hall 3"` rebuilds the seats of an existing hall from its plan
+below (only while no ticket was ever sold for that hall).
 Refuses to run when APP_ENV=production, unless --allow-production is passed
 (a deliberate one-off, e.g. the demo seed before the final defence).
 """
@@ -12,13 +14,13 @@ from dataclasses import dataclass
 from datetime import datetime, time, timedelta
 from decimal import Decimal
 
-from sqlalchemy import select
+from sqlalchemy import delete, exists, select
 from sqlalchemy.orm import Session
 
 from app.api.catalog import ALMATY
 from app.config import get_settings
 from app.db import get_engine
-from app.models import Genre, Hall, Movie, Screening, Seat
+from app.models import Genre, Hall, Movie, Screening, Seat, Ticket
 
 CLEANING = timedelta(minutes=15)
 DAYS = 7
@@ -30,7 +32,7 @@ class HallPlan:
     hall_type: str
     rows: int
     seats_per_row: int
-    aisle_after: int  # an empty grid column after this seat number
+    aisles_after: tuple[int, ...]  # an empty grid column after each of these seat numbers
     vip_rows: tuple[int, ...]  # 1-based row indexes
     showtimes: tuple[time, ...]
     price: Decimal
@@ -42,7 +44,7 @@ HALLS = [
         "2D",
         8,
         12,
-        6,
+        (6,),
         (6, 7),
         (time(10), time(13), time(16), time(19), time(22)),
         Decimal("2000.00"),
@@ -52,7 +54,7 @@ HALLS = [
         "3D",
         7,
         10,
-        5,
+        (5,),
         (5, 6),
         (time(11), time(14), time(17), time(20), time(23)),
         Decimal("2500.00"),
@@ -60,10 +62,10 @@ HALLS = [
     HallPlan(
         "Hall 3",
         "IMAX",
-        10,
-        16,
-        8,
-        (7, 8, 9),
+        9,
+        14,
+        (3, 11),  # IMAX style: 3 seats, aisle, 8 in the middle, aisle, 3
+        (5, 6),
         (time(12), time(15, 30), time(19), time(22, 30)),
         Decimal("3500.00"),
     ),
@@ -151,7 +153,7 @@ def _seat_grid(hall: Hall, plan: HallPlan) -> list[Seat]:
     for r in range(1, plan.rows + 1):
         label = chr(ord("A") + r - 1)
         for n in range(1, plan.seats_per_row + 1):
-            col = n if n <= plan.aisle_after else n + 1  # skip one column for the aisle
+            col = n + sum(1 for a in plan.aisles_after if n > a)  # one empty column per aisle
             if r == 1 and n in (1, plan.seats_per_row):
                 seat_type = "wheelchair"
             elif r in plan.vip_rows:
@@ -169,6 +171,33 @@ def _seat_grid(hall: Hall, plan: HallPlan) -> list[Seat]:
                 )
             )
     return seats
+
+
+class RelayoutRefused(Exception):
+    pass
+
+
+def relayout(db: Session, hall_name: str) -> int:
+    """Rebuild an existing hall's seats from its plan. Returns the new number of seats.
+
+    Refused when the hall isn't in HALLS or doesn't exist yet, or when any ticket was ever sold
+    for its seats (tickets point to seats, and history must not change).
+    """
+    plan = next((p for p in HALLS if p.name == hall_name), None)
+    hall = db.scalar(select(Hall).where(Hall.name == hall_name))
+    if plan is None or hall is None:
+        raise RelayoutRefused(f"No hall {hall_name!r} in the plan and the database")
+    sold = db.scalar(
+        select(exists().where(Ticket.seat_id == Seat.seat_id, Seat.hall_id == hall.hall_id))
+    )
+    if sold:
+        raise RelayoutRefused(f"{hall_name} already has tickets; its seats can't change")
+    db.execute(delete(Seat).where(Seat.hall_id == hall.hall_id))
+    hall.hall_type = plan.hall_type
+    seats = _seat_grid(hall, plan)
+    db.add_all(seats)
+    db.flush()
+    return len(seats)
 
 
 def seed(db: Session) -> dict[str, int]:
@@ -253,6 +282,11 @@ def main(argv: Sequence[str] | None = None) -> None:
         action="store_true",
         help="seed even when APP_ENV=production (one-off demo seed)",
     )
+    parser.add_argument(
+        "--relayout",
+        metavar="HALL",
+        help="rebuild this existing hall's seats from its plan (no tickets sold yet), then seed",
+    )
     args = parser.parse_args(argv)
     if get_settings().app_env == "production":
         if not args.allow_production:
@@ -262,6 +296,11 @@ def main(argv: Sequence[str] | None = None) -> None:
             )
         print("WARNING: seeding the PRODUCTION database (--allow-production).")
     with Session(get_engine()) as db, db.begin():
+        if args.relayout:
+            try:
+                print(f"{args.relayout}: rebuilt with {relayout(db, args.relayout)} seats")
+            except RelayoutRefused as exc:
+                raise SystemExit(str(exc)) from exc
         added = seed(db)
     print("Added " + ", ".join(f"{n} {k}" for k, n in added.items()))
 

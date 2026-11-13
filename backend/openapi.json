@@ -492,6 +492,21 @@
             "description": "An empty grid column after this seat number",
             "title": "Aisle After"
           },
+          "aisles_after": {
+            "default": [],
+            "description": "Several aisles: an empty grid column after each of these seat numbers (IMAX style 3 + 8 + 3 is [3, 11]). Combined with aisle_after.",
+            "examples": [
+              [
+                3,
+                11
+              ]
+            ],
+            "items": {
+              "type": "integer"
+            },
+            "title": "Aisles After",
+            "type": "array"
+          },
           "hall_type": {
             "enum": [
               "2D",
@@ -674,6 +689,21 @@
             ],
             "description": "An empty grid column after this seat number",
             "title": "Aisle After"
+          },
+          "aisles_after": {
+            "default": [],
+            "description": "Several aisles: an empty grid column after each of these seat numbers (IMAX style 3 + 8 + 3 is [3, 11]). Combined with aisle_after.",
+            "examples": [
+              [
+                3,
+                11
+              ]
+            ],
+            "items": {
+              "type": "integer"
+            },
+            "title": "Aisles After",
+            "type": "array"
           },
           "rows": {
             "description": "Rows are labelled A, B, C, \u2026",

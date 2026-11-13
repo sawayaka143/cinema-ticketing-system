@@ -801,6 +801,16 @@ export interface components {
              */
             aisle_after?: number | null;
             /**
+             * Aisles After
+             * @description Several aisles: an empty grid column after each of these seat numbers (IMAX style 3 + 8 + 3 is [3, 11]). Combined with aisle_after.
+             * @default []
+             * @example [
+             *       3,
+             *       11
+             *     ]
+             */
+            aisles_after: number[];
+            /**
              * Hall Type
              * @enum {string}
              */
@@ -879,6 +889,16 @@ export interface components {
              * @description An empty grid column after this seat number
              */
             aisle_after?: number | null;
+            /**
+             * Aisles After
+             * @description Several aisles: an empty grid column after each of these seat numbers (IMAX style 3 + 8 + 3 is [3, 11]). Combined with aisle_after.
+             * @default []
+             * @example [
+             *       3,
+             *       11
+             *     ]
+             */
+            aisles_after: number[];
             /**
              * Rows
              * @description Rows are labelled A, B, C, …

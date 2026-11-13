@@ -1,11 +1,14 @@
 """The demo seed fills an empty catalog once and never duplicates on a second run."""
 
+import uuid
+from decimal import Decimal
+
 import pytest
-from sqlalchemy import create_engine, func, select
+from sqlalchemy import create_engine, func, select, text
 from sqlalchemy.orm import Session
 
 from app import seed as seed_module
-from app.models import Movie, Screening, Seat
+from app.models import Booking, Customer, Hall, Movie, Screening, Seat, Ticket, TicketType
 
 
 def test_seed_twice_adds_nothing_the_second_time(db: Session):
@@ -73,3 +76,63 @@ def test_seed_runs_outside_production_with_or_without_flag(
     calls = _fake_env(monkeypatch, "development")
     seed_module.main(argv)
     assert len(calls) == 1
+
+
+def _hall_seats(db: Session, name: str) -> list[Seat]:
+    hall = db.scalar(select(Hall).where(Hall.name == name))
+    return list(db.scalars(select(Seat).where(Seat.hall_id == hall.hall_id)))
+
+
+def test_imax_plan_is_three_eight_three_in_nine_rows():
+    plan = next(p for p in seed_module.HALLS if p.name == "Hall 3")
+    assert (plan.hall_type, plan.rows, plan.seats_per_row, plan.aisles_after) == (
+        "IMAX",
+        9,
+        14,
+        (3, 11),
+    )
+
+
+def test_relayout_rebuilds_an_unsold_hall(db: Session):
+    seed_module.seed(db)
+
+    assert seed_module.relayout(db, "Hall 3") == 9 * 14
+
+    seats = _hall_seats(db, "Hall 3")
+    assert len(seats) == 126
+    assert {s.row_label for s in seats} == set("ABCDEFGHI")
+    by_number = {s.seat_number: s.grid_col for s in seats if s.row_label == "E"}
+    assert [by_number[n] for n in (3, 4, 11, 12)] == [3, 5, 12, 14]  # two aisles
+
+
+def test_relayout_refuses_a_hall_with_tickets(db: Session):
+    seed_module.seed(db)
+    seat = _hall_seats(db, "Hall 3")[0]
+    screening = db.scalar(select(Screening).where(Screening.hall_id == seat.hall_id))
+    user_id = uuid.uuid4()
+    db.execute(text("INSERT INTO auth.users (id, email) VALUES (:i, 'r@test.kz')"), {"i": user_id})
+    customer = Customer(auth_user_id=user_id, full_name="R", email="r@test.kz")
+    ticket_type = TicketType(name="test-relayout")
+    db.add_all([customer, ticket_type])
+    db.flush()
+    booking = Booking(customer_id=customer.customer_id)
+    db.add(booking)
+    db.flush()
+    db.add(
+        Ticket(
+            booking_id=booking.booking_id,
+            screening_id=screening.screening_id,
+            seat_id=seat.seat_id,
+            ticket_type_id=ticket_type.ticket_type_id,
+            price=Decimal("3500.00"),
+        )
+    )
+    db.flush()
+
+    with pytest.raises(seed_module.RelayoutRefused, match="already has tickets"):
+        seed_module.relayout(db, "Hall 3")
+
+
+def test_relayout_refuses_an_unknown_hall(db: Session):
+    with pytest.raises(seed_module.RelayoutRefused, match="No hall"):
+        seed_module.relayout(db, "Hall 99")
