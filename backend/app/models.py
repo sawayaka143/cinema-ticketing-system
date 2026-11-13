@@ -139,6 +139,7 @@ class Booking(Base):
         DateTime(timezone=True), server_default=text("now() + interval '10 minutes'")
     )
     qr_token: Mapped[str | None] = mapped_column(Text, unique=True)
+    payment_token: Mapped[str | None] = mapped_column(Text, unique=True)
     checked_in_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     checked_in_by_staff_id: Mapped[int | None] = mapped_column(ForeignKey("staff.staff_id"))
 

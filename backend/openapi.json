@@ -464,6 +464,103 @@
         "title": "CustomerOut",
         "type": "object"
       },
+      "FakeKaspiOut": {
+        "properties": {
+          "amount": {
+            "title": "Amount",
+            "type": "string"
+          },
+          "hall": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hall"
+          },
+          "merchant": {
+            "title": "Merchant",
+            "type": "string"
+          },
+          "movie_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Movie Title"
+          },
+          "seats": {
+            "examples": [
+              [
+                "A5",
+                "A6"
+              ]
+            ],
+            "items": {
+              "type": "string"
+            },
+            "title": "Seats",
+            "type": "array"
+          },
+          "seconds_left": {
+            "title": "Seconds Left",
+            "type": "integer"
+          },
+          "start_time": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Time"
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "paid",
+              "cancelled",
+              "expired"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "merchant",
+          "amount",
+          "status",
+          "seconds_left",
+          "movie_title",
+          "hall",
+          "start_time",
+          "seats"
+        ],
+        "title": "FakeKaspiOut",
+        "type": "object"
+      },
+      "FakePayIn": {
+        "properties": {
+          "decline": {
+            "default": false,
+            "description": "true shows a declined payment (demo)",
+            "title": "Decline",
+            "type": "boolean"
+          }
+        },
+        "title": "FakePayIn",
+        "type": "object"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -658,6 +755,43 @@
           "seat_ids"
         ],
         "title": "HoldIn",
+        "type": "object"
+      },
+      "InvoiceOut": {
+        "properties": {
+          "amount": {
+            "title": "Amount",
+            "type": "string"
+          },
+          "booking_id": {
+            "title": "Booking Id",
+            "type": "integer"
+          },
+          "pay_path": {
+            "description": "Frontend path for the QR code; prefix it with the site's origin",
+            "examples": [
+              "/fake-kaspi/3q2-x\u2026"
+            ],
+            "title": "Pay Path",
+            "type": "string"
+          },
+          "payment_token": {
+            "title": "Payment Token",
+            "type": "string"
+          },
+          "seconds_left": {
+            "title": "Seconds Left",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "booking_id",
+          "payment_token",
+          "pay_path",
+          "amount",
+          "seconds_left"
+        ],
+        "title": "InvoiceOut",
         "type": "object"
       },
       "LayoutIn": {
@@ -2674,6 +2808,54 @@
         ]
       }
     },
+    "/api/bookings/{booking_id}/kaspi-invoice": {
+      "post": {
+        "description": "A payment link for my pending booking, to show as a QR code. Asking again reuses it.",
+        "operationId": "create_kaspi_invoice_api_bookings__booking_id__kaspi_invoice_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "booking_id",
+            "required": true,
+            "schema": {
+              "title": "Booking Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Kaspi Invoice",
+        "tags": [
+          "fake-kaspi"
+        ]
+      }
+    },
     "/api/bookings/{booking_id}/pay": {
       "post": {
         "description": "Fake payment for my pending hold (\u00a76, step 2). A decline is stored; retry is allowed.",
@@ -2820,6 +3002,102 @@
         "summary": "Check In",
         "tags": [
           "checkin"
+        ]
+      }
+    },
+    "/api/fake-kaspi/{token}": {
+      "get": {
+        "description": "What the phone shows: merchant, amount, show and seats. No login; no personal data.",
+        "operationId": "get_fake_kaspi_invoice_api_fake_kaspi__token__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "token",
+            "required": true,
+            "schema": {
+              "title": "Token",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FakeKaspiOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Fake Kaspi Invoice",
+        "tags": [
+          "fake-kaspi"
+        ]
+      }
+    },
+    "/api/fake-kaspi/{token}/pay": {
+      "post": {
+        "description": "Pay (or decline) from the phone. Paying a booking that is already paid changes nothing.",
+        "operationId": "pay_fake_kaspi_invoice_api_fake_kaspi__token__pay_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "token",
+            "required": true,
+            "schema": {
+              "title": "Token",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FakePayIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FakeKaspiOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Pay Fake Kaspi Invoice",
+        "tags": [
+          "fake-kaspi"
         ]
       }
     },
