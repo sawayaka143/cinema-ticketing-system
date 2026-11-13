@@ -11,7 +11,7 @@ import { messageOf, must, statusOf, useApi } from "../lib/useApi";
 
 const MAX_SEATS = 10;
 
-// Three.js is large, so the 3D hall is its own chunk, fetched only when someone opens it.
+// Three.js is large, so the 3D hall is its own chunk, fetched after the page itself has shown.
 const HallView3D = lazy(() => import("../components/HallView3D"));
 
 export function ScreeningPage() {
@@ -25,7 +25,6 @@ export function ScreeningPage() {
   const [message, setMessage] = useState<{ tone: "info" | "error"; text: string } | null>(null);
   // A login without a customer profile (e.g. made in the Supabase dashboard) can't book yet.
   const [needsProfile, setNeedsProfile] = useState(false);
-  const [view, setView] = useState<"map" | "3d">("map");
 
   const path = { params: { path: { screening_id: screeningId } } };
   // Film, hall and time rarely change, so they come from the cache first; seats never do.
@@ -159,28 +158,18 @@ export function ScreeningPage() {
 
         <div className="booking-layout">
           <div className="hall-panel">
-            <div className="view-switch" role="group" aria-label="How to show the hall">
-              <Button size="sm" variant={view === "map" ? "solid" : "ghost"} aria-pressed={view === "map"} onClick={() => setView("map")}>
-                Seat map
-              </Button>
-              <Button size="sm" variant={view === "3d" ? "solid" : "ghost"} aria-pressed={view === "3d"} onClick={() => setView("3d")}>
-                3D view from your seat
-              </Button>
-            </div>
             {!map ? (
-              <Skeleton width="100%" height="18rem" radius={14} aria-busy="true" />
-            ) : view === "map" ? (
-              <SeatMap seats={map.seats} picked={new Set(picked.keys())} onToggle={toggle} disabled={busy} />
+              <Skeleton width="100%" height="30rem" radius={18} aria-busy="true" />
             ) : (
-              <Suspense fallback={<Skeleton width="100%" height="28rem" radius={18} aria-busy="true" />}>
+              <Suspense fallback={<Skeleton width="100%" height="30rem" radius={18} aria-busy="true" />}>
                 <HallView3D
                   seats={map.seats}
                   picked={new Set(picked.keys())}
                   onToggle={toggle}
                   disabled={busy}
-                  title={s.movie.title}
-                  subtitle={`${s.hall.name} · ${s.hall.hall_type} · ${span(s)}`}
-                  onClose={() => setView("map")}
+                  fallback={
+                    <SeatMap seats={map.seats} picked={new Set(picked.keys())} onToggle={toggle} disabled={busy} />
+                  }
                 />
               </Suspense>
             )}
@@ -189,7 +178,7 @@ export function ScreeningPage() {
           <Card as="aside" elevated className="basket" aria-label="Your seats">
             <h2>Your seats</h2>
             {chosen.length === 0 ? (
-              <p className="muted">Tap free seats on the map. Up to {MAX_SEATS} per booking.</p>
+              <p className="muted">Tap a seat in the hall to see the screen from it, then pick it. Up to {MAX_SEATS} per booking.</p>
             ) : (
               <ul className="picks">
                 {chosen.map((seat) => (

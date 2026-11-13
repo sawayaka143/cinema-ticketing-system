@@ -345,15 +345,9 @@ select {
   min-width: 0;
 }
 
-.view-switch {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--s2);
-}
-
 .hall3d {
   width: 100%;
-  height: clamp(22rem, 62vh, 36rem);
+  height: clamp(24rem, 68vh, 40rem);
   overflow: hidden;
 }
 
@@ -396,6 +390,38 @@ select {
   position: absolute;
   top: var(--s3);
   right: var(--s3);
+}
+
+.hall3d-legend {
+  position: absolute;
+  right: var(--s3);
+  bottom: var(--s3);
+  left: var(--s3);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2) var(--s4);
+  justify-content: center;
+  margin: 0;
+  padding: 0.45rem 0.8rem;
+  border-radius: 0.75rem;
+  background: rgb(11 12 14 / 0.72);
+  color: var(--muted);
+  font-size: 0.8125rem;
+  list-style: none;
+  pointer-events: none;
+  backdrop-filter: blur(6px);
+}
+
+.hall3d-legend li {
+  display: inline-flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.hall3d-legend i {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 0.25rem;
 }
 
 .hall3d-tip {
