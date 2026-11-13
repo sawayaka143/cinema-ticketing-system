@@ -17,7 +17,7 @@ Follow these steps in order. Stop and tell the user if any check fails. Don't tr
 - Refuse to start if:
   - the issue is closed;
   - the issue has no acceptance criteria (ask the user to get them from Zhakhongir or the owner first);
-  - the issue is in someone else's area (see "Who owns what" in `AGENTS.md`), e.g. a non-owner picking a `area:frontend` issue.
+  - the issue is in someone else's area (see "Who owns what" in `AGENTS.md`), e.g. someone without frontend access picking an `area:frontend` issue.
 
 ## 2. Clean, current main
 

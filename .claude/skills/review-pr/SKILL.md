@@ -21,7 +21,7 @@ Also read the linked issue (`Closes #x`) for the acceptance criteria.
 **Process**
 - Is CI green? If not, the review is just "fix CI first" plus the failing check names.
 - Do the title, branch name and linked issue follow `AGENTS.md`?
-- Is every touched file inside the author's area? Flag anything outside it, especially `frontend/`, `.github/`, `.claude/` and migrations.
+- Is every touched file inside the author's area (see `AGENTS.md`)? Flag anything outside it, especially `frontend/` (for authors without frontend access), `.github/`, `.claude/` and migrations.
 
 **Correctness**
 - Does it meet every acceptance criterion of the issue? Go through them one by one.
