@@ -2,8 +2,9 @@
 
 Run from backend/:  python -m app.seed
 Safe to run again: existing halls, movies and screenings are skipped, not duplicated.
-`python -m app.seed --relayout all` (or --relayout "Hall 3") rebuilds the seats and type of
-existing halls from the plans below, for each hall only while no ticket was ever sold for it.
+`python -m app.seed --relayout all` (or --relayout "Hall 3") only rebuilds the seats and type of
+existing halls from the plans below (no movies or screenings are added), and only while no ticket
+was ever sold for any of them.
 Refuses to run when APP_ENV=production, unless --allow-production is passed
 (a deliberate one-off, e.g. the demo seed before the final defence).
 """
@@ -293,7 +294,7 @@ def main(argv: Sequence[str] | None = None) -> None:
         metavar="HALL",
         action="append",
         default=[],
-        help='rebuild an existing hall from its plan (no tickets sold yet); repeat, or use "all"',
+        help='only rebuild existing halls from their plans (no tickets sold); repeat, or "all"',
     )
     args = parser.parse_args(argv)
     if get_settings().app_env == "production":
@@ -314,6 +315,8 @@ def main(argv: Sequence[str] | None = None) -> None:
         if refused:
             # Nothing is saved (the transaction rolls back), so a half-done relayout can't happen.
             raise SystemExit("Nothing changed. " + " ".join(refused))
+        if names:
+            return  # a relayout only touches the halls, never the schedule
         added = seed(db)
     print("Added " + ", ".join(f"{n} {k}" for k, n in added.items()))
 
