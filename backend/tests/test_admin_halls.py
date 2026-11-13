@@ -122,8 +122,14 @@ def test_duplicate_hall_name_is_409(client: TestClient, boss):
 
 @pytest.mark.parametrize(
     "layout",
-    [{"vip_rows": [4]}, {"aisle_after": 6}, {"wheelchair_seats": ["D1"]}, {"rows": 27}],
-    ids=["vip-outside", "aisle-outside", "wheelchair-outside", "too-many-rows"],
+    [
+        {"vip_rows": [4]},
+        {"aisle_after": 6},
+        {"aisles_after": [2, 6]},
+        {"wheelchair_seats": ["D1"]},
+        {"rows": 27},
+    ],
+    ids=["vip-outside", "aisle-outside", "aisles-outside", "wheelchair-outside", "too-many-rows"],
 )
 def test_layout_that_doesnt_fit_is_rejected(client: TestClient, boss, layout: dict):
     res = _create(client, **layout)
@@ -198,3 +204,22 @@ def test_halls_need_a_manager(client: TestClient, db: Session):
     app.dependency_overrides[get_current_user] = lambda: user
     assert _create(client).status_code == 403
     assert client.get("/api/admin/halls").status_code == 403
+
+
+def test_imax_layout_with_two_aisles(client: TestClient, boss):
+    """3 + 8 + 3 seats: an empty grid column after seat 3 and after seat 11."""
+    res = _create(
+        client,
+        "IMAX hall",
+        rows=9,
+        seats_per_row=14,
+        aisle_after=None,
+        aisles_after=[3, 11],
+        vip_rows=[5, 6],
+        wheelchair_seats=[],
+    )
+
+    assert (res.status_code, res.json()["capacity"]) == (201, 126)
+    seats = _seats(client, res.json()["hall_id"])
+    cols = [seats[f"E{n}"]["grid_col"] for n in (3, 4, 11, 12, 14)]
+    assert cols == [3, 5, 12, 14, 16]

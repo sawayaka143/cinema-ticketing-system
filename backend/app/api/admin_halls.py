@@ -29,6 +29,12 @@ class LayoutIn(BaseModel):
     aisle_after: int | None = Field(
         default=None, ge=1, description="An empty grid column after this seat number"
     )
+    aisles_after: list[int] = Field(
+        default=[],
+        description="Several aisles: an empty grid column after each of these seat numbers "
+        "(IMAX style 3 + 8 + 3 is [3, 11]). Combined with aisle_after.",
+        examples=[[3, 11]],
+    )
     vip_rows: list[int] = Field(default=[], description="1-based row numbers")
     wheelchair_seats: list[str] = Field(default=[], examples=[["A1", "A12"]])
 
@@ -71,8 +77,11 @@ def _bad(detail: str) -> HTTPException:
 
 def _layout(hall_id: int, plan: LayoutIn) -> list[Seat]:
     """Seats for a rectangular hall. Raises 400 when the layout doesn't fit."""
-    if plan.aisle_after is not None and plan.aisle_after >= plan.seats_per_row:
-        raise _bad("aisle_after must be smaller than seats_per_row")
+    aisles = set(plan.aisles_after)
+    if plan.aisle_after is not None:
+        aisles.add(plan.aisle_after)
+    if any(not 1 <= a < plan.seats_per_row for a in aisles):
+        raise _bad("Every aisle must come after a seat and before the last one in the row")
     if any(not 1 <= r <= plan.rows for r in plan.vip_rows):
         raise _bad("A VIP row is outside the hall")
     wheelchair: set[tuple[str, int]] = set()
@@ -86,7 +95,7 @@ def _layout(hall_id: int, plan: LayoutIn) -> list[Seat]:
     for r in range(1, plan.rows + 1):
         label = chr(ord("A") + r - 1)
         for n in range(1, plan.seats_per_row + 1):
-            aisle = plan.aisle_after is not None and n > plan.aisle_after
+            aisles_before = sum(1 for a in aisles if n > a)  # one empty column per aisle
             if (label, n) in wheelchair:
                 seat_type = "wheelchair"
             elif r in plan.vip_rows:
@@ -100,7 +109,7 @@ def _layout(hall_id: int, plan: LayoutIn) -> list[Seat]:
                     seat_number=n,
                     seat_type=seat_type,
                     grid_row=r,
-                    grid_col=n + 1 if aisle else n,
+                    grid_col=n + aisles_before,
                 )
             )
     return seats
