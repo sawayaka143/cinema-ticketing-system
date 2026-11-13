@@ -2,8 +2,8 @@
 
 Run from backend/:  python -m app.seed
 Safe to run again: existing halls, movies and screenings are skipped, not duplicated.
-`python -m app.seed --relayout "Hall 3"` rebuilds the seats of an existing hall from its plan
-below (only while no ticket was ever sold for that hall).
+`python -m app.seed --relayout all` (or --relayout "Hall 3") rebuilds the seats and type of
+existing halls from the plans below, for each hall only while no ticket was ever sold for it.
 Refuses to run when APP_ENV=production, unless --allow-production is passed
 (a deliberate one-off, e.g. the demo seed before the final defence).
 """
@@ -38,34 +38,40 @@ class HallPlan:
     price: Decimal
 
 
+# Every hall is IMAX style: 9 rows of 3 seats, aisle, 8 in the middle, aisle, 3.
+IMAX_ROWS = 9
+IMAX_SEATS = 14
+IMAX_AISLES = (3, 11)
+IMAX_VIP_ROWS = (5, 6)
+
 HALLS = [
     HallPlan(
         "Hall 1",
-        "2D",
-        8,
-        12,
-        (6,),
-        (6, 7),
+        "IMAX",
+        IMAX_ROWS,
+        IMAX_SEATS,
+        IMAX_AISLES,
+        IMAX_VIP_ROWS,
         (time(10), time(13), time(16), time(19), time(22)),
         Decimal("2000.00"),
     ),
     HallPlan(
         "Hall 2",
-        "3D",
-        7,
-        10,
-        (5,),
-        (5, 6),
+        "IMAX",
+        IMAX_ROWS,
+        IMAX_SEATS,
+        IMAX_AISLES,
+        IMAX_VIP_ROWS,
         (time(11), time(14), time(17), time(20), time(23)),
         Decimal("2500.00"),
     ),
     HallPlan(
         "Hall 3",
         "IMAX",
-        9,
-        14,
-        (3, 11),  # IMAX style: 3 seats, aisle, 8 in the middle, aisle, 3
-        (5, 6),
+        IMAX_ROWS,
+        IMAX_SEATS,
+        IMAX_AISLES,
+        IMAX_VIP_ROWS,
         (time(12), time(15, 30), time(19), time(22, 30)),
         Decimal("3500.00"),
     ),
@@ -285,7 +291,9 @@ def main(argv: Sequence[str] | None = None) -> None:
     parser.add_argument(
         "--relayout",
         metavar="HALL",
-        help="rebuild this existing hall's seats from its plan (no tickets sold yet), then seed",
+        action="append",
+        default=[],
+        help='rebuild an existing hall from its plan (no tickets sold yet); repeat, or use "all"',
     )
     args = parser.parse_args(argv)
     if get_settings().app_env == "production":
@@ -296,11 +304,16 @@ def main(argv: Sequence[str] | None = None) -> None:
             )
         print("WARNING: seeding the PRODUCTION database (--allow-production).")
     with Session(get_engine()) as db, db.begin():
-        if args.relayout:
+        names = [p.name for p in HALLS] if "all" in args.relayout else args.relayout
+        refused = []
+        for name in names:
             try:
-                print(f"{args.relayout}: rebuilt with {relayout(db, args.relayout)} seats")
+                print(f"{name}: rebuilt with {relayout(db, name)} seats")
             except RelayoutRefused as exc:
-                raise SystemExit(str(exc)) from exc
+                refused.append(str(exc))
+        if refused:
+            # Nothing is saved (the transaction rolls back), so a half-done relayout can't happen.
+            raise SystemExit("Nothing changed. " + " ".join(refused))
         added = seed(db)
     print("Added " + ", ".join(f"{n} {k}" for k, n in added.items()))
 

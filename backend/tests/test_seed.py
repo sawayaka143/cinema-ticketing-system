@@ -83,8 +83,8 @@ def _hall_seats(db: Session, name: str) -> list[Seat]:
     return list(db.scalars(select(Seat).where(Seat.hall_id == hall.hall_id)))
 
 
-def test_imax_plan_is_three_eight_three_in_nine_rows():
-    plan = next(p for p in seed_module.HALLS if p.name == "Hall 3")
+@pytest.mark.parametrize("plan", seed_module.HALLS, ids=lambda p: p.name)
+def test_every_hall_is_imax_three_eight_three_in_nine_rows(plan):
     assert (plan.hall_type, plan.rows, plan.seats_per_row, plan.aisles_after) == (
         "IMAX",
         9,
@@ -93,12 +93,15 @@ def test_imax_plan_is_three_eight_three_in_nine_rows():
     )
 
 
-def test_relayout_rebuilds_an_unsold_hall(db: Session):
+@pytest.mark.parametrize("name", ["Hall 2", "Hall 3"])
+def test_relayout_rebuilds_an_unsold_hall(db: Session, name: str):
     seed_module.seed(db)
+    db.execute(text("DELETE FROM ticket"))  # whatever an earlier run left in a local database
 
-    assert seed_module.relayout(db, "Hall 3") == 9 * 14
+    assert seed_module.relayout(db, name) == 9 * 14
 
-    seats = _hall_seats(db, "Hall 3")
+    assert db.scalar(select(Hall.hall_type).where(Hall.name == name)) == "IMAX"
+    seats = _hall_seats(db, name)
     assert len(seats) == 126
     assert {s.row_label for s in seats} == set("ABCDEFGHI")
     by_number = {s.seat_number: s.grid_col for s in seats if s.row_label == "E"}
