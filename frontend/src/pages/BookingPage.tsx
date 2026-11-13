@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { api } from "../api/client";
+import { KaspiQr } from "../components/KaspiQr";
 import { Status } from "../components/Layout";
 import { Button, Card, EmptyState, ErrorState, FadeIn, Skeleton } from "../components/ui";
 import { useAuth } from "../lib/auth-context";
 import { type Booking, clock, price, when } from "../lib/format";
 import { messageOf, must, statusOf, useApi } from "../lib/useApi";
+import { useCountdown } from "../lib/useCountdown";
 
 /** One booking: the live hold (countdown, total, cancel) or its final state. */
 export function BookingPage() {
@@ -74,6 +76,7 @@ function BookingView({ booking: initial, refresh }: { booking: Booking; refresh:
   const [booking, setBooking] = useState(initial);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [kaspi, setKaspi] = useState(false);
   const left = useCountdown(booking.status === "pending" ? booking.seconds_left : 0);
 
   // The hold ran out on screen: ask the API, which marks it expired and frees the seats.
@@ -127,7 +130,24 @@ function BookingView({ booking: initial, refresh }: { booking: Booking; refresh:
 
         <Tickets booking={booking} />
 
-        {booking.status === "pending" && <PayForm busy={busy} onPay={pay} onCancel={cancel} />}
+        {booking.status === "pending" && kaspi && (
+          <KaspiQr
+            booking={booking}
+            onPaid={(latest) => {
+              setKaspi(false);
+              setBooking(latest);
+            }}
+            onBack={() => setKaspi(false)}
+          />
+        )}
+
+        {booking.status === "pending" && !kaspi && (
+          <PayForm
+            busy={busy}
+            onPay={(method, decline) => (method === "kaspi" ? setKaspi(true) : void pay(method, decline))}
+            onCancel={cancel}
+          />
+        )}
 
         {booking.status === "paid" && <PaidTickets booking={booking} />}
 
@@ -180,14 +200,18 @@ function PayForm({
           </label>
         ))}
       </fieldset>
-      <label className="choice muted small">
-        <input type="checkbox" checked={decline} onChange={(e) => setDecline(e.target.checked)} />
-        Demo: make the bank decline this payment
-      </label>
+      {method === "card" ? (
+        <label className="choice muted small">
+          <input type="checkbox" checked={decline} onChange={(e) => setDecline(e.target.checked)} />
+          Demo: make the bank decline this payment
+        </label>
+      ) : (
+        <p className="muted small">You will get a QR code to scan with your phone, or to tap if you are on one.</p>
+      )}
       <p className="muted small">Payment is simulated. No real money is charged.</p>
       <div className="actions">
         <Button type="submit" variant="solid" loading={busy} disabled={busy}>
-          {busy ? "Please wait…" : "Pay now"}
+          {busy ? "Please wait…" : method === "kaspi" ? "Show Kaspi QR" : "Pay now"}
         </Button>
         <Button type="button" variant="ghost" disabled={busy} onClick={onCancel}>
           Cancel and free the seats
@@ -283,16 +307,4 @@ function Tickets({ booking }: { booking: Booking }) {
       </tfoot>
     </table>
   );
-}
-
-/** Seconds left, ticking once a second. Based on the API's seconds_left, so the device clock doesn't matter. */
-function useCountdown(seconds: number) {
-  const [deadline] = useState(() => Date.now() + seconds * 1000);
-  const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    if (seconds <= 0) return;
-    const id = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(id);
-  }, [seconds]);
-  return Math.max(0, Math.ceil((deadline - now) / 1000));
 }

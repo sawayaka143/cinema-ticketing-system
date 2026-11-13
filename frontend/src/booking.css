@@ -336,3 +336,267 @@ select {
 .basket .form.profile {
   margin: 0;
 }
+
+/* --- Demo Kaspi QR payment (#101) -------------------------------------------------------- */
+
+.kaspi-qr {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s6);
+  align-items: center;
+  margin-bottom: var(--s6);
+}
+
+.kaspi-qr-code {
+  position: relative;
+  display: block;
+  padding: var(--s3);
+  line-height: 0;
+  transition: transform 0.2s var(--ease-spring);
+}
+
+.kaspi-qr-code img {
+  display: block;
+  width: 240px;
+  height: 240px;
+}
+
+.kaspi-qr-code:hover,
+.kaspi-qr-code:focus-visible {
+  transform: scale(1.02);
+}
+
+.kaspi-qr-code:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+/* The "tap me" chip on the code: says it is a link, not only something to scan. */
+.kaspi-qr-tap {
+  position: absolute;
+  right: -0.5rem;
+  bottom: -0.75rem;
+  display: inline-flex;
+  gap: 0.3rem;
+  align-items: center;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1;
+  box-shadow: 0 4px 14px rgb(0 0 0 / 0.35);
+  animation: kaspi-tap 2.4s var(--ease-out) infinite;
+}
+
+@keyframes kaspi-tap {
+  0%,
+  70%,
+  100% {
+    transform: translateY(0);
+  }
+  80% {
+    transform: translateY(-3px);
+  }
+}
+
+.kaspi-qr-text {
+  display: grid;
+  flex: 1 1 16rem;
+  gap: var(--s3);
+}
+
+.kaspi-qr-text p {
+  margin: 0;
+}
+
+.kaspi-qr-hint {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  color: var(--accent);
+}
+
+.kaspi-qr-pulse {
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-right: 0.35rem;
+  border-radius: 50%;
+  background: var(--accent);
+  vertical-align: middle;
+  animation: kaspi-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes kaspi-pulse {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+/* On a phone the code can't be scanned by the same phone: tapping is the main way. */
+@media (max-width: 40rem) {
+  .kaspi-qr {
+    justify-content: center;
+  }
+
+  .kaspi-qr-code img {
+    width: 200px;
+    height: 200px;
+  }
+
+  .kaspi-open {
+    width: 100%;
+  }
+}
+
+/* The pay page itself, opened on the phone. A bank-app look, labelled as a demo. */
+.fake-kaspi {
+  --pay: #e5372c;
+  --pay-hover: #f04b40;
+
+  display: grid;
+  gap: var(--s4);
+  width: min(100%, 26rem);
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: var(--s4) var(--s4) var(--s8);
+  align-content: start;
+}
+
+.fake-kaspi-bar {
+  display: flex;
+  gap: var(--s3);
+  align-items: center;
+  font-size: 1.125rem;
+}
+
+.fake-kaspi-logo {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.7rem;
+  background: var(--pay);
+  color: #fff;
+  font-weight: 700;
+}
+
+.fake-kaspi-demo {
+  padding: 0.1rem 0.45rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.fake-kaspi-card {
+  padding: var(--s6);
+}
+
+/* Card wraps its children in .squircle-inner > .card-body, so the layout goes there. */
+.fake-kaspi-card .card-body {
+  display: grid;
+  gap: var(--s4);
+}
+
+.fake-kaspi-card p,
+.fake-kaspi-card h1 {
+  margin: 0;
+}
+
+.fake-kaspi-merchant {
+  display: flex;
+  gap: var(--s3);
+  align-items: center;
+  color: var(--muted);
+}
+
+.fake-kaspi-amount {
+  font-size: 2.5rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.fake-kaspi-details {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--s2) var(--s4);
+  margin: 0;
+}
+
+.fake-kaspi-details dt {
+  color: var(--muted);
+}
+
+.fake-kaspi-details dd {
+  margin: 0;
+}
+
+.fake-kaspi-seats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2);
+}
+
+.fake-kaspi-timer {
+  color: var(--muted);
+}
+
+.fake-kaspi-timer b {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.fake-kaspi-timer.urgent b {
+  color: var(--bad);
+}
+
+/* The bank's button colour, only on this page. */
+.fake-kaspi .fake-kaspi-pay {
+  --accent: var(--pay);
+  --accent-hover: var(--pay-hover);
+  --on-accent: #fff;
+}
+
+.fake-kaspi-error {
+  color: var(--bad);
+}
+
+.fake-kaspi-done .card-body {
+  justify-items: center;
+  text-align: center;
+}
+
+.fake-kaspi-check {
+  display: grid;
+  place-items: center;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  background: #1f9d55;
+  color: #fff;
+  font-size: 2rem;
+}
+
+.fake-kaspi-note {
+  margin: 0;
+  color: var(--text-subtle);
+  font-size: 0.8125rem;
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kaspi-qr-tap,
+  .kaspi-qr-pulse {
+    animation: none;
+  }
+
+  .kaspi-qr-code {
+    transition: none;
+  }
+}
