@@ -13,7 +13,6 @@
       "Bash(git commit --no-verify*)",
       "Bash(git commit * --no-verify*)",
       "Bash(git reset --hard origin/*)",
-      "Bash(gh pr merge*)",
       "Bash(gh repo edit*)",
       "Bash(gh api -X DELETE*)",
       "Read(./.env)",
@@ -23,6 +22,7 @@
     "ask": [
       "Bash(gh pr create*)",
       "Bash(gh issue create*)",
+      "Bash(gh pr merge*)",
       "Bash(gh pr review*)",
       "Bash(gh pr comment*)"
     ]

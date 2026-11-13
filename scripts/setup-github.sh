@@ -68,7 +68,7 @@ JSON
 
 echo "→ Labels"
 label() { gh label create "$1" --color "$2" --description "$3" --force --repo "$repo" >/dev/null; }
-label "area:frontend" "1d76db" "frontend/ (owner only)"
+label "area:frontend" "1d76db" "frontend/ (@sawayaka143, @Sanzhar872)"
 label "area:backend"  "0e8a16" "backend/ API"
 label "area:database" "5319e7" "migrations and schema"
 label "area:tests"    "fbca04" "tests"

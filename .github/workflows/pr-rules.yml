@@ -74,12 +74,16 @@ jobs:
             warn "PR changes $size lines (guideline $MAX_LINES, lockfiles and generated files excluded). Consider splitting it."
           fi
 
-          # 5. Areas: frontend/ is the owner's area, so changes there by others only warn
+          # 5. Areas: frontend/ is open to the owner and Sanzhar872; changes there by others only warn
           #    (the generated src/api/schema.d.ts is expected); workflow and rule files only warn
           if [[ "$AUTHOR" != "$OWNER" ]]; then
-            restricted=$(cut -f1 files.tsv | grep -E '^frontend/' | grep -vx 'frontend/src/api/schema.d.ts' || true)
-            if [[ -n "$restricted" ]]; then
-              warn "frontend/ is the owner's area (see AGENTS.md); the owner will look closely: $(tr '\n' ' ' <<< "$restricted")"
+            if [[ "$AUTHOR" != "Sanzhar872" ]]; then
+              restricted=$(cut -f1 files.tsv | grep -E '^frontend/' | grep -vx 'frontend/src/api/schema.d.ts' || true)
+              if [[ -n "$restricted" ]]; then
+                warn "frontend/ is restricted (see AGENTS.md); the owner will look closely: $(tr '\n' ' ' <<< "$restricted")"
+              else
+                ok "areas"
+              fi
             else
               ok "areas"
             fi
