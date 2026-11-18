@@ -7,6 +7,14 @@ export type Seat = components["schemas"]["SeatOut"];
 export type TicketType = components["schemas"]["TicketTypeOut"];
 export type Booking = components["schemas"]["BookingOut"];
 export type MyBooking = components["schemas"]["MyBookingOut"];
+export type Me = components["schemas"]["Me"];
+export type AdminMovie = components["schemas"]["AdminMovieOut"];
+export type AdminScreening = components["schemas"]["AdminScreeningOut"];
+export type AdminHall = components["schemas"]["AdminHallOut"];
+export type ReportRow = components["schemas"]["ReportRow"];
+export type StaffBooking = components["schemas"]["StaffBookingOut"];
+export type CheckinOut = components["schemas"]["CheckinOut"];
+export type RefundOut = components["schemas"]["RefundOut"];
 
 /** "Fri 7 Nov, 19:30" in Almaty time. */
 export function when(iso: string) {
@@ -52,4 +60,14 @@ export function nextDays(count = 7): Day[] {
 
 export function dayOf(iso: string) {
   return isoFmt.format(new Date(iso));
+}
+
+/** Current YYYY-MM-DD date in Almaty time. */
+export function almatyToday() {
+  return isoFmt.format(new Date());
+}
+
+/** Combine local YYYY-MM-DD and HH:MM into an Almaty (+05:00) ISO-8601 timestamp. */
+export function almatyIso(dateStr: string, timeStr: string) {
+  return `${dateStr}T${timeStr}:00+05:00`;
 }

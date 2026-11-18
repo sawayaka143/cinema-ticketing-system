@@ -1,0 +1,228 @@
+/* Manager & staff dashboard: structured operate-mode tables, forms, and action badges. */
+
+.badge-subtle {
+  border: 1px solid transparent;
+  background: var(--surface-2);
+}
+
+.badge-warning {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(240, 165, 58, 0.14);
+}
+
+.badge-success {
+  border-color: #4dc47d;
+  color: #7ee2a8;
+  background: rgba(77, 196, 125, 0.12);
+}
+
+.badge-error {
+  border-color: var(--bad);
+  color: var(--bad);
+  background: rgba(255, 138, 122, 0.12);
+}
+
+.mgr-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s3);
+  margin-bottom: var(--s4);
+}
+
+.mgr-header h1 {
+  margin: 0;
+  font-size: 1.75rem;
+}
+
+.mgr-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2);
+  margin-bottom: var(--s6);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: var(--s3);
+}
+
+.mgr-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: var(--s3);
+  margin-bottom: var(--s6);
+  padding: var(--s3) var(--s4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.mgr-stat {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.mgr-stat span {
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+
+.mgr-stat b {
+  font-size: 1.25rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.mgr-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s3);
+  margin-bottom: var(--s4);
+}
+
+.mgr-toolbar h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.mgr-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s2);
+}
+
+.mgr-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: var(--s3) var(--s4);
+  padding: var(--s4);
+  margin-bottom: var(--s6);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.mgr-form label {
+  display: grid;
+  gap: var(--s1);
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+.mgr-form input,
+.mgr-form select,
+.mgr-form textarea,
+.mgr-inline-input {
+  width: 100%;
+  min-height: 2.5rem;
+  padding: 0.45rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) * 0.75);
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+}
+
+.mgr-form textarea {
+  min-height: 4.5rem;
+  resize: vertical;
+}
+
+.mgr-form .mgr-span-all {
+  grid-column: 1 / -1;
+}
+
+.mgr-form-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2);
+  align-items: center;
+}
+
+.mgr-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.mgr-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.mgr-table th,
+.mgr-table td {
+  padding: 0.65rem var(--s3);
+  border-bottom: 1px solid var(--border-subtle);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.mgr-table th {
+  color: var(--muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  background: var(--surface-2);
+  white-space: nowrap;
+}
+
+.mgr-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.mgr-table tr.is-dim td {
+  opacity: 0.65;
+}
+
+.mgr-table .num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.mgr-row-actions {
+  display: inline-flex;
+  gap: var(--s2);
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.mgr-inline-input {
+  width: 6.5rem;
+  min-height: 2rem;
+  padding: 0.25rem 0.5rem;
+  text-align: right;
+}
+
+.mgr-box-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+  gap: var(--s6);
+}
+
+.mgr-result {
+  margin-top: var(--s4);
+  padding: var(--s4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  display: grid;
+  gap: var(--s2);
+}
+
+.mgr-result p {
+  margin: 0;
+}
+
+@media (max-width: 700px) {
+  .mgr-table th,
+  .mgr-table td {
+    padding: 0.55rem var(--s2);
+    font-size: 0.875rem;
+  }
+}
