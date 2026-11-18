@@ -2,11 +2,13 @@ import type { ReactNode } from "react";
 import { Link, NavLink, Outlet } from "react-router";
 import { useAuth } from "../lib/auth-context";
 import { supabase } from "../lib/supabase";
+import { Badge } from "./ui/Badge";
 import { BrandMark } from "./ui/BrandMark";
 import { Button } from "./ui/Button";
 
 export function Layout() {
-  const { session, ready } = useAuth();
+  const { session, ready, me } = useAuth();
+  const staffRole = me?.staff?.role ?? null;
 
   return (
     <>
@@ -20,12 +22,13 @@ export function Layout() {
             <div className="account">
               {!ready ? null : session ? (
                 <>
+                  {staffRole && (
+                    <Badge tone="accent" variant="subtle" className="cap">
+                      {staffRole}
+                    </Badge>
+                  )}
                   <span className="who">{session.user.email}</span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => supabase.auth.signOut()}
-                  >
+                  <Button variant="ghost" size="sm" onClick={() => supabase.auth.signOut()}>
                     Log out
                   </Button>
                 </>
@@ -43,6 +46,9 @@ export function Layout() {
               What&apos;s on
             </NavLink>
             <NavLink to="/me/bookings">My bookings</NavLink>
+            {staffRole && (staffRole === "manager" || staffRole === "admin") && (
+              <NavLink to="/manager">Manager</NavLink>
+            )}
           </nav>
         </div>
       </header>

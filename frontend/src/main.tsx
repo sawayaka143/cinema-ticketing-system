@@ -3,12 +3,14 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter, Route, Routes } from "react-router";
 import "./index.css";
 import "./booking.css";
+import "./manager.css";
 import { Layout, Status } from "./components/Layout";
 import { AuthProvider } from "./lib/auth";
 import { BookingPage } from "./pages/BookingPage";
 import { BookingsPage } from "./pages/BookingsPage";
 import { FakeKaspiPage } from "./pages/FakeKaspiPage";
 import { LoginPage } from "./pages/LoginPage";
+import { ManagerPage } from "./pages/ManagerPage";
 import { MoviePage } from "./pages/MoviePage";
 import { MoviesPage } from "./pages/MoviesPage";
 import { ScreeningPage } from "./pages/ScreeningPage";
@@ -27,6 +29,7 @@ createRoot(document.getElementById("root")!).render(
             <Route path="bookings/:id" element={<BookingPage />} />
             <Route path="login" element={<LoginPage />} />
             <Route path="me/bookings" element={<BookingsPage />} />
+            <Route path="manager" element={<ManagerPage />} />
             <Route path="*" element={<Status>Page not found.</Status>} />
           </Route>
         </Routes>
