@@ -1,20 +1,25 @@
 import { useState } from "react";
 import { Link } from "react-router";
+import { ManagerBoxOfficeTab } from "../components/manager/ManagerBoxOfficeTab";
+import { ManagerHallsTab, ManagerMoviesTab } from "../components/manager/ManagerCatalogTabs";
 import { ManagerReportTab } from "../components/manager/ManagerReportTab";
 import { ManagerScheduleTab } from "../components/manager/ManagerScheduleTab";
 import { Badge, Button, EmptyState, FadeIn, Skeleton } from "../components/ui";
 import { useAuth } from "../lib/auth-context";
 
-type Tab = "report" | "schedule";
+type Tab = "report" | "schedule" | "movies" | "halls" | "box-office";
 
 const MANAGER_TABS: { id: Tab; label: string }[] = [
   { id: "report", label: "Occupancy report" },
   { id: "schedule", label: "Schedule" },
+  { id: "movies", label: "Movies" },
+  { id: "halls", label: "Halls" },
+  { id: "box-office", label: "Box office" },
 ];
 
 export function ManagerPage() {
   const { session, ready, me, meReady } = useAuth();
-  const [tab, setTab] = useState<Tab>("report");
+  const [tab, setTab] = useState<Tab | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [prefillTitle, setPrefillTitle] = useState<string | null>(null);
 
@@ -33,7 +38,7 @@ export function ManagerPage() {
       <FadeIn direction="up">
         <EmptyState
           title="Log in to open the manager panel"
-          description="Sign in with a manager or admin account to view the report and manage screenings."
+          description="Sign in with a staff account to manage movies, halls, screenings, and view the report."
           action={
             <Button as={Link} to="/login" variant="solid">
               Log in
@@ -44,13 +49,12 @@ export function ManagerPage() {
     );
   }
 
-  const isManager = me?.staff?.role === "manager" || me?.staff?.role === "admin";
-  if (!isManager) {
+  if (!me?.staff) {
     return (
       <FadeIn direction="up">
         <EmptyState
-          title="Manager access required"
-          description="Your account does not have a manager or admin staff role."
+          title="Staff access required"
+          description="Your account is signed in as a customer. A staff role is needed here."
           action={
             <Button as={Link} to="/" variant="ghost">
               Back to what&apos;s on
@@ -61,28 +65,32 @@ export function ManagerPage() {
     );
   }
 
-  const staff = me.staff!;
+  const isManager = me.staff.role === "manager" || me.staff.role === "admin";
+  const tabs = isManager ? MANAGER_TABS : MANAGER_TABS.filter((t) => t.id === "box-office");
+  const activeTab: Tab =
+    tab && tabs.some((t) => t.id === tab) ? tab : isManager ? "report" : "box-office";
+
   const bump = () => setRefreshKey((n) => n + 1);
 
   return (
     <FadeIn direction="up">
       <section>
         <div className="mgr-header">
-          <h1>Manager panel</h1>
+          <h1>{isManager ? "Manager panel" : "Box office"}</h1>
           <span className="muted">
-            {staff.full_name} ·{" "}
+            {me.staff.full_name} ·{" "}
             <Badge tone="accent" variant="subtle" className="cap">
-              {staff.role}
+              {me.staff.role}
             </Badge>
           </span>
         </div>
 
         <nav className="mgr-tabs" aria-label="Manager sections">
-          {MANAGER_TABS.map((item) => (
+          {tabs.map((item) => (
             <Button
               key={item.id}
               size="sm"
-              variant={tab === item.id ? "solid" : "ghost"}
+              variant={activeTab === item.id ? "solid" : "ghost"}
               onClick={() => {
                 setPrefillTitle(null);
                 setTab(item.id);
@@ -93,7 +101,7 @@ export function ManagerPage() {
           ))}
         </nav>
 
-        {tab === "report" && (
+        {activeTab === "report" && (
           <ManagerReportTab
             refreshKey={refreshKey}
             onAddShow={(title) => {
@@ -102,13 +110,16 @@ export function ManagerPage() {
             }}
           />
         )}
-        {tab === "schedule" && (
+        {activeTab === "schedule" && (
           <ManagerScheduleTab
             refreshKey={refreshKey}
             prefillTitle={prefillTitle}
             onChanged={bump}
           />
         )}
+        {activeTab === "movies" && <ManagerMoviesTab refreshKey={refreshKey} onChanged={bump} />}
+        {activeTab === "halls" && <ManagerHallsTab refreshKey={refreshKey} onChanged={bump} />}
+        {activeTab === "box-office" && <ManagerBoxOfficeTab />}
       </section>
     </FadeIn>
   );
