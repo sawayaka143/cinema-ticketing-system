@@ -293,6 +293,12 @@ def pay_booking(booking_id: int, body: PayIn, user: CurrentUserDep, db: SessionD
     """Fake payment for my pending hold (§6, step 2). A decline is stored; retry is allowed."""
     expire_stale_holds(db)
     booking = _own_booking(db, user, booking_id, lock=True)
+    settle_payment(db, booking, body.method, decline=body.simulate_decline)
+    return _booking_out(db, booking)
+
+
+def ensure_payable(db: Session, booking: Booking) -> None:
+    """409 unless the (locked) booking is pending and its hold hasn't ended."""
     if booking.status == "expired" or (
         booking.status == "pending" and booking.hold_expires_at <= datetime.now(UTC)
     ):
@@ -302,6 +308,14 @@ def pay_booking(booking_id: int, body: PayIn, user: CurrentUserDep, db: SessionD
         db.rollback()
         raise HTTPException(status.HTTP_409_CONFLICT, f"The booking is already {booking.status}")
 
+
+def settle_payment(db: Session, booking: Booking, method: str, *, decline: bool) -> None:
+    """Record one fake payment attempt for a locked booking and commit.
+
+    Success: the booking becomes 'paid' and gets its ticket QR token. Decline: a 'failed' row
+    is kept and 402 is raised; the customer may retry until the hold ends.
+    """
+    ensure_payable(db, booking)
     amount = db.scalar(
         text("SELECT total_amount FROM booking_total WHERE booking_id = :id"),
         {"id": booking.booking_id},
@@ -309,12 +323,12 @@ def pay_booking(booking_id: int, body: PayIn, user: CurrentUserDep, db: SessionD
     payment = Payment(
         booking_id=booking.booking_id,
         amount=amount,
-        method=body.method,
-        status="failed" if body.simulate_decline else "success",
+        method=method,
+        status="failed" if decline else "success",
         provider_ref=f"FAKE-{secrets.token_hex(6)}",
     )
     db.add(payment)
-    if body.simulate_decline:
+    if decline:
         db.commit()
         raise HTTPException(
             status.HTTP_402_PAYMENT_REQUIRED, "Payment declined. Try again before the hold expires"
@@ -323,7 +337,6 @@ def pay_booking(booking_id: int, body: PayIn, user: CurrentUserDep, db: SessionD
     booking.status = "paid"
     booking.qr_token = secrets.token_urlsafe(QR_TOKEN_BYTES)
     db.commit()
-    return _booking_out(db, booking)
 
 
 @router.get(

@@ -15,6 +15,7 @@
     "@supabase/supabase-js": "^2.118.0",
     "gsap": "3.15.1",
     "openapi-fetch": "^0.17.0",
+    "qrcode": "1.5.4",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "react-router": "^7.9.4",
@@ -22,6 +23,7 @@
   },
   "devDependencies": {
     "@types/node": "^24.19.2",
+    "@types/qrcode": "1.5.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@types/three": "0.187.0",
