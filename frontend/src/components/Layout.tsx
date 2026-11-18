@@ -46,8 +46,8 @@ export function Layout() {
               What&apos;s on
             </NavLink>
             <NavLink to="/me/bookings">My bookings</NavLink>
-            {staffRole && (staffRole === "manager" || staffRole === "admin") && (
-              <NavLink to="/manager">Manager</NavLink>
+            {staffRole && (
+              <NavLink to="/manager">{staffRole === "cashier" ? "Box office" : "Manager"}</NavLink>
             )}
           </nav>
         </div>
