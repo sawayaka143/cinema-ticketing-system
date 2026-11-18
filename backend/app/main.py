@@ -1,7 +1,17 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import admin, admin_halls, bookings, catalog, checkin, me, staff_bookings, system
+from app.api import (
+    admin,
+    admin_halls,
+    bookings,
+    catalog,
+    checkin,
+    fake_kaspi,
+    me,
+    staff_bookings,
+    system,
+)
 from app.config import get_settings
 
 app = FastAPI(title="Cinema Ticketing API", version="0.1.0")
@@ -22,3 +32,4 @@ app.include_router(checkin.router, prefix="/api")
 app.include_router(admin.router, prefix="/api")
 app.include_router(admin_halls.router, prefix="/api")
 app.include_router(staff_bookings.router, prefix="/api")
+app.include_router(fake_kaspi.router, prefix="/api")

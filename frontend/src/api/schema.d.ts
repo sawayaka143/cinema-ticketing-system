@@ -272,6 +272,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/bookings/{booking_id}/kaspi-invoice": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create Kaspi Invoice
+         * @description A payment link for my pending booking, to show as a QR code. Asking again reuses it.
+         */
+        post: operations["create_kaspi_invoice_api_bookings__booking_id__kaspi_invoice_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/bookings/{booking_id}/pay": {
         parameters: {
             query?: never;
@@ -326,6 +346,46 @@ export interface paths {
          * @description Validate a scanned QR code and let the whole booking in (once).
          */
         post: operations["check_in_api_checkin_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/fake-kaspi/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Fake Kaspi Invoice
+         * @description What the phone shows: merchant, amount, show and seats. No login; no personal data.
+         */
+        get: operations["get_fake_kaspi_invoice_api_fake_kaspi__token__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/fake-kaspi/{token}/pay": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Pay Fake Kaspi Invoice
+         * @description Pay (or decline) from the phone. Paying a booking that is already paid changes nothing.
+         */
+        post: operations["pay_fake_kaspi_invoice_api_fake_kaspi__token__pay_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -788,6 +848,43 @@ export interface components {
             /** Phone */
             phone: string | null;
         };
+        /** FakeKaspiOut */
+        FakeKaspiOut: {
+            /** Amount */
+            amount: string;
+            /** Hall */
+            hall: string | null;
+            /** Merchant */
+            merchant: string;
+            /** Movie Title */
+            movie_title: string | null;
+            /**
+             * Seats
+             * @example [
+             *       "A5",
+             *       "A6"
+             *     ]
+             */
+            seats: string[];
+            /** Seconds Left */
+            seconds_left: number;
+            /** Start Time */
+            start_time: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "pending" | "paid" | "cancelled" | "expired";
+        };
+        /** FakePayIn */
+        FakePayIn: {
+            /**
+             * Decline
+             * @description true shows a declined payment (demo)
+             * @default false
+             */
+            decline: boolean;
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -871,6 +968,23 @@ export interface components {
             ticket_types: {
                 [key: string]: string;
             };
+        };
+        /** InvoiceOut */
+        InvoiceOut: {
+            /** Amount */
+            amount: string;
+            /** Booking Id */
+            booking_id: number;
+            /**
+             * Pay Path
+             * @description Frontend path for the QR code; prefix it with the site's origin
+             * @example /fake-kaspi/3q2-x…
+             */
+            pay_path: string;
+            /** Payment Token */
+            payment_token: string;
+            /** Seconds Left */
+            seconds_left: number;
         };
         /** LayoutIn */
         LayoutIn: {
@@ -1840,6 +1954,37 @@ export interface operations {
             };
         };
     };
+    create_kaspi_invoice_api_bookings__booking_id__kaspi_invoice_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                booking_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvoiceOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     pay_booking_api_bookings__booking_id__pay_post: {
         parameters: {
             query?: never;
@@ -1926,6 +2071,72 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CheckinOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_fake_kaspi_invoice_api_fake_kaspi__token__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FakeKaspiOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    pay_fake_kaspi_invoice_api_fake_kaspi__token__pay_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FakePayIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FakeKaspiOut"];
                 };
             };
             /** @description Validation Error */
