@@ -1,7 +1,7 @@
 # Final defence: answers
 
 The 9 questions from the course handout. These are draft answers: keep them true for **today**. The `status-check` skill refreshes them every week.
-Last updated: Week 10 (2026-11-06).
+Last updated: Week 12 (2026-11-19).
 
 ## 1. What real problem does the system solve?
 Buying cinema tickets without queueing at the box office or calling the cinema, and without two people ending up with the same seat. The cinema gets the same thing in reverse: no lost sales on seats that look taken but were never paid for, and a clear view of which shows are empty and which are full.
@@ -11,7 +11,9 @@ Buying cinema tickets without queueing at the box office or calling the cinema, 
 - **Managers:** run the schedule (movies, halls, screenings, prices) and see occupancy and revenue per screening for the next 7 days, so they can move or cancel shows below 30 % and add shows above 90 %.
 
 ## 3. What works now? Show it.
-_Week 10:_ the deployed frontend (a placeholder in the real style), the deployed API (`/health`, `/docs`), CI, and the database design. No step of the booking flow works yet.
+_Week 12:_ the full MVP is live on Vercel and locally:
+- **Customer flow:** movie program (`/`), movie details (`/movies/:id`), 126-seat IMAX 3D seat map with first-person screen preview (`/screenings/:id`), 10-minute seat hold with live countdown, simulated card and demo Kaspi QR payment (`/bookings/:id` & `/fake-kaspi/:token`), downloadable QR tickets, and booking history (`/me/bookings`).
+- **Manager & Box Office panel (`/manager`):** 7-day occupancy and revenue report highlighting shows below 30% and above 90%, screening schedule CRUD with overlap checks, movies CRUD/archive, halls & seat layout builder, QR check-in, and booking refund.
 
 ## 4. What is technically inside?
 - **Frontend:** React, Vite, TypeScript (strict), on Vercel. API types are generated from the backend's OpenAPI file.
@@ -29,7 +31,7 @@ _Week 10:_ the deployed frontend (a placeholder in the real style), the deployed
 Details: [`schema-decisions.md`](../schema-decisions.md).
 
 ## 6. What was tested and improved?
-_Week 10:_ CI checks that every migration applies, rolls back and re-applies. Health and dependency tests run on every PR. Booking tests come with the booking endpoints (see `docs/test-cases.md` from W11).
+_Week 12:_ CI verifies `ruff check` / `ruff format`, Alembic migrations up/down/up, 199 backend `pytest` cases (booking concurrency/holds, overlap rules, Kaspi QR invoice, manager CRUD, staff check-in/refund), and OpenAPI contract sync (`openapi.json` → `schema.d.ts`) alongside frontend `oxlint`, `tsc -b`, and Vite production builds.
 Design improvements over Task 09:
 - the hold → pay split instead of one transaction
 - a ticket type instead of a free-form discount
@@ -37,8 +39,8 @@ Design improvements over Task 09:
 - a staff table with roles
 
 ## 7. What did each member personally contribute?
-Kept in the weekly files ([`week-10.md`](week-10.md) and later), with evidence from GitHub.
-As of Week 10, all repository work, including the Task 09 design, is by Aldiyar Yeskenov. The other members have no recorded contribution yet.
+Kept in the weekly files ([`week-10.md`](week-10.md), [`week-12.md`](week-12.md)), with evidence from GitHub.
+As of Week 12, architecture, backend/frontend core, UI design system, manager panel, and CI/deploy are by Aldiyar Yeskenov (`@sawayaka143`); demo Kaspi QR payment, IMAX hall relayout, and the Three.js 3D hall viewer are by Sanzhar Saparkhan (`@Sanzhar872`). The other members have no recorded repository contributions yet.
 
 ## 8. What makes the solution useful or different?
 - Seats can't be double-booked, and the database enforces it, not only the UI.
