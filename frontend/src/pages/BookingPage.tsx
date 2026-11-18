@@ -137,14 +137,24 @@ function BookingView({ booking: initial, refresh }: { booking: Booking; refresh:
               setKaspi(false);
               setBooking(latest);
             }}
-            onBack={() => setKaspi(false)}
+            onBack={() => {
+              setMessage(null);
+              setKaspi(false);
+            }}
           />
         )}
 
         {booking.status === "pending" && !kaspi && (
           <PayForm
             busy={busy}
-            onPay={(method, decline) => (method === "kaspi" ? setKaspi(true) : void pay(method, decline))}
+            onPay={(method, decline) => {
+              if (method === "kaspi") {
+                setMessage(null);
+                setKaspi(true);
+              } else {
+                void pay(method, decline);
+              }
+            }}
             onCancel={cancel}
           />
         )}
