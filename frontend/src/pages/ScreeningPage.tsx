@@ -1,4 +1,4 @@
-import { type FormEvent, useState } from "react";
+import { type FormEvent, lazy, Suspense, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { api } from "../api/client";
 import { Status } from "../components/Layout";
@@ -10,6 +10,9 @@ import { screeningKey } from "../lib/catalogCache";
 import { messageOf, must, statusOf, useApi } from "../lib/useApi";
 
 const MAX_SEATS = 10;
+
+// Three.js is large, so the 3D hall is its own chunk, fetched after the page itself has shown.
+const HallView3D = lazy(() => import("../components/HallView3D"));
 
 export function ScreeningPage() {
   const screeningId = Number(useParams().id);
@@ -154,16 +157,29 @@ export function ScreeningPage() {
         </p>
 
         <div className="booking-layout">
-          {map ? (
-            <SeatMap seats={map.seats} picked={new Set(picked.keys())} onToggle={toggle} disabled={busy} />
-          ) : (
-            <Skeleton width="100%" height="18rem" radius={14} aria-busy="true" />
-          )}
+          <div className="hall-panel">
+            {!map ? (
+              <Skeleton width="100%" height="30rem" radius={18} aria-busy="true" />
+            ) : (
+              <Suspense fallback={<Skeleton width="100%" height="30rem" radius={18} aria-busy="true" />}>
+                <HallView3D
+                  seats={map.seats}
+                  picked={new Set(picked.keys())}
+                  onToggle={toggle}
+                  disabled={busy}
+                  hallType={s.hall.hall_type}
+                  fallback={
+                    <SeatMap seats={map.seats} picked={new Set(picked.keys())} onToggle={toggle} disabled={busy} />
+                  }
+                />
+              </Suspense>
+            )}
+          </div>
 
           <Card as="aside" elevated className="basket" aria-label="Your seats">
             <h2>Your seats</h2>
             {chosen.length === 0 ? (
-              <p className="muted">Tap free seats on the map. Up to {MAX_SEATS} per booking.</p>
+              <p className="muted">Tap a seat in the hall to see the screen from it, then pick it. Up to {MAX_SEATS} per booking.</p>
             ) : (
               <ul className="picks">
                 {chosen.map((seat) => (
