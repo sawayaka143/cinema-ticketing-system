@@ -22,16 +22,16 @@ export function BrandMark({
           ? 36
           : 28;
 
-  const radius = Math.max(6, Math.round(pixelSize * 0.32));
+  const radius = Math.max(4, Math.round(pixelSize * 0.22));
 
   const emblem = (
     <Squircle
       as="span"
       radius={radius}
-      smoothing={0.7}
+      smoothing={0.5}
       fill="var(--surface-2)"
       stroke="var(--accent)"
-      strokeWidth={1.5}
+      strokeWidth={1.25}
       shadow="none"
       style={{
         width: pixelSize,

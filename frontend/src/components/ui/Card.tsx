@@ -17,7 +17,7 @@ export interface CardProps extends HTMLAttributes<HTMLElement> {
 export const Card = forwardRef<HTMLElement, CardProps>(function Card(
   {
     as: Component = "article",
-    radius = 18,
+    radius = 6,
     hoverable = false,
     elevated = true,
     className = "",
@@ -31,11 +31,11 @@ export const Card = forwardRef<HTMLElement, CardProps>(function Card(
       as={Component}
       ref={ref}
       radius={radius}
-      smoothing={0.65}
+      smoothing={0.5}
       fill="var(--surface)"
       stroke="var(--border)"
       strokeWidth={1}
-      shadow={elevated ? "elevated" : "subtle"}
+      shadow={elevated ? "subtle" : "none"}
       className={`card ${hoverable ? "card-hoverable" : ""} ${className}`.trim()}
       {...props}
     >

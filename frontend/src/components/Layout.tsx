@@ -13,35 +13,12 @@ export function Layout() {
   return (
     <>
       <header className="rail">
-        <div className="rail-tier rail-tier-brand">
-          <div className="rail-content rail-top">
-            <Link to="/" className="mark" aria-label="Alatau Cinema Home">
-              <BrandMark size="md" />
-              <span>Alatau Cinema</span>
-            </Link>
-            <div className="account">
-              {!ready ? null : session ? (
-                <>
-                  {staffRole && (
-                    <Badge tone="accent" variant="subtle" className="cap">
-                      {staffRole}
-                    </Badge>
-                  )}
-                  <span className="who">{session.user.email}</span>
-                  <Button variant="ghost" size="sm" onClick={() => supabase.auth.signOut()}>
-                    Log out
-                  </Button>
-                </>
-              ) : (
-                <Button as={Link} to="/login" variant="ghost" size="sm">
-                  Log in
-                </Button>
-              )}
-            </div>
-          </div>
-        </div>
-        <div className="rail-tier rail-tier-nav">
-          <nav className="rail-content rail-nav" aria-label="Main">
+        <div className="rail-content rail-top">
+          <Link to="/" className="mark" aria-label="Alatau Cinema Home">
+            <BrandMark size="md" />
+            <span>Alatau Cinema</span>
+          </Link>
+          <nav className="rail-nav" aria-label="Main">
             <NavLink to="/" end>
               What&apos;s on
             </NavLink>
@@ -50,14 +27,35 @@ export function Layout() {
               <NavLink to="/manager">{staffRole === "cashier" ? "Box office" : "Manager"}</NavLink>
             )}
           </nav>
+          <div className="account">
+            {!ready ? null : session ? (
+              <>
+                {staffRole && (
+                  <Badge tone="accent" variant="subtle" className="cap">
+                    {staffRole}
+                  </Badge>
+                )}
+                <span className="who">{session.user.email}</span>
+                <Button variant="ghost" size="sm" onClick={() => supabase.auth.signOut()}>
+                  Log out
+                </Button>
+              </>
+            ) : (
+              <Button as={Link} to="/login" variant="ghost" size="sm">
+                Log in
+              </Button>
+            )}
+          </div>
         </div>
       </header>
       <main className="page">
         <Outlet />
       </main>
       <footer className="foot">
-        <p>Alatau Cinema is a fictional cinema. University project, KBTU.</p>
-        <p>Times are Almaty time. Prices in tenge.</p>
+        <div className="rail-content foot-inner">
+          <p>Alatau Cinema · Almaty</p>
+          <p>Halls 2D · 3D · IMAX · All times Asia/Almaty (UTC+5) · Prices in tenge (₸)</p>
+        </div>
       </footer>
     </>
   );

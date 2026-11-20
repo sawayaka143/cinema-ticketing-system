@@ -57,9 +57,9 @@ export const Button = forwardRef<HTMLElement, ButtonProps>(function Button(
   };
 
   const radiusMap: Record<ButtonSize, number> = {
-    sm: 10,
-    md: 14,
-    lg: 16,
+    sm: 4,
+    md: 6,
+    lg: 8,
   };
 
   if (isLinkVariant) {
@@ -94,10 +94,10 @@ export const Button = forwardRef<HTMLElement, ButtonProps>(function Button(
       as={Component}
       ref={ref}
       radius={radiusMap[size]}
-      smoothing={0.7}
+      smoothing={0.5}
       fill={fill}
       stroke={stroke}
-      strokeWidth={1.5}
+      strokeWidth={1}
       shadow="none"
       className={`btn btn-${variant} ${sizeClasses[size]} ${isDisabled ? "btn-disabled" : ""} ${className}`.trim()}
       disabled={isButtonTag ? isDisabled : undefined}
