@@ -146,8 +146,8 @@ export function ScreeningPage() {
   return (
     <FadeIn direction="up">
       <section>
-        <p className="kicker">
-          <Link to={`/movies/${s.movie.movie_id}`}>{s.movie.title}</Link>
+        <p className="back-link">
+          <Link to={`/movies/${s.movie.movie_id}`}>← {s.movie.title}</Link>
         </p>
         <h1>
           {s.hall.name} · {s.hall.hall_type}

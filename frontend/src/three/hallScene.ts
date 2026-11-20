@@ -56,11 +56,11 @@ const DRAG_SPEED = 0.0045; // radians per dragged pixel
 const CLICK_SLOP = 6; // pixels a pointer may move and still count as a click
 
 export const SEAT_COLORS = {
-  standard: "#b3232b",
-  vip: "#7c1d4a",
-  wheelchair: "#3f82c4",
-  taken: "#3a3d44",
-  picked: "#f0a53a",
+  standard: "#a82830",
+  vip: "#6e2348",
+  wheelchair: "#24788f",
+  taken: "#433f3b",
+  picked: "#2eb882",
 } as const;
 
 const COLORS = {
@@ -131,7 +131,7 @@ export class HallScene {
     this.renderer.outputColorSpace = SRGBColorSpace;
     this.renderer.domElement.className = "hall3d-canvas";
     container.appendChild(this.renderer.domElement);
-    this.scene.background = new Color("#07080a");
+    this.scene.background = new Color("#12100e");
 
     // --- layout from the seat grid ---------------------------------------------------------------
     const rows = [...new Set(seats.map((s) => s.grid_row))].sort((a, b) => a - b);
@@ -195,9 +195,9 @@ export class HallScene {
       box.translate(0, top - height / 2, zOf(i));
       steps.push(box);
     }
-    this.scene.add(new Mesh(mergeGeometries(steps), new MeshStandardMaterial({ color: "#1c1e25", roughness: 0.95 })));
+    this.scene.add(new Mesh(mergeGeometries(steps), new MeshStandardMaterial({ color: "#24211e", roughness: 0.95 })));
 
-    const wall = new MeshStandardMaterial({ color: "#121419", roughness: 0.9 });
+    const wall = new MeshStandardMaterial({ color: "#191715", roughness: 0.9 });
     const sideWall = new PlaneGeometry(backZ + 1.2, wallTop + 1);
     for (const side of [-1, 1]) {
       const w = new Mesh(sideWall, wall);
@@ -213,7 +213,7 @@ export class HallScene {
     frontWall.position.set(0, (screenY + screenHeight) / 2, -1.2);
     this.scene.add(frontWall);
 
-    // A dim amber strip on every step edge in the side aisles, like a real hall's floor lights.
+    // A dim floor strip on every step edge in the side aisles, like a real hall's floor lights.
     const strips: BufferGeometry[] = [];
     for (let i = 1; i <= lastRow; i++) {
       for (const side of [-1, 1]) {
@@ -222,7 +222,7 @@ export class HallScene {
         strips.push(strip);
       }
     }
-    if (strips.length) this.scene.add(new Mesh(mergeGeometries(strips), new MeshBasicMaterial({ color: "#b5782a" })));
+    if (strips.length) this.scene.add(new Mesh(mergeGeometries(strips), new MeshBasicMaterial({ color: "#8c877c" })));
 
     // Row letters at both ends of each row.
     for (const r of rows) {
@@ -252,13 +252,13 @@ export class HallScene {
     });
     this.scene.add(this.seatsMesh);
 
-    // --- light: from above for the hall view, plus the screen's cool glow ---------------------------
-    this.scene.add(new AmbientLight("#ffffff", 0.45));
-    this.scene.add(new HemisphereLight("#c9d4f0", "#0d0e12", 1.1));
-    const top = new DirectionalLight("#ffffff", 1.3);
+    // --- light: from above for the hall view, plus the screen's warm projector glow ---------------
+    this.scene.add(new AmbientLight("#ffffff", 0.5));
+    this.scene.add(new HemisphereLight("#f2ede3", "#12100e", 1.1));
+    const top = new DirectionalLight("#ffffff", 1.25);
     top.position.set(2, 20, zOf(lastRow));
     top.target.position.set(0, 0, zOf(lastRow / 2));
-    const glow = new DirectionalLight("#9fb6ff", 0.9);
+    const glow = new DirectionalLight("#f5e6d8", 0.8);
     glow.position.set(0, screenY + 1, -2);
     glow.target.position.set(0, 0, zOf(lastRow));
     this.scene.add(top, top.target, glow, glow.target);
@@ -611,9 +611,9 @@ function makeScreenTexture() {
   const ctx = canvas.getContext("2d");
   if (ctx) {
     const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-    gradient.addColorStop(0, "#1f2f57");
-    gradient.addColorStop(0.5, "#33285a");
-    gradient.addColorStop(1, "#5a2f24");
+    gradient.addColorStop(0, "#262320");
+    gradient.addColorStop(0.5, "#382f2b");
+    gradient.addColorStop(1, "#4a2d28");
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     const glow = ctx.createRadialGradient(512, 224, 20, 512, 224, 560);
@@ -634,7 +634,7 @@ function makeLabel(text: string) {
   canvas.height = 128;
   const ctx = canvas.getContext("2d");
   if (ctx) {
-    ctx.fillStyle = "rgba(190,196,208,0.95)";
+    ctx.fillStyle = "rgba(244,239,230,0.92)";
     ctx.font = `700 84px ${getComputedStyle(document.body).fontFamily || "sans-serif"}`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
