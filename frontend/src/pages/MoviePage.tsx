@@ -81,7 +81,7 @@ export function MoviePage() {
                   </h3>
                   <div className="times">
                     {byDay.get(d.iso)?.map((s) => (
-                      <ShowtimeChip key={s.screening_id} s={s} />
+                      <ShowtimeChip key={s.screening_id} screening={s} />
                     ))}
                   </div>
                 </section>

@@ -52,24 +52,25 @@ export function Skeleton({
   );
 }
 
-/** Pre-composed skeleton for a movie row in the daily program list. */
+/** Pre-composed skeleton for a movie card in the daily program grid. */
 export function MovieRowSkeleton() {
   return (
     <Card className="film-card skeleton-film-card" aria-hidden="true">
       <div className="film-layout">
-        <Skeleton height={150} radius={14} className="poster-squircle" />
+        <Skeleton height={216} radius={4} className="poster-squircle" />
         <div className="film-details">
-          <div className="title">
-            <Skeleton width="45%" height="1.6rem" radius={8} />
-            <Skeleton width="2.5rem" height="1.4rem" radius={6} />
+          <div className="film-head">
+            <div className="title">
+              <Skeleton width="68%" height="1.5rem" radius={4} />
+              <Skeleton width="2.25rem" height="1.35rem" radius={4} />
+            </div>
+            <Skeleton width="52%" height="0.95rem" radius={4} style={{ marginTop: "0.45rem" }} />
+            <Skeleton width="92%" height="0.95rem" radius={4} style={{ marginTop: "0.75rem" }} />
+            <Skeleton width="76%" height="0.95rem" radius={4} style={{ marginTop: "0.35rem" }} />
           </div>
-          <div style={{ marginTop: "0.5rem" }}>
-            <Skeleton width="30%" height="1rem" radius={6} />
-          </div>
-          <div className="times" style={{ marginTop: "1rem" }}>
-            <Skeleton width="6.5rem" height="2.25rem" radius={10} />
-            <Skeleton width="6.5rem" height="2.25rem" radius={10} />
-            <Skeleton width="6.5rem" height="2.25rem" radius={10} />
+          <div className="times">
+            <Skeleton width="8.5rem" height="3.25rem" radius={6} />
+            <Skeleton width="8.5rem" height="3.25rem" radius={6} />
           </div>
         </div>
       </div>
@@ -77,11 +78,11 @@ export function MovieRowSkeleton() {
   );
 }
 
-/** Pre-composed skeleton stack representing program loading. */
-export function ProgramSkeleton({ count = 3 }: { count?: number }) {
+/** Pre-composed skeleton grid representing program loading. */
+export function ProgramSkeleton({ count = 4 }: { count?: number }) {
   return (
     <div
-      className="films-stack"
+      className="films-grid"
       role="status"
       aria-busy="true"
       aria-label="Loading cinema program…"

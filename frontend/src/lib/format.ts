@@ -35,6 +35,11 @@ const dayFmt = new Intl.DateTimeFormat("en-GB", { timeZone: TZ, weekday: "short"
 const dateFmt = new Intl.DateTimeFormat("en-GB", { timeZone: TZ, day: "numeric", month: "short" });
 const isoFmt = new Intl.DateTimeFormat("en-CA", { timeZone: TZ }); // YYYY-MM-DD
 
+/** "19:30": single Almaty wall-clock time. */
+export function timeOf(iso: string) {
+  return timeFmt.format(new Date(iso));
+}
+
 /** "19:30–21:59": a screening always shows its real span. */
 export function span(s: { start_time: string; end_time: string }) {
   return `${timeFmt.format(new Date(s.start_time))}–${timeFmt.format(new Date(s.end_time))}`;

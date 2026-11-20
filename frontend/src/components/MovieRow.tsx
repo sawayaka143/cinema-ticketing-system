@@ -8,10 +8,12 @@ import { Squircle } from "./ui/Squircle";
 export function Poster({ movie, priority = false }: { movie: Movie; priority?: boolean }) {
   return (
     <Squircle
-      radius={14}
-      smoothing={0.65}
+      radius={4}
+      smoothing={0.5}
+      stroke="var(--border)"
+      strokeWidth={1}
       clipContent
-      shadow="subtle"
+      shadow="none"
       className="poster-squircle"
     >
       {movie.poster_url ? (
@@ -22,8 +24,8 @@ export function Poster({ movie, priority = false }: { movie: Movie; priority?: b
           loading={priority ? "eager" : "lazy"}
           fetchPriority={priority ? "high" : "auto"}
           decoding="async"
-          width={104}
-          height={150}
+          width={144}
+          height={216}
         />
       ) : (
         <span className="poster-empty" aria-hidden="true" />
@@ -49,17 +51,22 @@ export { ShowtimeChip } from "./ui/ShowtimeChip";
 
 export function MovieRow({ movie, screenings, priority = false }: { movie: Movie; screenings: Screening[]; priority?: boolean }) {
   return (
-    <Card hoverable className="film-card">
+    <Card className="film-card">
       <div className="film-layout">
-        <Poster movie={movie} priority={priority} />
+        <Link to={`/movies/${movie.movie_id}`} className="poster-link" tabIndex={-1} aria-hidden="true">
+          <Poster movie={movie} priority={priority} />
+        </Link>
         <div className="film-details">
-          <div className="title">
-            <h2>
-              <Link to={`/movies/${movie.movie_id}`}>{movie.title}</Link>
-            </h2>
-            <Age minAge={movie.min_age} />
+          <div className="film-head">
+            <div className="title">
+              <h2>
+                <Link to={`/movies/${movie.movie_id}`}>{movie.title}</Link>
+              </h2>
+              <Age minAge={movie.min_age} />
+            </div>
+            <p className="meta">{[...movie.genres, runtime(movie.duration_min)].join(" · ")}</p>
+            {movie.description && <p className="film-synopsis">{movie.description}</p>}
           </div>
-          <p className="meta">{[...movie.genres, runtime(movie.duration_min)].join(" · ")}</p>
           <div className="times">
             {screenings.map((s) => (
               <ShowtimeChip key={s.screening_id} screening={s} />

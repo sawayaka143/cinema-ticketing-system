@@ -15,6 +15,12 @@ import { MoviePage } from "./pages/MoviePage";
 import { MoviesPage } from "./pages/MoviesPage";
 import { ScreeningPage } from "./pages/ScreeningPage";
 
+const THEME_PRESETS = new Set(["spruce", "cobalt", "noir", "plum"]);
+const themeParam = new URLSearchParams(window.location.search).get("theme");
+if (themeParam && THEME_PRESETS.has(themeParam)) {
+  document.documentElement.dataset.theme = themeParam;
+}
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <AuthProvider>
