@@ -877,6 +877,7 @@ button {
 /* Panels, forms, states */
 .panel {
   max-width: 44rem;
+  margin-inline: auto;
 }
 
 .narrow {
