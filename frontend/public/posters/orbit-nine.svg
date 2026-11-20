@@ -1,94 +1,31 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600" width="100%" height="100%">
   <defs>
-    <linearGradient id="spaceDeep" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#030712"/>
-      <stop offset="50%" stop-color="#0b0f19"/>
-      <stop offset="100%" stop-color="#020408"/>
+    <linearGradient id="o9-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#05070c"/>
+      <stop offset="50%" stop-color="#0d1424"/>
+      <stop offset="100%" stop-color="#04060a"/>
     </linearGradient>
-    <radialGradient id="nebulaViolet" cx="40%" cy="35%" r="60%">
-      <stop offset="0%" stop-color="#7c3aed" stop-opacity="0.45"/>
-      <stop offset="50%" stop-color="#2563eb" stop-opacity="0.25"/>
-      <stop offset="100%" stop-color="#030712" stop-opacity="0"/>
+    <radialGradient id="o9-eclipse" cx="50%" cy="40%" r="42%">
+      <stop offset="0%" stop-color="#6cc5e0" stop-opacity="0.45"/>
+      <stop offset="55%" stop-color="#224578" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#05070c" stop-opacity="0"/>
     </radialGradient>
-    <radialGradient id="planetGlow" cx="50%" cy="50%" r="50%">
-      <stop offset="60%" stop-color="#0284c7"/>
-      <stop offset="90%" stop-color="#0369a1"/>
-      <stop offset="100%" stop-color="#0c4a6e" stop-opacity="0"/>
-    </radialGradient>
-    <linearGradient id="planetAtmosphere" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#38bdf8"/>
-      <stop offset="40%" stop-color="#0284c7"/>
-      <stop offset="100%" stop-color="#082f49"/>
-    </linearGradient>
   </defs>
-
-  <!-- Background Space -->
-  <rect width="400" height="600" fill="url(#spaceDeep)"/>
-  <!-- Nebula glow -->
-  <rect width="400" height="600" fill="url(#nebulaViolet)"/>
-
-  <!-- Starfield -->
-  <g fill="#ffffff" opacity="0.75">
-    <circle cx="30" cy="40" r="1"/>
-    <circle cx="85" cy="120" r="1.5"/>
-    <circle cx="150" cy="55" r="0.8"/>
-    <circle cx="210" cy="30" r="1.2"/>
-    <circle cx="270" cy="95" r="1"/>
-    <circle cx="340" cy="60" r="1.4"/>
-    <circle cx="380" cy="140" r="0.9"/>
-    <circle cx="45" cy="220" r="1.2"/>
-    <circle cx="360" cy="280" r="1.5"/>
-    <circle cx="75" cy="390" r="0.8"/>
-    <circle cx="330" cy="420" r="1.1"/>
-  </g>
-
-  <!-- Giant Gas Planet with Ring -->
-  <g transform="translate(200, 260)">
-    <!-- Back of Ring -->
-    <ellipse cx="0" cy="0" rx="170" ry="38" fill="none" stroke="#38bdf8" stroke-width="6" opacity="0.25" stroke-dasharray="2 1" transform="rotate(-22)"/>
-    <ellipse cx="0" cy="0" rx="155" ry="32" fill="none" stroke="#818cf8" stroke-width="12" opacity="0.35" transform="rotate(-22)"/>
-    
-    <!-- Planet body -->
-    <circle cx="0" cy="0" r="75" fill="url(#planetAtmosphere)"/>
-    
-    <!-- Planet shadow (night side) -->
-    <path d="M 0 -75 A 75 75 0 0 1 0 75 A 50 75 0 0 0 0 -75 Z" fill="#030712" opacity="0.85"/>
-    
-    <!-- Front of Ring -->
-    <path d="M -155 10 A 155 32 0 0 0 155 -10" fill="none" stroke="#818cf8" stroke-width="12" opacity="0.85" transform="rotate(-22)"/>
-    <path d="M -170 12 A 170 38 0 0 0 170 -12" fill="none" stroke="#38bdf8" stroke-width="5" opacity="0.9" transform="rotate(-22)"/>
-  </g>
-
-  <!-- Space Station "Orbit Nine" Silhouette / High-Tech Structure -->
-  <g transform="translate(190, 235) scale(0.9)" stroke="#67e8f9" stroke-width="1.5" fill="#0f172a">
-    <!-- Central hub -->
-    <circle cx="0" cy="0" r="16" fill="#1e293b"/>
-    <circle cx="0" cy="0" r="5" fill="#38bdf8"/>
-    <!-- Solar truss bars -->
-    <line x1="-70" y1="0" x2="70" y2="0" stroke="#38bdf8" stroke-width="2"/>
-    <line x1="0" y1="-50" x2="0" y2="50" stroke="#38bdf8" stroke-width="2"/>
-    <!-- Rotating Ring -->
-    <circle cx="0" cy="0" r="42" fill="none" stroke="#67e8f9" stroke-width="2.5" stroke-dasharray="10 4"/>
-    <!-- Solar Panels -->
-    <rect x="-85" y="-12" width="22" height="24" fill="#0284c7" stroke="#38bdf8" stroke-width="1"/>
-    <rect x="63" y="-12" width="22" height="24" fill="#0284c7" stroke="#38bdf8" stroke-width="1"/>
-    <!-- Warning Beacon -->
-    <circle cx="0" cy="-52" r="3" fill="#ef4444" stroke="none"/>
-  </g>
-
-  <!-- Futuristic Hud / Coordinates overlay -->
-  <g fill="#38bdf8" opacity="0.5" font-family="'Courier New', monospace" font-size="8">
-    <text x="35" y="80">SYS.LOC: ORBIT-09</text>
-    <text x="35" y="94">DIST: 4.2 AU</text>
-    <text x="365" y="80" text-anchor="end">STATUS: UNREACHABLE</text>
-    <text x="365" y="94" text-anchor="end">O2: 14% [CRITICAL]</text>
-  </g>
-
-  <!-- Typography -->
-  <text x="200" y="475" text-anchor="middle" font-family="'Inter', -apple-system, sans-serif" font-size="12" font-weight="700" fill="#38bdf8" letter-spacing="8">NO RESCUE IS COMING</text>
-  <text x="200" y="518" text-anchor="middle" font-family="'Trebuchet MS', -apple-system, sans-serif" font-size="38" font-weight="900" fill="#ffffff" letter-spacing="6">ORBIT</text>
-  <text x="200" y="552" text-anchor="middle" font-family="'Trebuchet MS', -apple-system, sans-serif" font-size="34" font-weight="900" fill="#a855f7" letter-spacing="8">NINE</text>
-
-  <rect x="160" y="565" width="80" height="1" fill="#38bdf8" opacity="0.6"/>
-  <text x="200" y="582" text-anchor="middle" font-family="'Inter', -apple-system, sans-serif" font-size="9" font-weight="600" fill="#94a3b8" letter-spacing="3">SCI-FI · THRILLER · 2026</text>
+  <rect width="400" height="600" fill="url(#o9-bg)"/>
+  <rect width="400" height="600" fill="url(#o9-eclipse)"/>
+  <!-- Precision orbital geometry -->
+  <circle cx="200" cy="238" r="144" fill="none" stroke="#6cc5e0" stroke-opacity="0.18" stroke-width="1"/>
+  <circle cx="200" cy="238" r="108" fill="none" stroke="#6cc5e0" stroke-opacity="0.28" stroke-width="1" stroke-dasharray="4 6"/>
+  <ellipse cx="200" cy="238" rx="168" ry="34" fill="none" stroke="#6cc5e0" stroke-opacity="0.4" stroke-width="1.5" transform="rotate(-18 200 238)"/>
+  <!-- Dark planet sphere & bright rim -->
+  <circle cx="200" cy="238" r="76" fill="#070a12" stroke="#6cc5e0" stroke-opacity="0.65" stroke-width="1.5"/>
+  <path d="M 136 196 A 76 76 0 0 1 258 186" fill="none" stroke="#e9f6fb" stroke-width="2" stroke-opacity="0.7"/>
+  <!-- Front orbital arc -->
+  <path d="M 42 292 A 168 34 -18 0 0 358 184" fill="none" stroke="#e2a84b" stroke-width="2" stroke-opacity="0.85"/>
+  <!-- Station beacon -->
+  <circle cx="294" cy="204" r="4" fill="#f0a53a"/>
+  <line x1="200" y1="74" x2="200" y2="402" stroke="#6cc5e0" stroke-opacity="0.12" stroke-width="1"/>
+  <text x="200" y="484" text-anchor="middle" font-family="'Segoe UI', system-ui, sans-serif" font-size="36" font-weight="800" fill="#eef4f7" letter-spacing="8">ORBIT</text>
+  <text x="200" y="524" text-anchor="middle" font-family="'Segoe UI', system-ui, sans-serif" font-size="34" font-weight="700" fill="#6cc5e0" letter-spacing="10">NINE</text>
+  <rect x="20" y="20" width="360" height="560" fill="none" stroke="#6cc5e0" stroke-opacity="0.14"/>
 </svg>
