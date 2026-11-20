@@ -5,13 +5,49 @@ import { Badge, Button, Card, Squircle } from "./ui";
 
 const TYPE_LABEL: Record<string, string> = { standard: "Standard", vip: "VIP", wheelchair: "Wheelchair" };
 
-const LEGEND: [string, string][] = [
-  [SEAT_COLORS.standard, "Free"],
-  [SEAT_COLORS.vip, "VIP"],
-  [SEAT_COLORS.wheelchair, "Wheelchair"],
-  [SEAT_COLORS.picked, "Your pick"],
-  [SEAT_COLORS.taken, "Taken"],
+type LegendKind = "free" | "vip" | "wheelchair" | "picked" | "taken";
+
+const LEGEND: { color: string; label: string; kind: LegendKind }[] = [
+  { color: SEAT_COLORS.standard, label: "Free", kind: "free" },
+  { color: SEAT_COLORS.vip, label: "VIP", kind: "vip" },
+  { color: SEAT_COLORS.wheelchair, label: "Wheelchair", kind: "wheelchair" },
+  { color: SEAT_COLORS.picked, label: "Your pick", kind: "picked" },
+  { color: SEAT_COLORS.taken, label: "Taken", kind: "taken" },
 ];
+
+function LegendMark({ kind }: { kind: LegendKind }) {
+  if (kind === "vip") {
+    return (
+      <svg viewBox="0 0 12 12" width="10" height="10" aria-hidden="true">
+        <path d="M6 1.5l1.3 2.7 3 .4-2.2 2.1.5 3L6 8.3 3.4 9.7l.5-3L1.7 4.6l3-.4z" fill="currentColor" />
+      </svg>
+    );
+  }
+  if (kind === "wheelchair") {
+    return (
+      <svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" aria-hidden="true">
+        <circle cx="5.5" cy="2.5" r="1" fill="currentColor" stroke="none" />
+        <path d="M5 4.5v3h3.2l1.1 2.3" />
+        <path d="M7.2 9A2.6 2.6 0 1 1 3.6 6.2" />
+      </svg>
+    );
+  }
+  if (kind === "picked") {
+    return (
+      <svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M2.5 6.2L5 8.7 9.5 3.5" />
+      </svg>
+    );
+  }
+  if (kind === "taken") {
+    return (
+      <svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" aria-hidden="true">
+        <path d="M3 3l6 6M9 3l-6 6" />
+      </svg>
+    );
+  }
+  return null;
+}
 
 /**
  * The hall in 3D (Three.js + GSAP), the main way to pick seats. It opens looking down on the whole
@@ -106,9 +142,10 @@ export default function HallView3D({
   return (
     <Squircle
       as="div"
-      radius={18}
+      radius={6}
+      smoothing={0.5}
       clipContent
-      fill="#07080a"
+      fill="#12100e"
       stroke="var(--border)"
       className="hall3d"
       innerClassName="hall3d-inner"
@@ -158,9 +195,16 @@ export default function HallView3D({
 
       {!focused && (
         <ul className="hall3d-legend" aria-label="Legend">
-          {LEGEND.map(([color, label]) => (
-            <li key={label}>
-              <i style={{ background: color }} aria-hidden="true" /> {label}
+          {LEGEND.map((item) => (
+            <li key={item.label}>
+              <i
+                className={`legend-swatch legend-swatch-${item.kind}`}
+                style={{ background: item.color }}
+                aria-hidden="true"
+              >
+                <LegendMark kind={item.kind} />
+              </i>
+              {item.label}
             </li>
           ))}
         </ul>

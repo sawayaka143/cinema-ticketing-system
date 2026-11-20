@@ -23,7 +23,10 @@ export function SeatMap({
   return (
     <div className="hall">
       <div className="screen" aria-hidden="true">
-        Screen
+        <svg className="screen-arc" viewBox="0 0 320 14" preserveAspectRatio="none">
+          <path d="M 6 12 Q 160 2 314 12" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+        </svg>
+        <span>Screen</span>
       </div>
       <div className="seats" style={{ gridTemplateColumns: `2rem repeat(${cols}, minmax(0, 2.25rem)) 2rem` }}>
         {rows.map((r) => (
