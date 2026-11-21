@@ -87,7 +87,18 @@ function LanguagePicker() {
                 onClick={() => choose(l.code)}
               >
                 <span>{l.name}</span>
-                {l.code === lang && <span aria-hidden="true">✓</span>}
+                {l.code === lang && (
+                  <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+                    <path
+                      d="m3 8.5 3.2 3.2L13 4.8"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.75"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                )}
               </button>
             </li>
           ))}

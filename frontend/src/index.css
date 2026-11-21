@@ -1342,9 +1342,20 @@ button {
     white-space: nowrap;
   }
 
-  /* Active tab: only the icon turns green */
+  /* Keep the focus ring inside the bar so the screen edge never clips it */
+  .tabbar a:focus-visible,
+  .tabbar button:focus-visible {
+    outline-offset: -3px;
+  }
+
+  /* Active tab: icon turns green; label darkens so state never relies on colour alone */
   .tabbar svg {
     transition: color 0.2s var(--ease-out);
+  }
+
+  .tabbar a.active,
+  .tabbar button.active {
+    color: var(--text);
   }
 
   .tabbar a.active svg,
