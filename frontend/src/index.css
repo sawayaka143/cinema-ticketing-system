@@ -216,6 +216,11 @@ h2 {
   white-space: nowrap;
 }
 
+/* Brand text is vertically centred on the logo */
+.mark > span:last-child {
+  line-height: 1;
+}
+
 .mark:hover {
   color: var(--accent);
 }
@@ -265,6 +270,13 @@ h2 {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* Phone-only shell pieces: hidden on desktop */
+.phone-tools,
+.tabbar-wrap,
+.account-sheet {
+  display: none;
 }
 
 /* Buttons */
@@ -589,12 +601,6 @@ button {
 
 .program-title-block {
   min-width: 0;
-}
-
-.program-sub {
-  margin: 0;
-  font-size: 0.875rem;
-  color: var(--muted);
 }
 
 .format-filters {
@@ -1197,28 +1203,6 @@ button {
 }
 
 @media (max-width: 40rem) {
-  .rail-top {
-    gap: var(--s2) var(--s3);
-  }
-
-  .rail-nav {
-    order: 3;
-    flex-basis: 100%;
-    padding-top: 0;
-    padding-bottom: 0.25rem;
-    border-top: 1px solid var(--border-subtle);
-  }
-
-  .rail nav a {
-    min-height: 2rem;
-    padding: 0 var(--s2);
-    font-size: 0.875rem;
-  }
-
-  .who {
-    display: none;
-  }
-
   .day-tab {
     flex: 0 0 auto;
     padding: 0.625rem 0.75rem;
@@ -1253,5 +1237,255 @@ button {
 
   .movie-layout .poster-squircle {
     max-width: 12rem;
+  }
+}
+
+/* Phone shell (#125): slim top bar, bottom tab bar, account sheet, safe areas */
+@media (max-width: 40rem) {
+  .rail {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+
+  .rail-top {
+    flex-wrap: nowrap;
+    min-height: 3.5rem;
+    padding-top: max(var(--s2), env(safe-area-inset-top));
+    padding-left: max(var(--gutter), env(safe-area-inset-left));
+    padding-right: max(var(--gutter), env(safe-area-inset-right));
+  }
+
+  .rail .rail-nav,
+  .account {
+    display: none;
+  }
+
+  /* Hit area grows via padding so the logo itself centres on the header tools */
+  .mark {
+    padding: 0.375rem 0;
+    margin: -0.375rem 0;
+  }
+
+  .tabbar-wrap {
+    display: block;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 20;
+  }
+
+  .account-sheet {
+    position: absolute;
+    right: var(--s3);
+    bottom: calc(100% + var(--s2));
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--s3);
+    width: min(18rem, calc(100vw - 1.5rem));
+    padding: var(--s4);
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    background: var(--surface-elevated);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 0.14);
+  }
+
+  .account-sheet .btn {
+    width: 100%;
+    min-height: 2.75rem;
+  }
+
+  .account-sheet-email {
+    margin: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    font-size: 0.875rem;
+    color: var(--muted);
+  }
+
+  .tabbar {
+    display: flex;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  .tabbar a,
+  .tabbar button {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.125rem;
+    min-height: 3.5rem;
+    padding: 0.375rem var(--s1);
+    border: 0;
+    background: transparent;
+    font: 500 0.6875rem/1.2 var(--font-sans);
+    color: var(--muted);
+    text-decoration: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .tabbar a span,
+  .tabbar button span {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Keep the focus ring inside the bar so the screen edge never clips it */
+  .tabbar a:focus-visible,
+  .tabbar button:focus-visible {
+    outline-offset: -3px;
+  }
+
+  /* Active tab: icon turns green; label darkens so state never relies on colour alone */
+  .tabbar svg {
+    transition: color 0.2s var(--ease-out);
+  }
+
+  .tabbar a.active,
+  .tabbar button.active {
+    color: var(--text);
+  }
+
+  .tabbar a.active svg,
+  .tabbar button.active svg {
+    color: var(--accent);
+  }
+
+  /* Header tools on the storefront: language picker + profile / bell */
+  .phone-tools {
+    display: flex;
+    align-items: center;
+    gap: var(--s1);
+    margin-left: auto;
+  }
+
+  .tool-pop {
+    position: relative;
+  }
+
+  .tool-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    min-width: 2.75rem;
+    height: 2.75rem;
+    padding: 0 var(--s2);
+    border: 0;
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--text);
+    font: 600 0.8125rem var(--font-sans);
+    text-decoration: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .tool-btn:active {
+    background: var(--surface-2);
+  }
+
+  .tool-caret {
+    opacity: 0.7;
+  }
+
+  .tool-menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + var(--s1));
+    z-index: 30;
+    min-width: 11rem;
+    margin: 0;
+    padding: var(--s1);
+    list-style: none;
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    background: var(--surface-elevated);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 0.14);
+    animation: tool-menu-in 0.16s var(--ease-out);
+  }
+
+  .tool-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 2.75rem;
+    padding: 0 var(--s3);
+    border: 0;
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--text);
+    font: 500 0.9375rem var(--font-sans);
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .tool-option[aria-selected="true"] {
+    color: var(--accent);
+    background: var(--surface-2);
+  }
+
+  .tool-notes {
+    width: min(16rem, calc(100vw - 1.5rem));
+    padding: var(--s4);
+  }
+
+  .tool-notes-title {
+    margin: 0 0 var(--s2);
+    font-weight: 600;
+  }
+
+  .tool-notes-empty {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--muted);
+  }
+
+  @keyframes tool-menu-in {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tabbar svg,
+    .tabbar a,
+    .tabbar button,
+    .tool-menu {
+      transition: none;
+      animation: none;
+    }
+  }
+
+  .page {
+    padding-left: max(var(--gutter), env(safe-area-inset-left));
+    padding-right: max(var(--gutter), env(safe-area-inset-right));
+  }
+
+  .foot-info {
+    display: none;
+  }
+
+  .foot {
+    padding-bottom: calc(3.5rem + env(safe-area-inset-bottom));
+  }
+
+  html,
+  body {
+    overflow-x: clip;
   }
 }
