@@ -205,7 +205,7 @@ h2 {
 
 .mark {
   display: inline-flex;
-  align-items: flex-end;
+  align-items: center;
   gap: 0.625rem;
   font-family: var(--font-display);
   font-size: 1.125rem;
@@ -216,11 +216,9 @@ h2 {
   white-space: nowrap;
 }
 
-/* Sit the text baseline flush with the bottom edge of the logo (descender space pulled down) */
+/* Brand text is vertically centred on the logo */
 .mark > span:last-child {
   line-height: 1;
-  position: relative;
-  top: 0.17em;
 }
 
 .mark:hover {
