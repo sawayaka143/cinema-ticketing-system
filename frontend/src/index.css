@@ -267,6 +267,12 @@ h2 {
   white-space: nowrap;
 }
 
+/* Phone-only shell pieces: hidden on desktop */
+.tabbar,
+.account-menu {
+  display: none;
+}
+
 /* Buttons */
 button {
   font: inherit;
@@ -1197,28 +1203,6 @@ button {
 }
 
 @media (max-width: 40rem) {
-  .rail-top {
-    gap: var(--s2) var(--s3);
-  }
-
-  .rail-nav {
-    order: 3;
-    flex-basis: 100%;
-    padding-top: 0;
-    padding-bottom: 0.25rem;
-    border-top: 1px solid var(--border-subtle);
-  }
-
-  .rail nav a {
-    min-height: 2rem;
-    padding: 0 var(--s2);
-    font-size: 0.875rem;
-  }
-
-  .who {
-    display: none;
-  }
-
   .day-tab {
     flex: 0 0 auto;
     padding: 0.625rem 0.75rem;
@@ -1253,5 +1237,144 @@ button {
 
   .movie-layout .poster-squircle {
     max-width: 12rem;
+  }
+}
+
+/* Phone shell (#125): slim top bar, bottom tab bar, account sheet, safe areas */
+@media (max-width: 40rem) {
+  .rail {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+
+  .rail-top {
+    flex-wrap: nowrap;
+    min-height: 3.5rem;
+    padding-top: max(var(--s2), env(safe-area-inset-top));
+    padding-left: max(var(--gutter), env(safe-area-inset-left));
+    padding-right: max(var(--gutter), env(safe-area-inset-right));
+  }
+
+  .rail .rail-nav,
+  .account-desktop,
+  .who {
+    display: none;
+  }
+
+  .account .btn {
+    white-space: nowrap;
+  }
+
+  .mark {
+    min-height: 2.75rem;
+  }
+
+  .account {
+    position: relative;
+  }
+
+  .account .btn-sm {
+    min-height: 2.75rem;
+    min-width: 2.75rem;
+  }
+
+  .account-menu {
+    display: block;
+    position: relative;
+  }
+
+  .avatar-btn {
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text);
+    font: 600 1rem var(--font-display);
+    cursor: pointer;
+  }
+
+  .account-sheet {
+    position: absolute;
+    right: 0;
+    top: calc(100% + var(--s2));
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--s3);
+    width: min(18rem, calc(100vw - 2rem));
+    padding: var(--s4);
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    background: var(--surface-elevated);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 0.14);
+  }
+
+  .account-sheet .btn {
+    width: 100%;
+    min-height: 2.75rem;
+  }
+
+  .account-sheet-email {
+    margin: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    font-size: 0.875rem;
+    color: var(--muted);
+  }
+
+  .tabbar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 20;
+    display: flex;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  .tabbar a {
+    flex: 1 1 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3.25rem;
+    padding: 0 var(--s2);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--muted);
+    text-align: center;
+    text-decoration: none;
+    border-top: 2px solid transparent;
+  }
+
+  .tabbar a.active {
+    color: var(--accent);
+    border-top-color: var(--accent);
+    background: var(--surface-2);
+  }
+
+  .page {
+    padding-left: max(var(--gutter), env(safe-area-inset-left));
+    padding-right: max(var(--gutter), env(safe-area-inset-right));
+  }
+
+  .foot-info {
+    display: none;
+  }
+
+  .foot {
+    padding-bottom: calc(3.25rem + env(safe-area-inset-bottom));
+  }
+
+  html,
+  body {
+    overflow-x: clip;
   }
 }
