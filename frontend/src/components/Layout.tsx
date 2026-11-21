@@ -18,14 +18,7 @@ export function Layout() {
   const menuOpen = openAt === location.pathname;
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // Tab order: What's on, Bookings, [Manager], Profile. The green line slides to the active one.
-  const tabCount = staffRole ? 4 : 3;
   const path = location.pathname;
-  let activeTab = -1;
-  if (menuOpen || path.startsWith("/login")) activeTab = tabCount - 1;
-  else if (path === "/") activeTab = 0;
-  else if (path.startsWith("/me")) activeTab = 1;
-  else if (staffRole && path.startsWith("/manager")) activeTab = 2;
 
   // Close the phone account sheet on outside tap or Escape.
   useEffect(() => {
@@ -103,12 +96,7 @@ export function Layout() {
             </Button>
           </div>
         )}
-        <nav
-          className="tabbar"
-          aria-label="Main (phone)"
-          style={{ "--tabs": tabCount, "--i": Math.max(activeTab, 0) } as React.CSSProperties}
-        >
-          <span className="tab-indicator" data-hidden={activeTab < 0} aria-hidden="true" />
+        <nav className="tabbar" aria-label="Main (phone)">
           <NavLink to="/" end>
             <FilmIcon />
             <span>What&apos;s on</span>
