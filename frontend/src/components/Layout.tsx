@@ -4,6 +4,7 @@ import { useAuth } from "../lib/auth-context";
 import { supabase } from "../lib/supabase";
 import { Badge } from "./ui/Badge";
 import { BrandMark } from "./ui/BrandMark";
+import { PhoneHeaderTools } from "./PhoneHeaderTools";
 import { DashboardIcon, FilmIcon, TicketIcon, UserIcon } from "./TabIcons";
 import { Button } from "./ui/Button";
 
@@ -16,6 +17,15 @@ export function Layout() {
   const [openAt, setOpenAt] = useState<string | null>(null);
   const menuOpen = openAt === location.pathname;
   const menuRef = useRef<HTMLDivElement>(null);
+
+  // Tab order: What's on, Bookings, [Manager], Profile. The green line slides to the active one.
+  const tabCount = staffRole ? 4 : 3;
+  const path = location.pathname;
+  let activeTab = -1;
+  if (menuOpen || path.startsWith("/login")) activeTab = tabCount - 1;
+  else if (path === "/") activeTab = 0;
+  else if (path.startsWith("/me")) activeTab = 1;
+  else if (staffRole && path.startsWith("/manager")) activeTab = 2;
 
   // Close the phone account sheet on outside tap or Escape.
   useEffect(() => {
@@ -42,6 +52,7 @@ export function Layout() {
             <BrandMark size="md" />
             <span>Alatau Cinema</span>
           </Link>
+          {path === "/" && ready && <PhoneHeaderTools signedIn={!!session} />}
           <nav className="rail-nav" aria-label="Main">
             <NavLink to="/" end>
               What&apos;s on
@@ -92,7 +103,12 @@ export function Layout() {
             </Button>
           </div>
         )}
-        <nav className="tabbar" aria-label="Main (phone)">
+        <nav
+          className="tabbar"
+          aria-label="Main (phone)"
+          style={{ "--tabs": tabCount, "--i": Math.max(activeTab, 0) } as React.CSSProperties}
+        >
+          <span className="tab-indicator" data-hidden={activeTab < 0} aria-hidden="true" />
           <NavLink to="/" end>
             <FilmIcon />
             <span>What&apos;s on</span>

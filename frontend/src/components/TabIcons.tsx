@@ -62,3 +62,23 @@ export function DashboardIcon() {
     </Icon>
   );
 }
+
+/** Globe: language picker. */
+export function GlobeIcon() {
+  return (
+    <Icon>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M3.5 12h17M12 3.5c2.4 2.4 3.6 5.2 3.6 8.5s-1.2 6.1-3.6 8.5c-2.4-2.4-3.6-5.2-3.6-8.5S9.6 5.9 12 3.5z" />
+    </Icon>
+  );
+}
+
+/** Bell: notifications. */
+export function BellIcon() {
+  return (
+    <Icon>
+      <path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z" />
+      <path d="M10 20.5a2.2 2.2 0 0 0 4 0" />
+    </Icon>
+  );
+}
