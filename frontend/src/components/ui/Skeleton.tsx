@@ -78,18 +78,29 @@ export function MovieRowSkeleton() {
   );
 }
 
+/** Skeleton for a poster tile in the 2-column phone storefront. */
+export function MovieTileSkeleton() {
+  return (
+    <div className="movie-tile" aria-hidden="true">
+      <Skeleton radius={4} className="poster-squircle" />
+      <Skeleton width="80%" height="1rem" radius={4} />
+      <Skeleton width="55%" height="0.8rem" radius={4} />
+    </div>
+  );
+}
+
 /** Pre-composed skeleton grid representing program loading. */
-export function ProgramSkeleton({ count = 4 }: { count?: number }) {
+export function ProgramSkeleton({ count = 4, tiles = false }: { count?: number; tiles?: boolean }) {
   return (
     <div
-      className="films-grid"
+      className={tiles ? "tiles-grid" : "films-grid"}
       role="status"
       aria-busy="true"
       aria-label="Loading cinema program…"
     >
-      {Array.from({ length: count }).map((_, i) => (
-        <MovieRowSkeleton key={i} />
-      ))}
+      {Array.from({ length: count }).map((_, i) =>
+        tiles ? <MovieTileSkeleton key={i} /> : <MovieRowSkeleton key={i} />,
+      )}
     </div>
   );
 }

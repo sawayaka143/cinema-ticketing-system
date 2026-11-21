@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router";
 import { api } from "../api/client";
 import { MovieRow } from "../components/MovieRow";
+import { MovieTile } from "../components/MovieTile";
 import { Button, EmptyState, ErrorState, FadeIn, ProgramSkeleton } from "../components/ui";
 import {
   type Movie,
@@ -12,6 +13,7 @@ import {
 } from "../lib/format";
 import { WEEK_KEY, primeFromWeek, toScreening } from "../lib/catalogCache";
 import { must, useApi } from "../lib/useApi";
+import { PHONE_QUERY, useMediaQuery } from "../lib/useMediaQuery";
 
 type DayMovieRow = { movie: Movie; screenings: Screening[] };
 
@@ -39,6 +41,7 @@ function groupByMovieForDay(screenings: ScreeningDetail[], dayIso: string): DayM
 
 export function MoviesPage() {
   const days = useMemo(() => nextDays(), []);
+  const isPhone = useMediaQuery(PHONE_QUERY);
   const [params, setParams] = useSearchParams();
   const [formatFilter, setFormatFilter] = useState<string>("ALL");
   const day = days.find((d) => d.iso === params.get("day")) ?? days[0];
@@ -148,7 +151,7 @@ export function MoviesPage() {
         )}
       </div>
 
-      {week.state === "loading" && <ProgramSkeleton count={4} />}
+      {week.state === "loading" && <ProgramSkeleton count={isPhone ? 6 : 4} tiles={isPhone} />}
       {week.state === "error" && (
         <FadeIn direction="up">
           <ErrorState
@@ -191,10 +194,14 @@ export function MoviesPage() {
         </FadeIn>
       )}
       {week.state === "ready" && rows.length > 0 && (
-        <div className="films-grid">
+        <div className={isPhone ? "tiles-grid" : "films-grid"}>
           {rows.map(({ movie, screenings }, index) => (
             <FadeIn key={movie.movie_id} delay={index * 40} direction="up">
-              <MovieRow movie={movie} screenings={screenings} priority={index < 4} />
+              {isPhone ? (
+                <MovieTile movie={movie} priority={index < 4} />
+              ) : (
+                <MovieRow movie={movie} screenings={screenings} priority={index < 4} />
+              )}
             </FadeIn>
           ))}
         </div>
