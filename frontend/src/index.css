@@ -268,8 +268,8 @@ h2 {
 }
 
 /* Phone-only shell pieces: hidden on desktop */
-.tabbar,
-.account-menu {
+.tabbar-wrap,
+.account-sheet {
   display: none;
 }
 
@@ -595,12 +595,6 @@ button {
 
 .program-title-block {
   min-width: 0;
-}
-
-.program-sub {
-  margin: 0;
-  font-size: 0.875rem;
-  color: var(--muted);
 }
 
 .format-filters {
@@ -1257,54 +1251,32 @@ button {
   }
 
   .rail .rail-nav,
-  .account-desktop,
-  .who {
+  .account {
     display: none;
-  }
-
-  .account .btn {
-    white-space: nowrap;
   }
 
   .mark {
     min-height: 2.75rem;
   }
 
-  .account {
-    position: relative;
-  }
-
-  .account .btn-sm {
-    min-height: 2.75rem;
-    min-width: 2.75rem;
-  }
-
-  .account-menu {
+  .tabbar-wrap {
     display: block;
-    position: relative;
-  }
-
-  .avatar-btn {
-    width: 2.75rem;
-    height: 2.75rem;
-    border-radius: 50%;
-    border: 1px solid var(--border);
-    background: var(--surface-2);
-    color: var(--text);
-    font: 600 1rem var(--font-display);
-    cursor: pointer;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 20;
   }
 
   .account-sheet {
     position: absolute;
-    right: 0;
-    top: calc(100% + var(--s2));
-    z-index: 30;
+    right: var(--s3);
+    bottom: calc(100% + var(--s2));
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: var(--s3);
-    width: min(18rem, calc(100vw - 2rem));
+    width: min(18rem, calc(100vw - 1.5rem));
     padding: var(--s4);
     border: 1px solid var(--border);
     border-radius: 0.75rem;
@@ -1326,11 +1298,6 @@ button {
   }
 
   .tabbar {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 20;
     display: flex;
     border-top: 1px solid var(--border);
     background: var(--surface);
@@ -1339,22 +1306,36 @@ button {
     padding-right: env(safe-area-inset-right);
   }
 
-  .tabbar a {
+  .tabbar a,
+  .tabbar button {
     flex: 1 1 0;
+    min-width: 0;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: 3.25rem;
-    padding: 0 var(--s2);
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--muted);
-    text-align: center;
-    text-decoration: none;
+    gap: 0.125rem;
+    min-height: 3.5rem;
+    padding: 0.375rem var(--s1);
+    border: 0;
     border-top: 2px solid transparent;
+    background: transparent;
+    font: 500 0.6875rem/1.2 var(--font-sans);
+    color: var(--muted);
+    text-decoration: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
   }
 
-  .tabbar a.active {
+  .tabbar span {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .tabbar a.active,
+  .tabbar button.active {
     color: var(--accent);
     border-top-color: var(--accent);
     background: var(--surface-2);
@@ -1370,7 +1351,7 @@ button {
   }
 
   .foot {
-    padding-bottom: calc(3.25rem + env(safe-area-inset-bottom));
+    padding-bottom: calc(3.5rem + env(safe-area-inset-bottom));
   }
 
   html,

@@ -4,6 +4,7 @@ import { useAuth } from "../lib/auth-context";
 import { supabase } from "../lib/supabase";
 import { Badge } from "./ui/Badge";
 import { BrandMark } from "./ui/BrandMark";
+import { DashboardIcon, FilmIcon, TicketIcon, UserIcon } from "./TabIcons";
 import { Button } from "./ui/Button";
 
 export function Layout() {
@@ -65,31 +66,6 @@ export function Layout() {
                 >
                   Log out
                 </Button>
-                <div className="account-menu" ref={menuRef}>
-                  <button
-                    type="button"
-                    className="avatar-btn"
-                    aria-label="Account menu"
-                    aria-expanded={menuOpen}
-                    aria-controls="account-sheet"
-                    onClick={() => setOpenAt(menuOpen ? null : location.pathname)}
-                  >
-                    {(session.user.email ?? "?").charAt(0).toUpperCase()}
-                  </button>
-                  {menuOpen && (
-                    <div className="account-sheet" id="account-sheet" role="dialog" aria-label="Account">
-                      <p className="account-sheet-email">{session.user.email}</p>
-                      {staffRole && (
-                        <Badge tone="accent" variant="subtle" className="cap">
-                          {staffRole}
-                        </Badge>
-                      )}
-                      <Button variant="outline" size="md" onClick={() => supabase.auth.signOut()}>
-                        Log out
-                      </Button>
-                    </div>
-                  )}
-                </div>
               </>
             ) : (
               <Button as={Link} to="/login" variant="ghost" size="sm">
@@ -102,13 +78,54 @@ export function Layout() {
       <main className="page">
         <Outlet />
       </main>
-      <nav className="tabbar" aria-label="Main (phone)">
-        <NavLink to="/" end>
-          What&apos;s on
-        </NavLink>
-        <NavLink to="/me/bookings">My bookings</NavLink>
-        {staffRole && <NavLink to="/manager">{staffLabel}</NavLink>}
-      </nav>
+      <div className="tabbar-wrap" ref={menuRef}>
+        {menuOpen && session && (
+          <div className="account-sheet" id="account-sheet" role="dialog" aria-label="Profile">
+            <p className="account-sheet-email">{session.user.email}</p>
+            {staffRole && (
+              <Badge tone="accent" variant="subtle" className="cap">
+                {staffRole}
+              </Badge>
+            )}
+            <Button variant="outline" size="md" onClick={() => supabase.auth.signOut()}>
+              Log out
+            </Button>
+          </div>
+        )}
+        <nav className="tabbar" aria-label="Main (phone)">
+          <NavLink to="/" end>
+            <FilmIcon />
+            <span>What&apos;s on</span>
+          </NavLink>
+          <NavLink to="/me/bookings">
+            <TicketIcon />
+            <span>Bookings</span>
+          </NavLink>
+          {staffRole && (
+            <NavLink to="/manager">
+              <DashboardIcon />
+              <span>{staffLabel}</span>
+            </NavLink>
+          )}
+          {session ? (
+            <button
+              type="button"
+              className={menuOpen ? "active" : ""}
+              aria-expanded={menuOpen}
+              aria-controls="account-sheet"
+              onClick={() => setOpenAt(menuOpen ? null : location.pathname)}
+            >
+              <UserIcon />
+              <span>Profile</span>
+            </button>
+          ) : (
+            <NavLink to="/login">
+              <UserIcon />
+              <span>Profile</span>
+            </NavLink>
+          )}
+        </nav>
+      </div>
       <footer className="foot">
         <div className="rail-content foot-inner">
           <p>Alatau Cinema · Almaty</p>

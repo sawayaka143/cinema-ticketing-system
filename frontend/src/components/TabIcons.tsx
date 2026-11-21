@@ -1,0 +1,64 @@
+import type { ReactNode } from "react";
+
+// Outline icons (24px grid, 1.75 stroke) for the phone tab bar. Decorative: the label carries the name.
+function Icon({ children }: { children: ReactNode }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="24"
+      height="24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      {children}
+    </svg>
+  );
+}
+
+/** Clapperboard: what's on. */
+export function FilmIcon() {
+  return (
+    <Icon>
+      <path d="M3 10h18v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 19z" />
+      <path d="m3 10 1.6-5 14.2-1.6.2 1.7" />
+      <path d="m7.5 8.6 2.2 1.4M12.5 7.9l2.2 2.1M17.5 6.7l2.2 3.3" />
+    </Icon>
+  );
+}
+
+/** Ticket stub: bookings. */
+export function TicketIcon() {
+  return (
+    <Icon>
+      <path d="M3 8.5A1.5 1.5 0 0 1 4.5 7h15A1.5 1.5 0 0 1 21 8.5v2a1.75 1.75 0 0 0 0 3.5v2a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 16v-2a1.75 1.75 0 0 0 0-3.5z" />
+      <path d="M14.5 7v10" strokeDasharray="1.5 2.5" />
+    </Icon>
+  );
+}
+
+/** Person: profile. */
+export function UserIcon() {
+  return (
+    <Icon>
+      <circle cx="12" cy="8" r="3.75" />
+      <path d="M4.5 20c.6-3.7 3.5-5.75 7.5-5.75s6.9 2.05 7.5 5.75" />
+    </Icon>
+  );
+}
+
+/** Dashboard grid: manager / box office. */
+export function DashboardIcon() {
+  return (
+    <Icon>
+      <rect x="3.5" y="3.5" width="7" height="8" rx="1.5" />
+      <rect x="13.5" y="3.5" width="7" height="5" rx="1.5" />
+      <rect x="13.5" y="11.5" width="7" height="9" rx="1.5" />
+      <rect x="3.5" y="14.5" width="7" height="6" rx="1.5" />
+    </Icon>
+  );
+}

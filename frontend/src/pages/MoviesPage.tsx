@@ -86,11 +86,6 @@ export function MoviesPage() {
       .filter((row) => row.screenings.length > 0);
   }, [dayRows, activeFormat]);
 
-  const screeningCount = useMemo(
-    () => rows.reduce((sum, r) => sum + r.screenings.length, 0),
-    [rows],
-  );
-
   const nextAvailableDay = useMemo(() => {
     if (week.state !== "ready") return null;
     const withScreenings = new Set(week.data.map((s) => dayOf(s.start_time)));
@@ -127,13 +122,6 @@ export function MoviesPage() {
       <div className="program-head">
         <div className="program-title-block">
           <h1>{day.weekday === "Today" ? "Today at Alatau" : `${day.weekday}, ${day.date}`}</h1>
-          {week.state === "ready" && rows.length > 0 && (
-            <p className="program-sub">
-              {rows.length} {rows.length === 1 ? "film" : "films"} · {screeningCount}{" "}
-              {screeningCount === 1 ? "screening" : "screenings"} · Select a showtime to pick seats
-              (10-min hold)
-            </p>
-          )}
         </div>
         {week.state === "ready" && availableFormats.length > 1 && (
           <div className="format-filters" role="group" aria-label="Filter by hall format">
