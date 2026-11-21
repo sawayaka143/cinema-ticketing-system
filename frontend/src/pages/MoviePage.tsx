@@ -21,8 +21,8 @@ export function MoviePage() {
     return (
       <Card as="article" elevated className="movie-card" aria-busy="true">
         <div className="movie-layout">
-          <Skeleton width={160} height={240} radius={14} />
-          <div className="movie-info">
+          <Skeleton radius={4} className="poster-squircle" />
+          <div className="movie-info movie-info-skeleton">
             <Skeleton width="60%" height="2rem" radius={8} />
             <Skeleton width="40%" height="1.2rem" radius={6} style={{ marginTop: "0.5rem" }} />
             <Skeleton width="100%" height="4rem" radius={8} style={{ marginTop: "1rem" }} />
