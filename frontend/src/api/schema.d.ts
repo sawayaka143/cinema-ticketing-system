@@ -125,6 +125,26 @@ export interface paths {
         patch: operations["update_movie_api_admin_movies__movie_id__patch"];
         trace?: never;
     };
+    "/api/admin/posters": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Upload Poster
+         * @description Upload a poster (JPEG, PNG or WebP, up to 4 MB). Returns the public URL to save.
+         */
+        post: operations["upload_poster_api_admin_posters_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/report": {
         parameters: {
             query?: never;
@@ -1258,6 +1278,11 @@ export interface components {
              */
             simulate_decline: boolean;
         };
+        /** PosterOut */
+        PosterOut: {
+            /** Url */
+            url: string;
+        };
         /** RefundIn */
         RefundIn: {
             /**
@@ -1831,6 +1856,32 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    upload_poster_api_admin_posters_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "image/jpeg": string;
+                "image/png": string;
+                "image/webp": string;
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PosterOut"];
                 };
             };
         };

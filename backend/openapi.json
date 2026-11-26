@@ -1487,6 +1487,19 @@
         "title": "PayIn",
         "type": "object"
       },
+      "PosterOut": {
+        "properties": {
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "PosterOut",
+        "type": "object"
+      },
       "RefundIn": {
         "properties": {
           "reason": {
@@ -2672,6 +2685,56 @@
           }
         ],
         "summary": "Update Movie",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/posters": {
+      "post": {
+        "description": "Upload a poster (JPEG, PNG or WebP, up to 4 MB). Returns the public URL to save.",
+        "operationId": "upload_poster_api_admin_posters_post",
+        "requestBody": {
+          "content": {
+            "image/jpeg": {
+              "schema": {
+                "format": "binary",
+                "type": "string"
+              }
+            },
+            "image/png": {
+              "schema": {
+                "format": "binary",
+                "type": "string"
+              }
+            },
+            "image/webp": {
+              "schema": {
+                "format": "binary",
+                "type": "string"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PosterOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Upload Poster",
         "tags": [
           "admin"
         ]
