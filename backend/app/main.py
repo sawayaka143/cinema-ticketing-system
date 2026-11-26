@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api import (
     admin,
     admin_halls,
+    admin_sales,
     bookings,
     catalog,
     checkin,
@@ -31,5 +32,6 @@ app.include_router(bookings.router, prefix="/api")
 app.include_router(checkin.router, prefix="/api")
 app.include_router(admin.router, prefix="/api")
 app.include_router(admin_halls.router, prefix="/api")
+app.include_router(admin_sales.router, prefix="/api")
 app.include_router(staff_bookings.router, prefix="/api")
 app.include_router(fake_kaspi.router, prefix="/api")

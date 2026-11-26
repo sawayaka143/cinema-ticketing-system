@@ -145,6 +145,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/sales": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Sales Report
+         * @description Paid bookings, tickets and revenue in the period: in total, per day and per movie.
+         */
+        get: operations["sales_report_api_admin_sales_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/sales/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Export Sales
+         * @description The period's sales as an Excel file: one row per day and a total. Not split by movie.
+         */
+        get: operations["export_sales_api_admin_sales_export_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/screenings": {
         parameters: {
             query?: never;
@@ -1270,6 +1310,60 @@ export interface components {
             /** Title */
             title: string;
         };
+        /** SalesDay */
+        SalesDay: {
+            /** Bookings */
+            bookings: number;
+            /**
+             * Day
+             * Format: date
+             */
+            day: string;
+            /** Revenue */
+            revenue: string;
+            /** Tickets */
+            tickets: number;
+        };
+        /** SalesMovie */
+        SalesMovie: {
+            /** Bookings */
+            bookings: number;
+            /** Movie Id */
+            movie_id: number;
+            /** Revenue */
+            revenue: string;
+            /** Tickets */
+            tickets: number;
+            /** Title */
+            title: string;
+        };
+        /** SalesReport */
+        SalesReport: {
+            /** By Day */
+            by_day: components["schemas"]["SalesDay"][];
+            /** By Movie */
+            by_movie: components["schemas"]["SalesMovie"][];
+            /**
+             * Date From
+             * Format: date
+             */
+            date_from: string;
+            /**
+             * Date To
+             * Format: date
+             */
+            date_to: string;
+            total: components["schemas"]["SalesTotals"];
+        };
+        /** SalesTotals */
+        SalesTotals: {
+            /** Bookings */
+            bookings: number;
+            /** Revenue */
+            revenue: string;
+            /** Tickets */
+            tickets: number;
+        };
         /** ScreeningDetail */
         ScreeningDetail: {
             /** Base Price */
@@ -1757,6 +1851,74 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ReportRow"][];
+                };
+            };
+        };
+    };
+    sales_report_api_admin_sales_get: {
+        parameters: {
+            query?: {
+                /** @description First day (Almaty time). Default: 29 days before `to`. */
+                from?: string | null;
+                /** @description Last day, included. Default: today. */
+                to?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SalesReport"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    export_sales_api_admin_sales_export_get: {
+        parameters: {
+            query?: {
+                /** @description First day (Almaty time). Default: 29 days before `to`. */
+                from?: string | null;
+                /** @description Last day, included. Default: today. */
+                to?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description An Excel workbook (.xlsx) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

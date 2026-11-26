@@ -1607,6 +1607,131 @@
         "title": "ReportRow",
         "type": "object"
       },
+      "SalesDay": {
+        "properties": {
+          "bookings": {
+            "title": "Bookings",
+            "type": "integer"
+          },
+          "day": {
+            "format": "date",
+            "title": "Day",
+            "type": "string"
+          },
+          "revenue": {
+            "title": "Revenue",
+            "type": "string"
+          },
+          "tickets": {
+            "title": "Tickets",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "bookings",
+          "tickets",
+          "revenue",
+          "day"
+        ],
+        "title": "SalesDay",
+        "type": "object"
+      },
+      "SalesMovie": {
+        "properties": {
+          "bookings": {
+            "title": "Bookings",
+            "type": "integer"
+          },
+          "movie_id": {
+            "title": "Movie Id",
+            "type": "integer"
+          },
+          "revenue": {
+            "title": "Revenue",
+            "type": "string"
+          },
+          "tickets": {
+            "title": "Tickets",
+            "type": "integer"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "bookings",
+          "tickets",
+          "revenue",
+          "movie_id",
+          "title"
+        ],
+        "title": "SalesMovie",
+        "type": "object"
+      },
+      "SalesReport": {
+        "properties": {
+          "by_day": {
+            "items": {
+              "$ref": "#/components/schemas/SalesDay"
+            },
+            "title": "By Day",
+            "type": "array"
+          },
+          "by_movie": {
+            "items": {
+              "$ref": "#/components/schemas/SalesMovie"
+            },
+            "title": "By Movie",
+            "type": "array"
+          },
+          "date_from": {
+            "format": "date",
+            "title": "Date From",
+            "type": "string"
+          },
+          "date_to": {
+            "format": "date",
+            "title": "Date To",
+            "type": "string"
+          },
+          "total": {
+            "$ref": "#/components/schemas/SalesTotals"
+          }
+        },
+        "required": [
+          "date_from",
+          "date_to",
+          "total",
+          "by_day",
+          "by_movie"
+        ],
+        "title": "SalesReport",
+        "type": "object"
+      },
+      "SalesTotals": {
+        "properties": {
+          "bookings": {
+            "title": "Bookings",
+            "type": "integer"
+          },
+          "revenue": {
+            "title": "Revenue",
+            "type": "string"
+          },
+          "tickets": {
+            "title": "Tickets",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "bookings",
+          "tickets",
+          "revenue"
+        ],
+        "title": "SalesTotals",
+        "type": "object"
+      },
       "ScreeningDetail": {
         "properties": {
           "base_price": {
@@ -2578,6 +2703,156 @@
           }
         ],
         "summary": "Occupancy Report",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/sales": {
+      "get": {
+        "description": "Paid bookings, tickets and revenue in the period: in total, per day and per movie.",
+        "operationId": "sales_report_api_admin_sales_get",
+        "parameters": [
+          {
+            "description": "First day (Almaty time). Default: 29 days before `to`.",
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "First day (Almaty time). Default: 29 days before `to`.",
+              "title": "From"
+            }
+          },
+          {
+            "description": "Last day, included. Default: today.",
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Last day, included. Default: today.",
+              "title": "To"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SalesReport"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Sales Report",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/sales/export": {
+      "get": {
+        "description": "The period's sales as an Excel file: one row per day and a total. Not split by movie.",
+        "operationId": "export_sales_api_admin_sales_export_get",
+        "parameters": [
+          {
+            "description": "First day (Almaty time). Default: 29 days before `to`.",
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "First day (Almaty time). Default: 29 days before `to`.",
+              "title": "From"
+            }
+          },
+          {
+            "description": "Last day, included. Default: today.",
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Last day, included. Default: today.",
+              "title": "To"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {}
+            },
+            "description": "An Excel workbook (.xlsx)"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Export Sales",
         "tags": [
           "admin"
         ]
