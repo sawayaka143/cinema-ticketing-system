@@ -84,3 +84,58 @@ def test_blank_phone_is_stored_as_null(client: TestClient, login):
 
 def test_create_customer_without_token_is_401(client: TestClient):
     assert client.post("/api/me/customer", json={"full_name": "A"}).status_code == 401
+
+
+def test_update_customer_profile(client: TestClient, login):
+    login("edit@test.kz")
+    assert client.post("/api/me/customer", json={"full_name": "Aruzhan"}).status_code == 201
+
+    res = client.patch(
+        "/api/me/customer",
+        json={
+            "full_name": " Aruzhan K. ",
+            "phone": "8 (707) 555-12-34",
+            "city": " Almaty ",
+            "avatar_url": "preset:reel",
+        },
+    )
+    assert res.status_code == 200
+    body = res.json()
+    assert body["full_name"] == "Aruzhan K."
+    assert body["phone"] == "+77075551234"
+    assert body["city"] == "Almaty"
+    assert body["avatar_url"] == "preset:reel"
+
+    # Clearing optional fields
+    cleared = client.patch(
+        "/api/me/customer",
+        json={"phone": "  ", "city": "", "avatar_url": None},
+    )
+    assert cleared.status_code == 200
+    assert cleared.json()["phone"] is None
+    assert cleared.json()["city"] is None
+    assert cleared.json()["avatar_url"] is None
+
+
+def test_update_customer_missing_profile_is_404(client: TestClient, login):
+    login("missing@test.kz")
+    res = client.patch("/api/me/customer", json={"full_name": "Nobody"})
+    assert res.status_code == 404
+
+
+def test_update_customer_rejects_bad_avatar_and_blank_name(client: TestClient, login):
+    login("bad@test.kz")
+    assert client.post("/api/me/customer", json={"full_name": "Valid"}).status_code == 201
+
+    bad_avatar = client.patch("/api/me/customer", json={"avatar_url": "javascript:alert(1)"})
+    assert bad_avatar.status_code == 400
+
+    blank_name = client.patch("/api/me/customer", json={"full_name": "   "})
+    assert blank_name.status_code == 400
+
+    bad_phone = client.patch("/api/me/customer", json={"phone": "12345"})
+    assert bad_phone.status_code == 400
+
+
+def test_update_customer_without_token_is_401(client: TestClient):
+    assert client.patch("/api/me/customer", json={"full_name": "A"}).status_code == 401

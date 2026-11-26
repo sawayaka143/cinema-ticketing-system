@@ -4,6 +4,7 @@ import { api } from "../api/client";
 import { MovieRow } from "../components/MovieRow";
 import { MovieTile } from "../components/MovieTile";
 import { Button, EmptyState, ErrorState, FadeIn, ProgramSkeleton } from "../components/ui";
+import { WEEK_KEY, primeFromWeek, toScreening } from "../lib/catalogCache";
 import {
   type Movie,
   type Screening,
@@ -11,7 +12,7 @@ import {
   dayOf,
   nextDays,
 } from "../lib/format";
-import { WEEK_KEY, primeFromWeek, toScreening } from "../lib/catalogCache";
+import { useI18n } from "../lib/i18n";
 import { must, useApi } from "../lib/useApi";
 import { PHONE_QUERY, useMediaQuery } from "../lib/useMediaQuery";
 
@@ -40,11 +41,12 @@ function groupByMovieForDay(screenings: ScreeningDetail[], dayIso: string): DayM
 }
 
 export function MoviesPage() {
-  const days = useMemo(() => nextDays(), []);
+  const { locale, t } = useI18n();
+  const todayLabel = t("program.today");
+  const days = useMemo(() => nextDays(7, locale, todayLabel), [locale, todayLabel]);
   const isPhone = useMediaQuery(PHONE_QUERY);
   const [params, setParams] = useSearchParams();
   const [formatFilter, setFormatFilter] = useState<string>("ALL");
-  const day = days.find((d) => d.iso === params.get("day")) ?? days[0];
 
   const week = useApi(
     async () => {
@@ -55,6 +57,21 @@ export function MoviesPage() {
     "week",
     WEEK_KEY,
   );
+
+  const daysWithScreenings = useMemo(() => {
+    if (week.state !== "ready") return null;
+    return new Set(week.data.map((s) => dayOf(s.start_time)));
+  }, [week]);
+
+  const explicitDay = params.get("day");
+  const autoAdvancedDay = useMemo(() => {
+    if (explicitDay || !daysWithScreenings) return null;
+    if (daysWithScreenings.has(days[0].iso)) return null;
+    return days.find((d) => daysWithScreenings.has(d.iso)) ?? null;
+  }, [explicitDay, daysWithScreenings, days]);
+
+  const day =
+    (explicitDay ? days.find((d) => d.iso === explicitDay) : autoAdvancedDay) ?? days[0];
 
   const dayRows = useMemo(
     () => (week.state === "ready" ? groupByMovieForDay(week.data, day.iso) : []),
@@ -97,21 +114,22 @@ export function MoviesPage() {
 
   const selectDay = (iso: string) => {
     setFormatFilter("ALL");
-    setParams(iso === days[0].iso ? {} : { day: iso });
+    setParams({ day: iso });
   };
 
   return (
     <>
       <div className="days-wrap">
-        <div className="days" role="group" aria-label="Program day">
+        <div className="days" role="group" aria-label={t("program.dayGroup")}>
           {days.map((d) => {
             const isSelected = d.iso === day.iso;
+            const isEmpty = daysWithScreenings !== null && !daysWithScreenings.has(d.iso);
             return (
               <button
                 key={d.iso}
                 type="button"
                 aria-pressed={isSelected}
-                className={`day-tab ${isSelected ? "day-tab-active" : ""}`}
+                className={`day-tab${isSelected ? " day-tab-active" : ""}${isEmpty ? " day-tab-empty" : ""}`}
                 onClick={() => selectDay(d.iso)}
               >
                 <span className="day-tab-label">{d.weekday}</span>
@@ -122,19 +140,27 @@ export function MoviesPage() {
         </div>
       </div>
 
+      {autoAdvancedDay && (
+        <p className="program-notice" role="status">
+          {t("program.showingNextDay", {
+            day: `${autoAdvancedDay.weekday}, ${autoAdvancedDay.date}`,
+          })}
+        </p>
+      )}
+
       <div className="program-head">
         <div className="program-title-block">
-          <h1>{day.weekday === "Today" ? "Today at Alatau" : `${day.weekday}, ${day.date}`}</h1>
+          <h1>{day.isToday ? t("program.todayAtAlatau") : `${day.weekday}, ${day.date}`}</h1>
         </div>
         {week.state === "ready" && availableFormats.length > 1 && (
-          <div className="format-filters" role="group" aria-label="Filter by hall format">
+          <div className="format-filters" role="group" aria-label={t("program.filterFormat")}>
             <button
               type="button"
               aria-pressed={activeFormat === "ALL"}
               className={`filter-pill ${activeFormat === "ALL" ? "filter-pill-active" : ""}`}
               onClick={() => setFormatFilter("ALL")}
             >
-              All formats
+              {t("program.allFormats")}
             </button>
             {availableFormats.map((fmt) => (
               <button
@@ -155,8 +181,8 @@ export function MoviesPage() {
       {week.state === "error" && (
         <FadeIn direction="up">
           <ErrorState
-            title="Couldn't load the program"
-            message="We had trouble reaching the box office. Check your connection and try again."
+            title={t("program.loadErrorTitle")}
+            message={t("program.loadErrorMsg")}
             details={week.message}
             onRetry={week.reload}
           />
@@ -167,26 +193,26 @@ export function MoviesPage() {
           <EmptyState
             title={
               activeFormat !== "ALL"
-                ? `No ${activeFormat} screenings on this day`
-                : "No screenings left on this day"
+                ? t("program.noFormatTitle", { format: activeFormat })
+                : t("program.noScreeningsTitle")
             }
             description={
-              activeFormat !== "ALL"
-                ? "Try showing all hall formats or choose another day above."
-                : "All screenings for this date have passed or none are scheduled."
+              activeFormat !== "ALL" ? t("program.noFormatDesc") : t("program.noScreeningsDesc")
             }
             action={
               activeFormat !== "ALL" ? (
                 <Button variant="solid" size="sm" onClick={() => setFormatFilter("ALL")}>
-                  Show all formats
+                  {t("program.showAllFormats")}
                 </Button>
               ) : nextAvailableDay ? (
                 <Button variant="solid" size="sm" onClick={() => selectDay(nextAvailableDay.iso)}>
-                  See {nextAvailableDay.weekday}, {nextAvailableDay.date}
+                  {t("program.seeDay", {
+                    day: `${nextAvailableDay.weekday}, ${nextAvailableDay.date}`,
+                  })}
                 </Button>
               ) : (
                 <Button variant="ghost" size="sm" onClick={week.reload}>
-                  Refresh program
+                  {t("program.refresh")}
                 </Button>
               )
             }
@@ -198,7 +224,7 @@ export function MoviesPage() {
           {rows.map(({ movie, screenings }, index) => (
             <FadeIn key={movie.movie_id} delay={index * 40} direction="up">
               {isPhone ? (
-                <MovieTile movie={movie} priority={index < 4} />
+                <MovieTile movie={movie} screenings={screenings} dayIso={day.iso} priority={index < 4} />
               ) : (
                 <MovieRow movie={movie} screenings={screenings} priority={index < 4} />
               )}

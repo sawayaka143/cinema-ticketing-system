@@ -82,12 +82,12 @@ export const Button = forwardRef<HTMLElement, ButtonProps>(function Button(
 
   const fill =
     variant === "solid"
-      ? "var(--accent)"
+      ? "var(--accent-fill, var(--accent))"
       : variant === "ghost"
         ? "var(--surface)"
         : "transparent";
 
-  const stroke = variant === "solid" ? "transparent" : "var(--border)";
+  const stroke = variant === "solid" ? "transparent" : "var(--border-control, var(--border))";
 
   return (
     <Squircle

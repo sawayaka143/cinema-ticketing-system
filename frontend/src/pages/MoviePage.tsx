@@ -1,13 +1,17 @@
-import { useParams } from "react-router";
+import { Link, useParams, useSearchParams } from "react-router";
 import { api } from "../api/client";
 import { Age, Poster, ShowtimeChip } from "../components/MovieRow";
 import { Card, EmptyState, ErrorState, FadeIn, Skeleton } from "../components/ui";
-import { type Screening, dayOf, nextDays, runtime } from "../lib/format";
 import { type MovieWithScreenings, movieKey } from "../lib/catalogCache";
+import { type Screening, dayOf, nextDays, runtime } from "../lib/format";
+import { useI18n } from "../lib/i18n";
 import { must, useApi } from "../lib/useApi";
 
 export function MoviePage() {
+  const { locale, t } = useI18n();
   const movieId = Number(useParams().id);
+  const [params] = useSearchParams();
+  const selectedDay = params.get("day");
   const page = useApi<MovieWithScreenings>(async () => {
     const path = { path: { movie_id: movieId } };
     const [movie, screenings] = await Promise.all([
@@ -36,8 +40,8 @@ export function MoviePage() {
     return (
       <FadeIn direction="up">
         <ErrorState
-          title="Couldn't load movie details"
-          message="We couldn't retrieve this film's information and showtimes. Please try again."
+          title={t("movie.loadErrorTitle")}
+          message={t("movie.loadErrorMsg")}
           details={page.message}
           onRetry={page.reload}
         />
@@ -51,41 +55,62 @@ export function MoviePage() {
     const key = dayOf(s.start_time);
     byDay.set(key, [...(byDay.get(key) ?? []), s]);
   }
-  const facts = [...movie.genres, runtime(movie.duration_min), movie.release_year];
+  const facts = [
+    ...movie.genres,
+    runtime(movie.duration_min, t("movie.hoursShort"), t("movie.minShort")),
+    movie.release_year,
+  ];
+
+  const activeDays = nextDays(7, locale, t("program.today")).filter((d) => byDay.has(d.iso));
+  const orderedDays =
+    selectedDay && byDay.has(selectedDay)
+      ? [
+          ...activeDays.filter((d) => d.iso === selectedDay),
+          ...activeDays.filter((d) => d.iso !== selectedDay),
+        ]
+      : activeDays;
 
   return (
     <FadeIn direction="up">
+      <p className="back-link">
+        <Link to={selectedDay ? `/?day=${encodeURIComponent(selectedDay)}` : "/"}>← {t("nav.backWhatsOn")}</Link>
+      </p>
       <Card as="article" elevated className="movie-card">
         <div className="movie-layout">
-          <Poster movie={movie} priority />
-          <div className="movie-info">
+          <div className="movie-poster-col">
+            <Poster movie={movie} priority />
+          </div>
+          <div className="movie-header-col">
             <div className="title">
               <h1>{movie.title}</h1>
               <Age minAge={movie.min_age} />
             </div>
             <p className="meta">{facts.filter(Boolean).join(" · ")}</p>
+          </div>
+          <div className="movie-body-col">
             {movie.description && <p className="lead">{movie.description}</p>}
-            <h2>Screenings</h2>
+            <h2>{t("movie.screenings")}</h2>
             {screenings.length === 0 && (
               <EmptyState
-                title="No upcoming screenings"
-                description="There are currently no scheduled screenings for this movie in the next 7 days."
+                title={t("movie.noUpcomingTitle")}
+                description={t("movie.noUpcomingDesc")}
               />
             )}
-            {nextDays()
-              .filter((d) => byDay.has(d.iso))
-              .map((d) => (
-                <section key={d.iso} className="day-group">
-                  <h3>
-                    {d.weekday}, {d.date}
-                  </h3>
-                  <div className="times">
-                    {byDay.get(d.iso)?.map((s) => (
-                      <ShowtimeChip key={s.screening_id} screening={s} />
-                    ))}
-                  </div>
-                </section>
-              ))}
+            {orderedDays.map((d) => (
+              <section
+                key={d.iso}
+                className={`day-group${selectedDay === d.iso ? " day-group-selected" : ""}`}
+              >
+                <h3>
+                  {d.weekday}, {d.date}
+                </h3>
+                <div className="times">
+                  {byDay.get(d.iso)?.map((s) => (
+                    <ShowtimeChip key={s.screening_id} screening={s} />
+                  ))}
+                </div>
+              </section>
+            ))}
           </div>
         </div>
       </Card>

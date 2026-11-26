@@ -1,8 +1,10 @@
 import { type FormEvent, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { api } from "../api/client";
 import { Status } from "../components/Layout";
+import { EyeIcon, EyeOffIcon } from "../components/TabIcons";
 import { Button, Card, FadeIn } from "../components/ui";
+import { useI18n } from "../lib/i18n";
 import { supabase } from "../lib/supabase";
 
 type Mode = "login" | "signup";
@@ -17,7 +19,12 @@ async function ensureCustomer(fullName: string | undefined) {
 
 export function LoginPage() {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const rawNext = params.get("next");
+  const safeNext = rawNext && rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/";
+  const { t } = useI18n();
   const [mode, setMode] = useState<Mode>("login");
+  const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<{ tone: "info" | "error"; text: string } | null>(null);
 
@@ -38,51 +45,99 @@ export function LoginPage() {
     if (error) {
       setMessage({ tone: "error", text: error.message });
     } else if (!data.session) {
-      setMessage({ tone: "info", text: "Check your email to confirm the account, then log in." });
+      setMessage({ tone: "info", text: t("auth.checkEmail") });
       setMode("login");
     } else {
       await ensureCustomer(data.session.user.user_metadata.full_name as string | undefined);
-      navigate("/");
+      navigate(safeNext, { replace: true });
     }
     setBusy(false);
   }
 
+  const switchMode = () => {
+    setMessage(null);
+    setMode(mode === "login" ? "signup" : "login");
+  };
+
   return (
     <FadeIn direction="up">
-      <Card as="section" elevated className="panel narrow">
-        <h1>{mode === "login" ? "Log in" : "Create an account"}</h1>
-        <form className="form" onSubmit={submit}>
-          {mode === "signup" && (
+      <Card as="section" elevated className="panel narrow auth-card">
+        <FadeIn key={mode} direction="up" duration={260} className="auth-stage">
+          <div className="auth-head">
+            <h1>{mode === "login" ? t("auth.loginTitle") : t("auth.signupTitle")}</h1>
+            <p className="muted">
+              {mode === "login" ? t("auth.loginSubtitle") : t("auth.signupSubtitle")}
+            </p>
+          </div>
+
+          <form className="form auth-form" onSubmit={submit}>
+            {mode === "signup" && (
+              <label>
+                {t("auth.fullName")}
+                <input
+                  name="full_name"
+                  autoComplete="name"
+                  placeholder={t("auth.fullNamePlaceholder")}
+                  required
+                  maxLength={100}
+                />
+              </label>
+            )}
             <label>
-              Full name
-              <input name="full_name" autoComplete="name" required maxLength={100} />
+              {t("auth.email")}
+              <input
+                name="email"
+                type="email"
+                inputMode="email"
+                autoComplete="email"
+                autoCapitalize="none"
+                placeholder={t("auth.emailPlaceholder")}
+                required
+              />
             </label>
-          )}
-          <label>
-            Email
-            <input name="email" type="email" autoComplete="email" required />
-          </label>
-          <label>
-            Password
-            <input
-              name="password"
-              type="password"
-              autoComplete={mode === "login" ? "current-password" : "new-password"}
-              minLength={6}
-              required
-            />
-          </label>
-          <Button type="submit" variant="solid" size="lg" loading={busy} disabled={busy}>
-            {busy ? "Please wait…" : mode === "login" ? "Log in" : "Sign up"}
+            <label>
+              {t("auth.password")}
+              <div className="password-field">
+                <input
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete={mode === "login" ? "current-password" : "new-password"}
+                  placeholder={t("auth.passwordPlaceholder")}
+                  minLength={6}
+                  required
+                />
+                <button
+                  type="button"
+                  className="password-toggle"
+                  aria-label={showPassword ? t("auth.hidePassword") : t("auth.showPassword")}
+                  aria-pressed={showPassword}
+                  onClick={() => setShowPassword((s) => !s)}
+                >
+                  {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+                </button>
+              </div>
+            </label>
+            <Button type="submit" variant="solid" size="lg" className="auth-submit-btn" loading={busy} disabled={busy}>
+              {busy ? t("auth.pleaseWait") : mode === "login" ? t("auth.loginTitle") : t("auth.signUp")}
+            </Button>
+          </form>
+
+          {message && <Status tone={message.tone}>{message.text}</Status>}
+
+          <div className="auth-divider" role="separator">
+            <span>{mode === "login" ? t("auth.newHere") : t("auth.alreadyHave")}</span>
+          </div>
+
+          <Button
+            type="button"
+            variant="outline"
+            size="lg"
+            className="auth-switch-btn"
+            onClick={switchMode}
+          >
+            {mode === "login" ? t("auth.createAccountCta") : t("auth.loginTitle")}
           </Button>
-        </form>
-        {message && <Status tone={message.tone}>{message.text}</Status>}
-        <p className="switch">
-          {mode === "login" ? "New here?" : "Already have an account?"}{" "}
-          <Button variant="link" onClick={() => setMode(mode === "login" ? "signup" : "login")}>
-            {mode === "login" ? "Create an account" : "Log in"}
-          </Button>
-        </p>
+        </FadeIn>
       </Card>
     </FadeIn>
   );

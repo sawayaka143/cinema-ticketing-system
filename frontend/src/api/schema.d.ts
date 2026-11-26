@@ -469,7 +469,11 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        /**
+         * Update Customer
+         * @description Update the logged-in customer's profile fields (name, phone, city, avatar).
+         */
+        patch: operations["update_customer_api_me_customer_patch"];
         trace?: never;
     };
     "/api/movies": {
@@ -828,6 +832,10 @@ export interface components {
         };
         /** CustomerCreate */
         CustomerCreate: {
+            /** Avatar Url */
+            avatar_url?: string | null;
+            /** City */
+            city?: string | null;
             /** Full Name */
             full_name: string;
             /**
@@ -839,6 +847,10 @@ export interface components {
         };
         /** CustomerOut */
         CustomerOut: {
+            /** Avatar Url */
+            avatar_url: string | null;
+            /** City */
+            city: string | null;
             /** Customer Id */
             customer_id: number;
             /** Email */
@@ -847,6 +859,20 @@ export interface components {
             full_name: string;
             /** Phone */
             phone: string | null;
+        };
+        /** CustomerUpdate */
+        CustomerUpdate: {
+            /** Avatar Url */
+            avatar_url?: string | null;
+            /** City */
+            city?: string | null;
+            /** Full Name */
+            full_name?: string | null;
+            /**
+             * Phone
+             * @description Spaces, dashes, brackets and a leading 8 are fine; blank clears the phone.
+             */
+            phone?: string | null;
         };
         /** FakeKaspiOut */
         FakeKaspiOut: {
@@ -2256,6 +2282,39 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomerOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_customer_api_me_customer_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CustomerUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };

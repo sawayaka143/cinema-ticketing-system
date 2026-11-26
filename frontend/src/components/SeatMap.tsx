@@ -1,7 +1,12 @@
 import type { Seat } from "../lib/format";
 import { price } from "../lib/format";
+import { type TranslationKey, useI18n } from "../lib/i18n";
 
-const TYPE_LABEL: Record<string, string> = { standard: "Standard", vip: "VIP", wheelchair: "Wheelchair" };
+const SEAT_TYPE_KEY: Record<string, TranslationKey> = {
+  standard: "seat.standard",
+  vip: "seat.vip",
+  wheelchair: "seat.wheelchair",
+};
 
 /** The hall as a grid: one button per seat, placed by grid_row / grid_col, screen at the top. */
 export function SeatMap({
@@ -15,6 +20,7 @@ export function SeatMap({
   onToggle: (seat: Seat) => void;
   disabled?: boolean;
 }) {
+  const { t } = useI18n();
   const cols = Math.max(...seats.map((s) => s.grid_col), 1);
   const rows = [...new Set(seats.map((s) => s.grid_row))].sort((a, b) => a - b);
   const labelOf = new Map(seats.map((s) => [s.grid_row, s.row_label]));
@@ -26,15 +32,18 @@ export function SeatMap({
         <svg className="screen-arc" viewBox="0 0 320 14" preserveAspectRatio="none">
           <path d="M 6 12 Q 160 2 314 12" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
         </svg>
-        <span>Screen</span>
+        <span>{t("seat.screen")}</span>
       </div>
-      <div className="seats" style={{ gridTemplateColumns: `2rem repeat(${cols}, minmax(0, 2.25rem)) 2rem` }}>
+      <div className="seats" style={{ gridTemplateColumns: `1.75rem repeat(${cols}, minmax(2rem, 2.25rem)) 1.75rem` }}>
         {rows.map((r) => (
           <RowLabel key={`l${r}`} row={rowIndex(r)} label={labelOf.get(r) ?? ""} col={1} />
         ))}
         {seats.map((s) => {
           const on = picked.has(s.seat_id);
-          const name = `Row ${s.row_label}, seat ${s.seat_number}, ${TYPE_LABEL[s.seat_type] ?? s.seat_type}, ${price(s.price)}`;
+          const typeLabel = SEAT_TYPE_KEY[s.seat_type] ? t(SEAT_TYPE_KEY[s.seat_type]) : s.seat_type;
+          const ariaLabel = s.is_taken
+            ? t("seat.ariaTaken", { row: s.row_label, seat: s.seat_number, type: typeLabel })
+            : t("seat.ariaSeat", { row: s.row_label, seat: s.seat_number, type: typeLabel, price: price(s.price) });
           return (
             <button
               key={s.seat_id}
@@ -43,8 +52,12 @@ export function SeatMap({
               style={{ gridRow: rowIndex(s.grid_row), gridColumn: s.grid_col + 1 }}
               disabled={s.is_taken || disabled}
               aria-pressed={on}
-              aria-label={s.is_taken ? `${name}, taken` : name}
-              title={s.is_taken ? `${s.row_label}${s.seat_number} · taken` : `${s.row_label}${s.seat_number} · ${price(s.price)}`}
+              aria-label={ariaLabel}
+              title={
+                s.is_taken
+                  ? `${s.row_label}${s.seat_number} · ${t("seat.taken")}`
+                  : `${s.row_label}${s.seat_number} · ${price(s.price)}`
+              }
               onClick={() => onToggle(s)}
             >
               {s.seat_number}
@@ -55,21 +68,21 @@ export function SeatMap({
           <RowLabel key={`r${r}`} row={rowIndex(r)} label={labelOf.get(r) ?? ""} col={cols + 2} />
         ))}
       </div>
-      <ul className="legend" aria-label="Legend">
+      <ul className="legend" aria-label={t("seat.legend")}>
         <li>
-          <i className="seat" /> Free
+          <i className="seat" /> {t("seat.free")}
         </li>
         <li>
-          <i className="seat seat-vip" /> VIP
+          <i className="seat seat-vip" /> {t("seat.vip")}
         </li>
         <li>
-          <i className="seat seat-wheelchair" /> Wheelchair
+          <i className="seat seat-wheelchair" /> {t("seat.wheelchair")}
         </li>
         <li>
-          <i className="seat on" /> Your pick
+          <i className="seat on" /> {t("seat.yourPick")}
         </li>
         <li>
-          <i className="seat taken" /> Taken
+          <i className="seat taken" /> {t("seat.taken")}
         </li>
       </ul>
     </div>
