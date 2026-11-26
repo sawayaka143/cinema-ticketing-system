@@ -1627,3 +1627,24 @@ button {
     overflow-x: clip;
   }
 }
+.lang-switcher {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.lang-switcher button {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.lang-switcher button.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+}

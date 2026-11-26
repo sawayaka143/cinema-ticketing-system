@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useParams, useSearchParams } from "react-router";
 import { api } from "../api/client";
 import type { components } from "../api/schema";
@@ -14,6 +15,7 @@ type Invoice = components["schemas"]["FakeKaspiOut"];
  * the access. It imitates the real flow without the bank's name or logo, and says it is a demo.
  */
 export function FakeKaspiPage() {
+  const { t } = useTranslation();
   const token = useParams().token ?? "";
   const bookingId = Number(useSearchParams()[0].get("b")) || null;
   const page = useApi(
@@ -43,14 +45,11 @@ export function FakeKaspiPage() {
 
       {page.state === "error" &&
         (page.message.includes("Unknown payment link") ? (
-          <EmptyState
-            title="This payment link doesn't exist"
-            description="Scan the QR code on the cinema site again."
-          />
+          <EmptyState title={t("kaspi.unknownTitle")} description={t("kaspi.unknownDesc")} />
         ) : (
           <ErrorState
-            title="Couldn't open the payment"
-            message="We couldn't reach the payment service. Please try again."
+            title={t("kaspi.openErrorTitle")}
+            message={t("kaspi.openErrorMsg")}
             details={page.message}
             onRetry={page.reload}
           />
@@ -60,14 +59,13 @@ export function FakeKaspiPage() {
         <PayView key={`${page.data.status}:${page.data.seconds_left}`} token={token} bookingId={bookingId} initial={page.data} />
       )}
 
-      <p className="fake-kaspi-note">
-        Demo of a Kaspi QR payment for a university project. No real money is charged.
-      </p>
+      <p className="fake-kaspi-note">{t("kaspi.note")}</p>
     </main>
   );
 }
 
 function PayView({ token, bookingId, initial }: { token: string; bookingId: number | null; initial: Invoice }) {
+  const { t } = useTranslation();
   const [invoice, setInvoice] = useState(initial);
   const [busy, setBusy] = useState<"pay" | "decline" | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -83,7 +81,7 @@ function PayView({ token, bookingId, initial }: { token: string; bookingId: numb
     } catch (err) {
       // 402: declined on purpose, the customer may try again. 409: the hold ran out meanwhile.
       if (statusOf(err) === 409) setInvoice({ ...invoice, status: "expired", seconds_left: 0 });
-      else setMessage(statusOf(err) === 402 ? "Payment declined (demo). You can try again." : messageOf(err));
+      else setMessage(statusOf(err) === 402 ? t("kaspi.declinedMsg") : messageOf(err));
     }
     setBusy(null);
   }
@@ -95,15 +93,15 @@ function PayView({ token, bookingId, initial }: { token: string; bookingId: numb
           <span className="fake-kaspi-check" aria-hidden="true">
             ✓
           </span>
-          <h1>Paid {price(invoice.amount)}</h1>
+          <h1>{t("kaspi.paid", { amount: price(invoice.amount) })}</h1>
           <p className="muted">
             {invoice.merchant}
             {invoice.movie_title ? ` · ${invoice.movie_title}` : ""}
           </p>
-          <p>Your tickets are ready. The cinema site on your computer updates by itself.</p>
+          <p>{t("kaspi.ready")}</p>
           {bookingId && (
             <Button as={Link} to={`/bookings/${bookingId}`} variant="solid" size="lg" className="wide">
-              Show my tickets
+              {t("kaspi.showTickets")}
             </Button>
           )}
         </Card>
@@ -114,11 +112,11 @@ function PayView({ token, bookingId, initial }: { token: string; bookingId: numb
   if (invoice.status !== "pending" || left === 0) {
     return (
       <EmptyState
-        title={invoice.status === "cancelled" ? "This booking was cancelled" : "The 10 minutes ran out"}
-        description="Nothing was charged. Pick your seats again on the cinema site."
+        title={invoice.status === "cancelled" ? t("kaspi.cancelledTitle") : t("kaspi.expiredTitle")}
+        description={t("kaspi.nothingCharged")}
         action={
           <Button as={Link} to="/" variant="solid">
-            Back to the cinema
+            {t("kaspi.backToCinema")}
           </Button>
         }
       />
@@ -137,23 +135,23 @@ function PayView({ token, bookingId, initial }: { token: string; bookingId: numb
         <dl className="fake-kaspi-details">
           {invoice.movie_title && (
             <>
-              <dt>Movie</dt>
+              <dt>{t("kaspi.movie")}</dt>
               <dd>{invoice.movie_title}</dd>
             </>
           )}
           {invoice.start_time && (
             <>
-              <dt>When</dt>
+              <dt>{t("kaspi.when")}</dt>
               <dd>{when(invoice.start_time)}</dd>
             </>
           )}
           {invoice.hall && (
             <>
-              <dt>Hall</dt>
+              <dt>{t("kaspi.hall")}</dt>
               <dd>{invoice.hall}</dd>
             </>
           )}
-          <dt>Seats</dt>
+          <dt>{t("kaspi.seats")}</dt>
           <dd className="fake-kaspi-seats">
             {invoice.seats.map((s) => (
               <Badge key={s} tone="neutral" variant="outline">
@@ -164,7 +162,7 @@ function PayView({ token, bookingId, initial }: { token: string; bookingId: numb
         </dl>
 
         <p className={`fake-kaspi-timer${left <= 60 ? " urgent" : ""}`} role="timer" aria-live="off">
-          Pay within <b>{clock(left)}</b>
+          {t("kaspi.payWithin")} <b>{clock(left)}</b>
         </p>
 
         <Button
@@ -175,7 +173,7 @@ function PayView({ token, bookingId, initial }: { token: string; bookingId: numb
           disabled={busy !== null}
           onClick={() => void send(false)}
         >
-          Pay {price(invoice.amount)}
+          {t("kaspi.pay", { amount: price(invoice.amount) })}
         </Button>
         <Button
           variant="ghost"
@@ -184,7 +182,7 @@ function PayView({ token, bookingId, initial }: { token: string; bookingId: numb
           disabled={busy !== null}
           onClick={() => void send(true)}
         >
-          Decline (demo)
+          {t("kaspi.decline")}
         </Button>
 
         {message && (

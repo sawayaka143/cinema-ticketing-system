@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router";
 import { api } from "../api/client";
 import { MovieRow } from "../components/MovieRow";
@@ -40,6 +41,7 @@ function groupByMovieForDay(screenings: ScreeningDetail[], dayIso: string): DayM
 }
 
 export function MoviesPage() {
+  const { t } = useTranslation();
   const days = useMemo(() => nextDays(), []);
   const isPhone = useMediaQuery(PHONE_QUERY);
   const [params, setParams] = useSearchParams();
@@ -103,7 +105,7 @@ export function MoviesPage() {
   return (
     <>
       <div className="days-wrap">
-        <div className="days" role="group" aria-label="Program day">
+        <div className="days" role="group" aria-label={t("movies.programDay")}>
           {days.map((d) => {
             const isSelected = d.iso === day.iso;
             return (
@@ -124,17 +126,17 @@ export function MoviesPage() {
 
       <div className="program-head">
         <div className="program-title-block">
-          <h1>{day.weekday === "Today" ? "Today at Alatau" : `${day.weekday}, ${day.date}`}</h1>
+          <h1>{day.weekday === "Today" ? t("movies.todayTitle") : `${day.weekday}, ${day.date}`}</h1>
         </div>
         {week.state === "ready" && availableFormats.length > 1 && (
-          <div className="format-filters" role="group" aria-label="Filter by hall format">
+          <div className="format-filters" role="group" aria-label={t("movies.filterAria")}>
             <button
               type="button"
               aria-pressed={activeFormat === "ALL"}
               className={`filter-pill ${activeFormat === "ALL" ? "filter-pill-active" : ""}`}
               onClick={() => setFormatFilter("ALL")}
             >
-              All formats
+              {t("movies.allFormats")}
             </button>
             {availableFormats.map((fmt) => (
               <button
@@ -155,8 +157,8 @@ export function MoviesPage() {
       {week.state === "error" && (
         <FadeIn direction="up">
           <ErrorState
-            title="Couldn't load the program"
-            message="We had trouble reaching the box office. Check your connection and try again."
+            title={t("movies.errorTitle")}
+            message={t("movies.errorMessage")}
             details={week.message}
             onRetry={week.reload}
           />
@@ -167,26 +169,27 @@ export function MoviesPage() {
           <EmptyState
             title={
               activeFormat !== "ALL"
-                ? `No ${activeFormat} screenings on this day`
-                : "No screenings left on this day"
+                ? t("movies.noFormat", { format: activeFormat })
+                : t("movies.noneLeft")
             }
             description={
-              activeFormat !== "ALL"
-                ? "Try showing all hall formats or choose another day above."
-                : "All screenings for this date have passed or none are scheduled."
+              activeFormat !== "ALL" ? t("movies.tryAllDesc") : t("movies.passedDesc")
             }
             action={
               activeFormat !== "ALL" ? (
                 <Button variant="solid" size="sm" onClick={() => setFormatFilter("ALL")}>
-                  Show all formats
+                  {t("movies.showAll")}
                 </Button>
               ) : nextAvailableDay ? (
                 <Button variant="solid" size="sm" onClick={() => selectDay(nextAvailableDay.iso)}>
-                  See {nextAvailableDay.weekday}, {nextAvailableDay.date}
+                  {t("movies.see", {
+                    weekday: nextAvailableDay.weekday,
+                    date: nextAvailableDay.date,
+                  })}
                 </Button>
               ) : (
                 <Button variant="ghost" size="sm" onClick={week.reload}>
-                  Refresh program
+                  {t("movies.refresh")}
                 </Button>
               )
             }

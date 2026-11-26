@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useParams } from "react-router";
 import { api } from "../api/client";
 import { KaspiQr } from "../components/KaspiQr";
@@ -11,6 +12,7 @@ import { useCountdown } from "../lib/useCountdown";
 
 /** One booking: the live hold (countdown, total, cancel) or its final state. */
 export function BookingPage() {
+  const { t } = useTranslation();
   const bookingId = Number(useParams().id);
   const { session, ready } = useAuth();
   const [reload, setReload] = useState(0);
@@ -33,11 +35,11 @@ export function BookingPage() {
     return (
       <FadeIn direction="up">
         <EmptyState
-          title="Log in to see this booking"
-          description="Please sign in with the account that placed this booking."
+          title={t("booking.loginTitle")}
+          description={t("booking.loginDesc")}
           action={
             <Button as={Link} to="/login" variant="solid">
-              Log in
+              {t("auth.login")}
             </Button>
           }
         />
@@ -59,8 +61,8 @@ export function BookingPage() {
     return (
       <FadeIn direction="up">
         <ErrorState
-          title="Couldn't load this booking"
-          message="We couldn't retrieve the booking details. Please try again."
+          title={t("booking.loadErrorTitle")}
+          message={t("booking.loadErrorMsg")}
           details={page.message}
           onRetry={page.reload}
         />
@@ -72,6 +74,7 @@ export function BookingPage() {
 }
 
 function BookingView({ booking: initial, refresh }: { booking: Booking; refresh: () => void }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [booking, setBooking] = useState(initial);
   const [busy, setBusy] = useState(false);
@@ -119,12 +122,12 @@ function BookingView({ booking: initial, refresh }: { booking: Booking; refresh:
   return (
     <FadeIn direction="up">
       <Card as="section" elevated className="panel">
-        <p className="kicker">Booking #{booking.booking_id}</p>
-        <h1>{TITLE[booking.status]}</h1>
+        <p className="kicker">{t("booking.kicker", { id: booking.booking_id })}</p>
+        <h1>{t(`booking.title.${booking.status}`)}</h1>
 
         {booking.status === "pending" && (
           <p className={`countdown${left <= 60 ? " urgent" : ""}`} role="timer" aria-live="off">
-            Seats held for <b>{clock(left)}</b>
+            {t("booking.heldFor")} <b>{clock(left)}</b>
           </p>
         )}
 
@@ -163,15 +166,13 @@ function BookingView({ booking: initial, refresh }: { booking: Booking; refresh:
 
         {(booking.status === "cancelled" || booking.status === "expired") && (
           <p>
-            {booking.status === "expired"
-              ? "The 10 minutes ran out, so the seats are free again."
-              : "The seats are free again."}{" "}
+            {booking.status === "expired" ? t("booking.expiredText") : t("booking.freeText")}{" "}
             {screeningId ? (
               <Button variant="link" onClick={() => navigate(`/screenings/${screeningId}`)}>
-                Pick seats again
+                {t("booking.pickAgain")}
               </Button>
             ) : (
-              <Link to="/">Back to what&apos;s on</Link>
+              <Link to="/">{t("booking.backToProgram")}</Link>
             )}
           </p>
         )}
@@ -191,6 +192,7 @@ function PayForm({
   onPay: (method: "card" | "kaspi", simulateDecline: boolean) => void;
   onCancel: () => void;
 }) {
+  const { t } = useTranslation();
   const [method, setMethod] = useState<"card" | "kaspi">("card");
   const [decline, setDecline] = useState(false);
   return (
@@ -202,29 +204,29 @@ function PayForm({
       }}
     >
       <fieldset>
-        <legend>Pay with</legend>
+        <legend>{t("booking.payWith")}</legend>
         {(["card", "kaspi"] as const).map((m) => (
           <label key={m} className="choice">
             <input type="radio" name="method" checked={method === m} onChange={() => setMethod(m)} />
-            {m === "card" ? "Bank card" : "Kaspi"}
+            {m === "card" ? t("booking.bankCard") : t("booking.kaspi")}
           </label>
         ))}
       </fieldset>
       {method === "card" ? (
         <label className="choice muted small">
           <input type="checkbox" checked={decline} onChange={(e) => setDecline(e.target.checked)} />
-          Demo: make the bank decline this payment
+          {t("booking.declineDemo")}
         </label>
       ) : (
-        <p className="muted small">You will get a QR code to scan with your phone, or to tap if you are on one.</p>
+        <p className="muted small">{t("booking.kaspiHint")}</p>
       )}
-      <p className="muted small">Payment is simulated. No real money is charged.</p>
+      <p className="muted small">{t("booking.simulated")}</p>
       <div className="actions">
         <Button type="submit" variant="solid" loading={busy} disabled={busy}>
-          {busy ? "Please wait…" : method === "kaspi" ? "Show Kaspi QR" : "Pay now"}
+          {busy ? t("booking.wait") : method === "kaspi" ? t("booking.showQr") : t("booking.payNow")}
         </Button>
         <Button type="button" variant="ghost" disabled={busy} onClick={onCancel}>
-          Cancel and free the seats
+          {t("booking.cancelFree")}
         </Button>
       </div>
     </form>
@@ -232,13 +234,16 @@ function PayForm({
 }
 
 function PaidTickets({ booking }: { booking: Booking }) {
+  const { t } = useTranslation();
   return (
     <div className="paid">
       <QrCode bookingId={booking.booking_id} />
       <div>
-        <p>Show this code at the entrance. One code lets the whole group in.</p>
-        {booking.checked_in_at && <p className="muted">Checked in at {when(booking.checked_in_at)}.</p>}
-        <Link to="/me/bookings">All my bookings</Link>
+        <p>{t("booking.paidShow")}</p>
+        {booking.checked_in_at && (
+          <p className="muted">{t("booking.checkedIn", { time: when(booking.checked_in_at) })}</p>
+        )}
+        <Link to="/me/bookings">{t("booking.allMine")}</Link>
       </div>
     </div>
   );
@@ -246,6 +251,7 @@ function PaidTickets({ booking }: { booking: Booking }) {
 
 /** The QR image needs the login token, so it is fetched as a blob instead of a plain image URL. */
 function QrCode({ bookingId }: { bookingId: number }) {
+  const { t } = useTranslation();
   const qr = useApi(async () => {
     const res = await api.GET("/api/bookings/{booking_id}/qr.png", {
       params: { path: { booking_id: bookingId } },
@@ -263,52 +269,46 @@ function QrCode({ bookingId }: { bookingId: number }) {
 
   if (qr.state === "loading") return <Skeleton width={200} height={200} radius={12} />;
   if (qr.state === "error") {
-    return (
-      <ErrorState
-        title="Couldn't load QR code"
-        message={qr.message}
-        onRetry={qr.reload}
-      />
-    );
+    return <ErrorState title={t("booking.qrErrTitle")} message={qr.message} onRetry={qr.reload} />;
   }
-  return <img className="qr" src={qr.data} alt={`QR code for booking ${bookingId}`} width={200} height={200} />;
+  return (
+    <img
+      className="qr"
+      src={qr.data}
+      alt={t("booking.qrAlt", { id: bookingId })}
+      width={200}
+      height={200}
+    />
+  );
 }
 
-const TITLE: Record<Booking["status"], string> = {
-  pending: "Your seats are on hold",
-  paid: "Your tickets",
-  cancelled: "Booking cancelled",
-  expired: "Hold expired",
-};
-
 function Tickets({ booking }: { booking: Booking }) {
+  const { t } = useTranslation();
   if (booking.tickets.length === 0) return null;
   return (
     <table className="tickets">
       <thead>
         <tr>
-          <th scope="col">Seat</th>
-          <th scope="col">Ticket</th>
+          <th scope="col">{t("booking.seat")}</th>
+          <th scope="col">{t("booking.ticket")}</th>
           <th scope="col" className="num">
-            Price
+            {t("booking.price")}
           </th>
         </tr>
       </thead>
       <tbody>
-        {booking.tickets.map((t) => (
-          <tr key={t.ticket_id}>
-            <td>
-              Row {t.row_label}, seat {t.seat_number}
-            </td>
-            <td className="cap">{t.ticket_type}</td>
-            <td className="num">{price(t.price)}</td>
+        {booking.tickets.map((tk) => (
+          <tr key={tk.ticket_id}>
+            <td>{t("booking.rowSeat", { row: tk.row_label, seat: tk.seat_number })}</td>
+            <td className="cap">{tk.ticket_type}</td>
+            <td className="num">{price(tk.price)}</td>
           </tr>
         ))}
       </tbody>
       <tfoot>
         <tr>
           <th scope="row" colSpan={2}>
-            Total
+            {t("booking.total")}
           </th>
           <td className="num">
             <b>{price(booking.total_amount)}</b>

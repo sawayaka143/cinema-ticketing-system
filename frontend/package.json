@@ -14,10 +14,12 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.118.0",
     "gsap": "3.15.1",
+    "i18next": "^27.2.9",
     "openapi-fetch": "^0.17.0",
     "qrcode": "1.5.4",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
+    "react-i18next": "^18.0.3",
     "react-router": "^7.9.4",
     "three": "0.187.0"
   },

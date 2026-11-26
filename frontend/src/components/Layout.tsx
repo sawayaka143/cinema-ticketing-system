@@ -7,11 +7,14 @@ import { BrandMark } from "./ui/BrandMark";
 import { PhoneHeaderTools } from "./PhoneHeaderTools";
 import { DashboardIcon, FilmIcon, TicketIcon, UserIcon } from "./TabIcons";
 import { Button } from "./ui/Button";
+import { useTranslation } from "react-i18next";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
 export function Layout() {
+  const { t } = useTranslation();
   const { session, ready, me } = useAuth();
   const staffRole = me?.staff?.role ?? null;
-  const staffLabel = staffRole === "cashier" ? "Box office" : "Manager";
+  const staffLabel = staffRole === "cashier" ? t("nav.boxOffice") : t("nav.manager");
   const location = useLocation();
   // The sheet is open only for the path it was opened on, so navigating closes it.
   const [openAt, setOpenAt] = useState<string | null>(null);
@@ -48,12 +51,13 @@ export function Layout() {
           {path === "/" && ready && <PhoneHeaderTools signedIn={!!session} />}
           <nav className="rail-nav" aria-label="Main">
             <NavLink to="/" end>
-              What&apos;s on
+                {t("nav.whatsOn")} 
             </NavLink>
-            <NavLink to="/me/bookings">My bookings</NavLink>
+            <NavLink to="/me/bookings">{t("nav.myBookings")}</NavLink>
             {staffRole && <NavLink to="/manager">{staffLabel}</NavLink>}
           </nav>
           <div className="account">
+                        <LanguageSwitcher />
             {!ready ? null : session ? (
               <>
                 {staffRole && (
@@ -68,12 +72,12 @@ export function Layout() {
                   className="account-desktop"
                   onClick={() => supabase.auth.signOut()}
                 >
-                  Log out
+                  {t("auth.logout")}
                 </Button>
               </>
             ) : (
               <Button as={Link} to="/login" variant="ghost" size="sm">
-                Log in
+               {t("auth.login")} 
               </Button>
             )}
           </div>
@@ -92,18 +96,18 @@ export function Layout() {
               </Badge>
             )}
             <Button variant="outline" size="md" onClick={() => supabase.auth.signOut()}>
-              Log out
+              {t("auth.logout")}
             </Button>
           </div>
         )}
         <nav className="tabbar" aria-label="Main (phone)">
           <NavLink to="/" end>
             <FilmIcon />
-            <span>What&apos;s on</span>
+            <span> {t("nav.whatsOn")}</span>
           </NavLink>
           <NavLink to="/me/bookings">
             <TicketIcon />
-            <span>Bookings</span>
+            <span>{t("nav.bookings")}</span>
           </NavLink>
           {staffRole && (
             <NavLink to="/manager">
@@ -120,7 +124,7 @@ export function Layout() {
               onClick={() => setOpenAt(menuOpen ? null : location.pathname)}
             >
               <UserIcon />
-              <span>Profile</span>
+              <span>{t("nav.profile")}</span>
             </button>
           ) : (
             <NavLink to="/login">
@@ -132,9 +136,9 @@ export function Layout() {
       </div>
       <footer className="foot">
         <div className="rail-content foot-inner">
-          <p>Alatau Cinema · Almaty</p>
+          <p>{t("footer.city")}</p>
           <p className="foot-info">
-            Halls 2D · 3D · IMAX · All times Asia/Almaty (UTC+5) · Prices in tenge (₸)
+            {t("footer.info")}
           </p>
         </div>
       </footer>
