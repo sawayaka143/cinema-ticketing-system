@@ -1,0 +1,54 @@
+/* Family and group deal hint under the picked seats. Same tokens as index.css. */
+
+.bundle-hint {
+  display: flex;
+  gap: 0.45rem;
+  align-items: flex-start;
+  margin: 0;
+  padding: 0.5rem 0.65rem;
+  border: 1px dashed color-mix(in srgb, var(--accent) 45%, var(--border));
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--accent) 6%, var(--surface));
+  color: var(--text);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  animation: bundle-in 0.3s var(--ease-spring);
+}
+
+.bundle-hint svg {
+  flex: none;
+  margin-top: 0.1rem;
+  color: var(--accent);
+}
+
+.bundle-hint.is-applied {
+  border-style: solid;
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+}
+
+.bundle-hint b {
+  font-weight: 700;
+}
+
+/* The deal line in the booking's ticket table. */
+.tickets .bundle-row th,
+.tickets .bundle-row td {
+  border-bottom: 1px solid var(--border);
+  color: var(--accent);
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+@keyframes bundle-in {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bundle-hint {
+    animation: none;
+  }
+}

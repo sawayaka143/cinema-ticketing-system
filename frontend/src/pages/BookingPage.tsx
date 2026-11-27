@@ -6,6 +6,8 @@ import { KaspiQr } from "../components/KaspiQr";
 import { Status } from "../components/Layout";
 import { Button, Card, EmptyState, ErrorState, FadeIn, Skeleton } from "../components/ui";
 import { useAuth } from "../lib/auth-context";
+import { BUNDLE_LABEL_KEY, BUNDLE_PCT } from "../lib/bundles";
+import "../components/bundle-hint.css";
 import { type CardInput, EMPTY_CARD, validateCard } from "../lib/card";
 import { type Booking, clock, price, when } from "../lib/format";
 import { type TranslationKey, useI18n } from "../lib/i18n";
@@ -365,6 +367,14 @@ function Tickets({ booking }: { booking: Booking }) {
         ))}
       </tbody>
       <tfoot>
+        {booking.bundle && Number(booking.bundle_saving) > 0 && (
+          <tr className="bundle-row">
+            <th scope="row" colSpan={2}>
+              {t(BUNDLE_LABEL_KEY[booking.bundle])} −{BUNDLE_PCT[booking.bundle]}%
+            </th>
+            <td className="num">−{price(booking.bundle_saving)}</td>
+          </tr>
+        )}
         <tr>
           <th scope="row" colSpan={2}>
             {t("booking.total")}
