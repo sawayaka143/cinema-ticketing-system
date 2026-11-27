@@ -17,9 +17,11 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
 
 from app.api.catalog import ALMATY, HallOut, MovieOut, _movie_out
+from app.config import get_settings
 from app.db import get_session
 from app.models import Genre, Hall, Movie, Screening, Staff, Ticket
 from app.staff import audit, require_staff
+from app.storage import delete_object_by_url
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -112,6 +114,7 @@ def update_movie(
 ) -> AdminMovieOut:
     """Change only the fields sent. `null` clears description, poster or year."""
     movie = _movie(db, movie_id)
+    old_poster = movie.poster_url
     changes = body.model_dump(exclude_unset=True)
     for field, value in changes.items():
         if field == "genres":
@@ -122,7 +125,10 @@ def update_movie(
         _reschedule_upcoming(db, movie)
     audit(db, staff, "update", "movie", movie_id, **jsonable_encoder(changes))
     db.commit()
-    return _admin_movie(_movie(db, movie_id))
+    updated = _movie(db, movie_id)
+    if "poster_url" in changes and old_poster and old_poster != updated.poster_url:
+        delete_object_by_url(get_settings().poster_bucket, old_poster)
+    return _admin_movie(updated)
 
 
 def _reschedule_upcoming(db: Session, movie: Movie) -> None:
@@ -141,6 +147,7 @@ def _reschedule_upcoming(db: Session, movie: Movie) -> None:
 def delete_movie(movie_id: int, staff: ManagerDep, db: SessionDep) -> Removed:
     """Deletes a movie without screenings; a movie with screenings is archived instead."""
     movie = _movie(db, movie_id)
+    old_poster = movie.poster_url
     if db.scalar(select(exists().where(Screening.movie_id == movie_id))):
         movie.is_active = False
         result = "archived"
@@ -149,6 +156,8 @@ def delete_movie(movie_id: int, staff: ManagerDep, db: SessionDep) -> Removed:
         result = "deleted"
     audit(db, staff, result, "movie", movie_id, title=movie.title)
     db.commit()
+    if result == "deleted" and old_poster:
+        delete_object_by_url(get_settings().poster_bucket, old_poster)
     return Removed(result=result)
 
 

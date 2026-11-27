@@ -111,6 +111,46 @@
   grid-column: 1 / -1;
 }
 
+.mgr-poster-field {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: var(--s2);
+}
+
+.mgr-poster-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s3);
+}
+
+.mgr-poster-preview {
+  width: 3.5rem;
+  aspect-ratio: 2 / 3;
+  flex-shrink: 0;
+  background: var(--surface);
+}
+
+.mgr-poster-preview img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mgr-poster-controls {
+  display: grid;
+  flex: 1 1 16rem;
+  gap: var(--s2);
+}
+
+.mgr-poster-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s2);
+}
+
 .mgr-form-actions {
   grid-column: 1 / -1;
   display: flex;

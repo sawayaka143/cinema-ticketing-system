@@ -107,8 +107,8 @@ export function UserAvatar({
   );
 }
 
-/** Center-crop and resize a user image file to a compact 192x192 data URL. */
-export async function resizeAvatarFile(file: File): Promise<string> {
+/** Center-crop and resize a user image file to a compact 192x192 WebP/JPEG Blob for upload. */
+export async function resizeAvatarBlob(file: File): Promise<Blob> {
   if (!/^image\/(png|jpeg|webp)$/.test(file.type)) {
     throw new Error("Unsupported image type");
   }
@@ -132,11 +132,16 @@ export async function resizeAvatarFile(file: File): Promise<string> {
     const sy = (img.naturalHeight - side) / 2;
     ctx.drawImage(img, sx, sy, side, side, 0, 0, size, size);
 
-    const webp = canvas.toDataURL("image/webp", 0.82);
-    if (webp.startsWith("data:image/webp;base64,") && webp.length < 180_000) {
+    const toBlob = (type: string) =>
+      new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, type, 0.85));
+
+    const webp = await toBlob("image/webp");
+    if (webp && webp.type === "image/webp" && webp.size < 180_000) {
       return webp;
     }
-    return canvas.toDataURL("image/jpeg", 0.82);
+    const jpeg = await toBlob("image/jpeg");
+    if (!jpeg) throw new Error("Could not encode image");
+    return jpeg;
   } finally {
     URL.revokeObjectURL(url);
   }

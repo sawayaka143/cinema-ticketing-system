@@ -4,9 +4,10 @@ import { api } from "../api/client";
 import { Status } from "../components/Layout";
 import { MoonIcon, SunIcon } from "../components/TabIcons";
 import { Button, Card, EmptyState, FadeIn, SegmentedPill, Skeleton } from "../components/ui";
-import { PRESET_AVATARS, UserAvatar, resizeAvatarFile } from "../components/UserAvatar";
+import { PRESET_AVATARS, UserAvatar, resizeAvatarBlob } from "../components/UserAvatar";
 import { useAuth } from "../lib/auth-context";
 import { LANGUAGES, type LangCode, useI18n } from "../lib/i18n";
+import { uploadAvatar } from "../lib/posterUpload";
 import { supabase } from "../lib/supabase";
 import { useTheme } from "../lib/theme";
 import { messageOf, must } from "../lib/useApi";
@@ -49,6 +50,7 @@ function ProfileForm({
   const [phone, setPhone] = useState(initialPhone);
   const [city, setCity] = useState(initialCity);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(initialAvatar);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState<{ tone: "info" | "error"; text: string } | null>(null);
 
@@ -61,11 +63,16 @@ function ProfileForm({
     event.target.value = "";
     if (!file) return;
     setStatus(null);
+    setUploadingAvatar(true);
     try {
-      const dataUrl = await resizeAvatarFile(file);
-      setAvatarUrl(dataUrl);
-    } catch {
-      setStatus({ tone: "error", text: t("settings.iconError") });
+      const blob = await resizeAvatarBlob(file);
+      const url = await uploadAvatar(blob);
+      setAvatarUrl(url);
+    } catch (err) {
+      const text = err instanceof Error && err.message ? err.message : t("settings.iconError");
+      setStatus({ tone: "error", text });
+    } finally {
+      setUploadingAvatar(false);
     }
   }
 
@@ -126,11 +133,24 @@ function ProfileForm({
               className="sr-only"
               onChange={onPickFile}
             />
-            <Button type="button" variant="outline" size="sm" onClick={() => fileRef.current?.click()}>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              loading={uploadingAvatar}
+              disabled={uploadingAvatar || busy}
+              onClick={() => fileRef.current?.click()}
+            >
               {t("settings.uploadIcon")}
             </Button>
             {avatarUrl && (
-              <Button type="button" variant="ghost" size="sm" onClick={() => setAvatarUrl(null)}>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                disabled={uploadingAvatar || busy}
+                onClick={() => setAvatarUrl(null)}
+              >
                 {t("settings.removeIcon")}
               </Button>
             )}

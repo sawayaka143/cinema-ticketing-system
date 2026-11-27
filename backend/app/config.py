@@ -13,10 +13,11 @@ class Settings(BaseSettings):
     # Dev-only, for python -m app.seed_users (test logins). Never set in production.
     supabase_service_role_key: str = ""
     seed_user_password: str = ""
-    # Server-side key for uploading movie posters to Supabase Storage (the service_role key of
-    # the same project). Without it the admin panel takes poster links only.
+    # Server-side key for uploading posters and avatars to Supabase Storage (the service_role
+    # key of the same project). Without it uploads return 503 and links/presets are used.
     supabase_storage_key: str = ""
     poster_bucket: str = "posters"
+    avatar_bucket: str = "avatars"
     app_env: str = "development"
     cors_origins: str = "http://localhost:5173"
 
