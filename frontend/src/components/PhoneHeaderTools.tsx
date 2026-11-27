@@ -4,7 +4,7 @@ import { useAuth } from "../lib/auth-context";
 import { LANGUAGES, type LangCode, useI18n } from "../lib/i18n";
 import { supabase } from "../lib/supabase";
 import { useTheme } from "../lib/theme";
-import { MoonIcon, SettingsIcon, SunIcon, UserIcon } from "./TabIcons";
+import { DashboardIcon, MoonIcon, SettingsIcon, SunIcon, UserIcon } from "./TabIcons";
 import { Badge } from "./ui/Badge";
 import { Button } from "./ui/Button";
 import { SegmentedPill } from "./ui/SegmentedPill";
@@ -21,6 +21,7 @@ export function ProfileMenu() {
   const ref = useRef<HTMLDivElement>(null);
 
   const staffRole = me?.staff?.role ?? null;
+  const canAdmin = staffRole === "admin" || staffRole === "manager";
   const displayName = me?.customer?.full_name || me?.staff?.full_name || null;
   const email = session?.user.email ?? null;
   const city = me?.customer?.city ?? null;
@@ -118,11 +119,18 @@ export function ProfileMenu() {
                 {email && <p className="profile-dropdown-email">{email}</p>}
                 <div className="profile-dropdown-tags">
                   {city && <span className="profile-dropdown-city">{city}</span>}
-                  {staffRole && (
-                    <Badge tone="accent" variant="subtle" className="cap">
-                      {staffRole}
-                    </Badge>
-                  )}
+                  {staffRole &&
+                    (canAdmin ? (
+                      <Link to="/admin" onClick={close} title={t("nav.admin")}>
+                        <Badge tone="accent" variant="subtle" className="cap">
+                          {staffRole}
+                        </Badge>
+                      </Link>
+                    ) : (
+                      <Badge tone="accent" variant="subtle" className="cap">
+                        {staffRole}
+                      </Badge>
+                    ))}
                 </div>
               </div>
             </div>
@@ -137,6 +145,12 @@ export function ProfileMenu() {
           <div className="profile-dropdown-divider" role="separator" />
 
           <div className="profile-dropdown-links">
+            {canAdmin && (
+              <Link to="/admin" className="profile-dropdown-link" onClick={close}>
+                <DashboardIcon />
+                <span>{t("nav.admin")}</span>
+              </Link>
+            )}
             <Link to="/settings" className="profile-dropdown-link" onClick={close}>
               <SettingsIcon />
               <span>{t("nav.settings")}</span>
