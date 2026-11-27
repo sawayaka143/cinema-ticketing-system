@@ -1,7 +1,9 @@
 import { type KeyboardEvent, type ReactNode, useEffect, useEffectEvent, useRef, useState } from "react";
 import { type Seat, price } from "../lib/format";
 import { type TranslationKey, useI18n } from "../lib/i18n";
+import { startSeat } from "../lib/startSeat";
 import { HallScene, SEAT_COLORS } from "../three/hallScene";
+import { HallMiniMap } from "./HallMiniMap";
 import { Badge, Button, Card, Squircle } from "./ui";
 
 const SEAT_TYPE_KEY: Record<string, TranslationKey> = {
@@ -80,9 +82,11 @@ export default function HallView3D({
   const mountRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<HallScene | null>(null);
   const panelBtnRef = useRef<HTMLElement | null>(null);
+  const skipNextFocusRef = useRef(false);
   const [focusedId, setFocusedId] = useState<number | null>(null);
   const [moving, setMoving] = useState(false);
   const [sceneReady, setSceneReady] = useState(false);
+  const [showPlan, setShowPlan] = useState(false);
   const [hover, setHover] = useState<{ seat: Seat; x: number; y: number } | null>(null);
   const [failed, setFailed] = useState(() => !hasWebGL());
 
@@ -114,6 +118,11 @@ export default function HallView3D({
     }
     scene.update(initial.seats, initial.picked);
     sceneRef.current = scene;
+    const initialSeat = startSeat(initial.seats);
+    if (initialSeat) {
+      skipNextFocusRef.current = true;
+      scene.flyToSeat(initialSeat.seat_id, { immediate: true });
+    }
     void Promise.resolve().then(() => setSceneReady(true));
     return () => {
       scene.dispose();
@@ -130,7 +139,11 @@ export default function HallView3D({
   // Move keyboard focus to the pick button when a seat is focused so keyboard users aren't trapped.
   useEffect(() => {
     if (focusedId !== null) {
-      panelBtnRef.current?.focus();
+      if (skipNextFocusRef.current) {
+        skipNextFocusRef.current = false;
+        return;
+      }
+      panelBtnRef.current?.focus({ preventScroll: true });
     }
   }, [focusedId]);
 
@@ -150,7 +163,10 @@ export default function HallView3D({
       ArrowUp: [0, step],
       ArrowDown: [0, -step],
     };
-    if (event.key === "Escape" && focusedId !== null) {
+    if (event.key === "Escape" && showPlan) {
+      event.preventDefault();
+      setShowPlan(false);
+    } else if (event.key === "Escape" && focusedId !== null) {
       event.preventDefault();
       sceneRef.current?.backToOverview();
     } else if (keys[event.key] && focusedId !== null) {
@@ -218,11 +234,34 @@ export default function HallView3D({
           : t("seat.hintOverview")}
       </p>
 
-      {focused && (
-        <div className="hall3d-back">
+      <div className="hall3d-back">
+        <Button
+          size="sm"
+          variant={showPlan ? "solid" : "outline"}
+          aria-expanded={showPlan}
+          onClick={() => setShowPlan((open) => !open)}
+        >
+          {t("seat.hallPlan")}
+        </Button>
+        {focused && (
           <Button size="sm" variant="solid" onClick={() => sceneRef.current?.backToOverview()} disabled={moving}>
             {t("seat.backToHall")}
           </Button>
+        )}
+      </div>
+
+      {showPlan && (
+        <div className="hall3d-plan-pop">
+          <Card as="section" elevated className="minimap-card glass" aria-label={t("seat.hallPlan")}>
+            <HallMiniMap
+              seats={seats}
+              picked={picked}
+              current={focusedId}
+              onGo={(seat) => {
+                sceneRef.current?.flyToSeat(seat.seat_id);
+              }}
+            />
+          </Card>
         </div>
       )}
 

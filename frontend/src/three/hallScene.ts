@@ -3,6 +3,7 @@ import {
   AmbientLight,
   BackSide,
   BoxGeometry,
+  BufferAttribute,
   type BufferGeometry,
   CanvasTexture,
   Color,
@@ -11,6 +12,7 @@ import {
   HemisphereLight,
   InstancedMesh,
   MathUtils,
+  Matrix4,
   Mesh,
   MeshBasicMaterial,
   MeshStandardMaterial,
@@ -19,10 +21,12 @@ import {
   PerspectiveCamera,
   PlaneGeometry,
   Raycaster,
+  RepeatWrapping,
   Scene,
   Sprite,
   SpriteMaterial,
   SRGBColorSpace,
+  Texture,
   TOUCH,
   Vector2,
   Vector3,
@@ -44,7 +48,13 @@ const ROW_PITCH = 1.05; // row to row, front to back
 const RISE = 0.3; // how much higher each row sits than the one in front
 const FIRST_ROW = 4; // distance from the screen to the first row (about half the screen width)
 const EYE = 1.15; // seated eye height above the row's floor
-const SCREEN_BOTTOM = 0.9; // lower edge of the screen above the front floor
+const SCREEN_BOTTOM = 1.6; // lower edge of the screen above the front floor
+const STAGE_HEIGHT = 0.55; // the low stage in front of the screen
+const WALL_BAY = 4.4; // side walls: one sconce per bay
+const SLATS_PER_BAY = 22; // acoustic slats, 20 cm apart
+const SCONCE_HEIGHT = 2.4; // above the step next to it
+const WASH_BELOW = 3; // the wall texture runs from 3 m under a sconce…
+const WASH_SPAN = 12; // …to 9 m above it
 const SIDE_AISLE = 1.9; // free floor on each side of the seats
 
 const OVERVIEW_FOV = 40;
@@ -146,7 +156,7 @@ export class HallScene {
     const rise = imax ? 0.42 : RISE;
     const screenWidth = imax ? hallWidth - 0.6 : seatsWidth * 0.95 + 0.4;
     const screenHeight = screenWidth / (imax ? 1.9 : 2.3);
-    const screenBottom = imax ? 0.6 : SCREEN_BOTTOM;
+    const screenBottom = imax ? 1.3 : SCREEN_BOTTOM;
     const firstRow = imax ? Math.max(FIRST_ROW, screenWidth * 0.4) : FIRST_ROW;
 
     const xOf = (col: number) => (col - (maxCol + 1) / 2) * SEAT_PITCH;
@@ -197,24 +207,57 @@ export class HallScene {
     }
     this.scene.add(new Mesh(mergeGeometries(steps), new MeshStandardMaterial({ color: "#24211e", roughness: 0.95 })));
 
-    const wall = new MeshStandardMaterial({ color: "#191715", roughness: 0.9 });
-    const sideWall = new PlaneGeometry(backZ + 1.2, wallTop + 1);
+    // --- walls: red acoustic slats; on the side walls a warm sconce every few metres washes the
+    // slats with light, like Codrops' "Cinema Seat Preview" (MIT). Each sconce sits the same height
+    // above the step next to it, so the row of lights climbs with the seats.
+    const floorAt = (z: number) => {
+      const i = Math.floor((z - (firstRow - ROW_PITCH / 2)) / ROW_PITCH);
+      return i < 0 ? 0 : floorOf(Math.min(i, lastRow));
+    };
+    const sideLength = backZ + 1.2;
+    const bays = Math.max(1, Math.round(sideLength / WALL_BAY));
+    const bay = sideLength / bays;
+    const sideMaterial = makeSideWallMaterial();
     for (const side of [-1, 1]) {
-      const w = new Mesh(sideWall, wall);
-      w.rotation.y = (-side * Math.PI) / 2;
-      w.position.set((side * hallWidth) / 2, wallTop / 2 - 0.5, (backZ - 1.2) / 2);
-      this.scene.add(w);
+      const parts: BufferGeometry[] = [];
+      for (let b = 0; b < bays; b++) {
+        const zc = -1.2 + (b + 0.5) * bay;
+        const sconce = Math.min(floorAt(zc) + SCONCE_HEIGHT, wallTop - 0.8);
+        const part = new PlaneGeometry(bay, wallTop + 1);
+        // The texture's height is measured from the sconce: map this wall's bottom and top onto it.
+        const uv = part.getAttribute("uv");
+        for (let k = 0; k < uv.count; k++) {
+          const y = uv.getY(k) > 0.5 ? wallTop : -1;
+          uv.setY(k, (y - sconce + WASH_BELOW) / WASH_SPAN);
+        }
+        part.rotateY((-side * Math.PI) / 2);
+        part.translate((side * hallWidth) / 2, wallTop / 2 - 0.5, zc);
+        parts.push(part);
+      }
+      this.scene.add(new Mesh(mergeGeometries(parts), sideMaterial));
     }
-    const back = new Mesh(new PlaneGeometry(hallWidth, wallTop + 1), wall);
+    const back = new Mesh(new PlaneGeometry(hallWidth, wallTop + 1), makeBackWallMaterial(hallWidth / WALL_BAY));
     back.rotation.y = Math.PI;
     back.position.set(0, wallTop / 2 - 0.5, backZ);
     this.scene.add(back);
+    // The wall around the screen stays near black, so the screen stands out.
+    const wall = new MeshStandardMaterial({ color: "#141110", roughness: 0.9 });
     const frontWall = new Mesh(new PlaneGeometry(hallWidth, screenY + screenHeight), wall);
     frontWall.position.set(0, (screenY + screenHeight) / 2, -1.2);
     this.scene.add(frontWall);
 
+    // A low stage under the screen, with a pale line along its front edge.
+    const stageWidth = Math.min(screenWidth * 0.85, hallWidth - 1);
+    const stageFront = Math.min(1.4, frontEnd - 1.2);
+    const stage = new BoxGeometry(stageWidth, STAGE_HEIGHT, stageFront + 1.2);
+    stage.translate(0, STAGE_HEIGHT / 2, (stageFront - 1.2) / 2);
+    this.scene.add(new Mesh(stage, new MeshStandardMaterial({ color: "#2a231f", roughness: 0.9 })));
+
     // A dim floor strip on every step edge in the side aisles, like a real hall's floor lights.
     const strips: BufferGeometry[] = [];
+    const edge = new BoxGeometry(stageWidth, 0.02, 0.03);
+    edge.translate(0, STAGE_HEIGHT, stageFront);
+    strips.push(edge);
     for (let i = 1; i <= lastRow; i++) {
       for (const side of [-1, 1]) {
         const strip = new BoxGeometry(SIDE_AISLE - 0.4, 0.03, 0.04);
@@ -222,7 +265,7 @@ export class HallScene {
         strips.push(strip);
       }
     }
-    if (strips.length) this.scene.add(new Mesh(mergeGeometries(strips), new MeshBasicMaterial({ color: "#8c877c" })));
+    this.scene.add(new Mesh(mergeGeometries(strips), new MeshBasicMaterial({ color: "#8c877c" })));
 
     // Row letters at both ends of each row.
     for (const r of rows) {
@@ -235,13 +278,13 @@ export class HallScene {
       }
     }
 
-    // --- seats: one instanced mesh, coloured per seat ------------------------------------------------
-    this.seatsMesh = new InstancedMesh(
-      makeChairGeometry(),
-      new MeshStandardMaterial({ color: "#ffffff", roughness: 0.55, metalness: 0 }),
-      Math.max(1, this.placed.length),
-    );
+    // --- seats: fabric back and cushion coloured per seat, dark armrests between the seats ----------
+    // The seat's shape and its matte fabric with baked shading follow Codrops' "Cinema Seat Preview"
+    // (github.com/codrops/CinemaSeatPreview, MIT licence).
+    this.seatsMesh = new InstancedMesh(makeSeatGeometry(), makeFabric(), Math.max(1, this.placed.length));
     this.seatsMesh.count = this.placed.length;
+    const occupied = new Set(seats.map((s) => `${s.grid_row}:${s.grid_col}`));
+    const arms: Matrix4[] = [];
     const dummy = new Object3D();
     this.placed.forEach((p, i) => {
       dummy.position.copy(p.position);
@@ -249,8 +292,20 @@ export class HallScene {
       dummy.rotation.set(0, Math.atan2(p.position.x, p.position.z + 6) * 0.5, 0);
       dummy.updateMatrix();
       this.seatsMesh.setMatrixAt(i, dummy.matrix);
+      // An armrest on the left of every seat, and one more on the right where a block ends.
+      arms.push(dummy.matrix.clone().multiply(new Matrix4().makeTranslation(-SEAT_PITCH / 2, 0, 0)));
+      if (!occupied.has(`${p.seat.grid_row}:${p.seat.grid_col + 1}`)) {
+        arms.push(dummy.matrix.clone().multiply(new Matrix4().makeTranslation(SEAT_PITCH / 2, 0, 0)));
+      }
     });
-    this.scene.add(this.seatsMesh);
+    const armsMesh = new InstancedMesh(
+      makeArmGeometry(),
+      new MeshStandardMaterial({ color: "#2b2725", roughness: 0.6, vertexColors: true }),
+      Math.max(1, arms.length),
+    );
+    arms.forEach((matrix, i) => armsMesh.setMatrixAt(i, matrix));
+    armsMesh.count = arms.length;
+    this.scene.add(this.seatsMesh, armsMesh);
 
     // --- light: from above for the hall view, plus the screen's warm projector glow ---------------
     this.scene.add(new AmbientLight("#ffffff", 0.5));
@@ -309,7 +364,7 @@ export class HallScene {
   }
 
   /** Brings the camera down to a seat's eye position, looking at the screen. */
-  flyToSeat(seatId: number) {
+  flyToSeat(seatId: number, { immediate = false }: { immediate?: boolean } = {}) {
     const i = this.indexById.get(seatId);
     if (i === undefined) return;
     const { seat, position } = this.placed[i];
@@ -317,6 +372,20 @@ export class HallScene {
     const eye = position.clone().add(new Vector3(0, EYE, 0.06));
     this.setHover(null);
     this.options.onFocus(seat);
+    if (immediate) {
+      this.tween?.kill();
+      this.tween = null;
+      this.animating = false;
+      this.controls.enabled = false;
+      this.camera.position.copy(eye);
+      this.camera.fov = this.seatFov();
+      this.camera.lookAt(this.screenCenter);
+      this.camera.updateProjectionMatrix();
+      this.mode = "seat";
+      this.faceScreen();
+      this.options.onMoving(false);
+      return;
+    }
     this.fly(eye, this.screenCenter, this.seatFov(), () => {
       this.mode = "seat";
       this.faceScreen();
@@ -356,7 +425,8 @@ export class HallScene {
       if ("geometry" in mesh && mesh.geometry) mesh.geometry.dispose();
       const materials = "material" in mesh ? [mesh.material].flat() : [];
       for (const material of materials) {
-        (material as MeshBasicMaterial).map?.dispose();
+        // Maps, the walls' glow maps; a shared texture is fine to dispose twice.
+        for (const value of Object.values(material)) if (value instanceof Texture) value.dispose();
         material.dispose();
       }
     });
@@ -582,25 +652,139 @@ export class HallScene {
   };
 }
 
-/** A soft cinema chair: rounded cushion and back, padded armrests and a stand, as one geometry. */
-function makeChairGeometry() {
-  const rounded = (w: number, h: number, d: number, r: number, x: number, y: number, z: number, tilt = 0) => {
-    const box = new RoundedBoxGeometry(w, h, d, 4, r);
-    if (tilt) box.rotateX(tilt);
-    box.translate(x, y, z);
-    return box;
-  };
-  const stand = new CylinderGeometry(0.05, 0.08, 0.36, 12);
-  stand.translate(0, 0.18, 0.06);
-  // mergeGeometries needs the same layout everywhere: drop the indices of the mixed parts.
-  const parts = [
-    rounded(0.58, 0.16, 0.52, 0.07, 0, 0.44, 0), // cushion
-    rounded(0.58, 0.7, 0.16, 0.075, 0, 0.82, 0.25, 0.12), // back, leaning away from the screen (-z)
-    rounded(0.09, 0.09, 0.48, 0.04, -0.33, 0.66, 0.02), // armrests
-    rounded(0.09, 0.09, 0.48, 0.04, 0.33, 0.66, 0.02),
-    stand,
-  ].map((g) => (g.index ? g.toNonIndexed() : g));
-  return mergeGeometries(parts);
+const SEAT_WIDTH = SEAT_PITCH - 0.14; // what's left between two armrests
+
+/** The upholstered part of a seat: a cushion and a back leaning away from the screen (+z). */
+function makeSeatGeometry() {
+  const cushion = new RoundedBoxGeometry(SEAT_WIDTH - 0.02, 0.12, 0.5, 3, 0.045);
+  cushion.translate(0, 0.41, -0.02);
+  const back = new RoundedBoxGeometry(SEAT_WIDTH, 0.66, 0.13, 3, 0.05);
+  back.translate(0, 0.33, 0);
+  back.rotateX(0.2);
+  back.translate(0, 0.44, 0.3);
+  return mergeGeometries([shaded(cushion, 0.35, 0.47, 0.55), shaded(back, 0.44, 1.08, 0.35)]);
+}
+
+/** An armrest: a side panel and the rest on top. One sits between every two seats. */
+function makeArmGeometry() {
+  const panel = new RoundedBoxGeometry(0.05, 0.63, 0.5, 2, 0.02);
+  panel.translate(0, 0.315, 0.12);
+  const rest = new RoundedBoxGeometry(0.11, 0.06, 0.56, 2, 0.022);
+  rest.translate(0, 0.65, 0.09);
+  return mergeGeometries([shaded(panel, 0, 0.68, 0.4), shaded(rest, 0, 0.68, 0.4)]);
+}
+
+/**
+ * Soft shading baked into the vertex colours: the lower part of a piece gets less light
+ * (`min` at height `from`, full light from `to` up). The seat's own colour multiplies it.
+ */
+function shaded(geometry: BufferGeometry, from: number, to: number, min: number) {
+  const position = geometry.getAttribute("position");
+  const colors = new Float32Array(position.count * 3);
+  for (let i = 0; i < position.count; i++) {
+    const t = MathUtils.clamp((position.getY(i) - from) / (to - from), 0, 1);
+    colors.fill(min + (1 - min) * t * t * (3 - 2 * t), i * 3, i * 3 + 3);
+  }
+  geometry.setAttribute("color", new BufferAttribute(colors, 3));
+  return geometry;
+}
+
+/** Matte seat fabric: no shine, a faint uneven weave, the colour from the seat (instance colour). */
+function makeFabric() {
+  const size = 64;
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d");
+  if (ctx) {
+    const image = ctx.createImageData(size, size);
+    for (let i = 0; i < size * size; i++) {
+      const v = 255 * (0.86 + Math.random() * 0.14);
+      image.data.set([v, v, v, 255], i * 4);
+    }
+    ctx.putImageData(image, 0, 0);
+  }
+  const weave = new CanvasTexture(canvas); // linear values: it only darkens the colour a little
+  weave.wrapS = RepeatWrapping;
+  weave.wrapT = RepeatWrapping;
+  return new MeshStandardMaterial({ color: "#ffffff", roughness: 0.92, metalness: 0, vertexColors: true, map: weave });
+}
+
+const SLAT_FACE: [number, number, number] = [104, 22, 30]; // red felt on the slats
+const SLAT_GAP: [number, number, number] = [26, 6, 9]; // the dark gaps between them
+
+/** How much of a slat's face a point across the bay (0..1) is on: 1 on the face, 0 in a gap. */
+function slatAt(u: number) {
+  const t = (u * SLATS_PER_BAY) % 1;
+  return MathUtils.smoothstep(t, 0, 0.12) * (1 - MathUtils.smoothstep(t, 0.88, 1));
+}
+
+/** One column per pixel across a bay: the slats in colour. */
+function paintSlats(ctx: CanvasRenderingContext2D, width: number, height: number) {
+  for (let x = 0; x < width; x++) {
+    const s = slatAt((x + 0.5) / width);
+    const [r, g, b] = SLAT_FACE.map((face, i) => Math.round(SLAT_GAP[i] + (face - SLAT_GAP[i]) * s));
+    ctx.fillStyle = `rgb(${r} ${g} ${b})`;
+    ctx.fillRect(x, 0, 1, height);
+  }
+}
+
+/**
+ * The side walls: one bay of red slats as the colour map, and as the glow (emissive) map the
+ * sconce in the middle of the bay with the warm light it throws up the slats.
+ */
+function makeSideWallMaterial() {
+  const width = 512;
+  const height = 1024;
+  const colors = document.createElement("canvas");
+  colors.width = width;
+  colors.height = height;
+  const colorCtx = colors.getContext("2d");
+  if (colorCtx) paintSlats(colorCtx, width, height);
+
+  const glow = document.createElement("canvas");
+  glow.width = width;
+  glow.height = height;
+  const glowCtx = glow.getContext("2d");
+  if (glowCtx) {
+    const image = glowCtx.createImageData(width, height);
+    for (let py = 0; py < height; py++) {
+      const above = (1 - (py + 0.5) / height) * WASH_SPAN - WASH_BELOW; // metres above the sconce
+      for (let px = 0; px < width; px++) {
+        const u = (px + 0.5) / width;
+        const dz = (u - 0.5) * WALL_BAY; // metres from the sconce, along the wall
+        const wash =
+          Math.exp(-2.2 * dz * dz) * MathUtils.smoothstep(above, -0.2, 0.3) * Math.exp(-0.38 * Math.max(above, 0));
+        const sconce = Math.exp(-160 * dz * dz) * Math.exp(-260 * above * above);
+        const light = Math.min(1, wash * (0.5 + 0.5 * slatAt(u)) * 0.9 + sconce * 1.6);
+        const o = (py * width + px) * 4;
+        image.data[o] = 255 * light;
+        image.data[o + 1] = 170 * light;
+        image.data[o + 2] = 100 * light;
+        image.data[o + 3] = 255;
+      }
+    }
+    glowCtx.putImageData(image, 0, 0);
+  }
+  const map = new CanvasTexture(colors);
+  const emissiveMap = new CanvasTexture(glow);
+  map.colorSpace = SRGBColorSpace;
+  emissiveMap.colorSpace = SRGBColorSpace;
+  return new MeshStandardMaterial({ map, emissiveMap, emissive: "#ffffff", roughness: 0.92 });
+}
+
+/** The back wall: the same red slats, repeated across, with no sconces. */
+function makeBackWallMaterial(bays: number) {
+  const canvas = document.createElement("canvas");
+  canvas.width = 512;
+  canvas.height = 4;
+  const ctx = canvas.getContext("2d");
+  if (ctx) paintSlats(ctx, canvas.width, canvas.height);
+  const map = new CanvasTexture(canvas);
+  map.colorSpace = SRGBColorSpace;
+  map.wrapS = RepeatWrapping;
+  map.repeat.set(bays, 1);
+  return new MeshStandardMaterial({ map, roughness: 0.92 });
 }
 
 /** The screen before the film starts: a soft, dimly lit gradient. */

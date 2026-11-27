@@ -106,6 +106,8 @@ const EN = {
   "seat.zoomIn": "Zoom in",
   "seat.zoomOut": "Zoom out",
   "seat.resetZoom": "Fit hall",
+  "seat.hallPlan": "Hall plan",
+  "seat.bestView": "Best view",
 
   // Ticket types
   "ticket.adult": "Adult",
@@ -326,6 +328,8 @@ const KK: Record<TranslationKey, string> = {
   "seat.zoomIn": "Жақындату",
   "seat.zoomOut": "Алыстату",
   "seat.resetZoom": "Залды сыйдыру",
+  "seat.hallPlan": "Зал сызбасы",
+  "seat.bestView": "Үздік көрініс",
 
   "ticket.adult": "Ересек",
   "ticket.student": "Студент",
@@ -539,6 +543,8 @@ const RU: Record<TranslationKey, string> = {
   "seat.zoomIn": "Приблизить",
   "seat.zoomOut": "Отдалить",
   "seat.resetZoom": "По размеру зала",
+  "seat.hallPlan": "План зала",
+  "seat.bestView": "Лучший обзор",
 
   "ticket.adult": "Взрослый",
   "ticket.student": "Студент",
