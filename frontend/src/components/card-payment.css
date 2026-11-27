@@ -1,0 +1,360 @@
+/* Bank card form for the simulated payment. Same tokens as index.css. */
+
+.card-pay {
+  display: grid;
+  grid-template-columns: minmax(0, 17.5rem) minmax(0, 1fr);
+  gap: var(--s4) var(--s6);
+  align-items: start;
+  padding: var(--s4);
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.75rem;
+  background: var(--surface-2);
+  animation: card-pay-in 0.35s var(--ease-spring);
+}
+
+@keyframes card-pay-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+/* --- live preview ---------------------------------------------------------------------- */
+
+.card-preview {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1.586; /* ISO/IEC 7810 ID-1, a real bank card */
+  perspective: 900px;
+  font-family: var(--font-sans);
+}
+
+.card-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1rem 1.1rem;
+  overflow: hidden;
+  border-radius: 0.9rem;
+  color: #fbf9f4;
+  background:
+    radial-gradient(120% 90% at 100% 0%, rgb(255 255 255 / 0.18), transparent 55%),
+    linear-gradient(135deg, var(--card-a), var(--card-b));
+  box-shadow:
+    0 14px 28px -14px rgb(24 22 20 / 0.55),
+    inset 0 0 0 1px rgb(255 255 255 / 0.08);
+  backface-visibility: hidden;
+  transition: transform 0.6s var(--ease-spring);
+}
+
+.card-back {
+  justify-content: flex-start;
+  gap: 0.8rem;
+  padding: 1.1rem 0 0;
+  transform: rotateY(180deg);
+}
+
+.card-preview.is-flipped .card-front {
+  transform: rotateY(-180deg);
+}
+
+.card-preview.is-flipped .card-back {
+  transform: rotateY(0);
+}
+
+.card-preview {
+  --card-a: #2b2724;
+  --card-b: #4a423b;
+}
+
+.card-preview.brand-visa {
+  --card-a: #1a2a6c;
+  --card-b: #2f56b0;
+}
+
+.card-preview.brand-mastercard {
+  --card-a: #221f1d;
+  --card-b: #4a3c33;
+}
+
+.card-preview.brand-amex {
+  --card-a: #0b5e6e;
+  --card-b: #2a8f8a;
+}
+
+.card-preview.brand-mir {
+  --card-a: #14532d;
+  --card-b: #1b7a4b;
+}
+
+.card-preview.brand-unionpay {
+  --card-a: #6d1b25;
+  --card-b: #a23038;
+}
+
+.card-top,
+.card-bottom {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s3);
+}
+
+.card-chip {
+  width: 2.2rem;
+  height: 1.6rem;
+  border-radius: 0.35rem;
+  background:
+    linear-gradient(90deg, transparent 32%, rgb(0 0 0 / 0.18) 33% 35%, transparent 36% 64%, rgb(0 0 0 / 0.18) 65% 67%, transparent 68%),
+    linear-gradient(180deg, transparent 45%, rgb(0 0 0 / 0.18) 46% 54%, transparent 55%),
+    linear-gradient(135deg, #e9d18f, #b8954a);
+}
+
+.card-brand-text {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.brand-text-visa {
+  font-style: italic;
+  font-size: 1.35rem;
+}
+
+.brand-text-unknown {
+  opacity: 0.6;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.card-number {
+  margin: 0;
+  font-size: clamp(1rem, 4.2vw, 1.2rem);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+  text-shadow: 0 1px 1px rgb(0 0 0 / 0.25);
+}
+
+.card-bottom {
+  align-items: flex-end;
+}
+
+.card-bottom div {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.card-bottom small,
+.card-back-note {
+  opacity: 0.65;
+  font-size: 0.5625rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.card-bottom span {
+  overflow: hidden;
+  font-size: 0.8125rem;
+  letter-spacing: 0.06em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-exp {
+  text-align: right;
+}
+
+.card-stripe {
+  height: 2.4rem;
+  background: #0f0d0c;
+}
+
+.card-sign {
+  display: flex;
+  justify-content: flex-end;
+  margin: 0 1.1rem;
+  padding: 0.35rem 0.6rem;
+  border-radius: 0.25rem;
+  background: repeating-linear-gradient(-45deg, #f4efe6, #f4efe6 5px, #e6dfd2 5px, #e6dfd2 10px);
+}
+
+.card-cvc {
+  color: #181614;
+  font-family: var(--font-sans);
+  font-style: italic;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+}
+
+.card-back-note {
+  margin: auto 1.1rem 0.9rem;
+}
+
+/* --- fields ---------------------------------------------------------------------------- */
+
+.card-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s3);
+}
+
+.card-field {
+  display: grid;
+  gap: 0.3rem;
+  align-content: start;
+  min-width: 0;
+}
+
+.card-field-number,
+.card-field-name {
+  grid-column: 1 / -1;
+}
+
+.card-field label {
+  color: var(--muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.card-field input {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0 var(--s3);
+  border: 1px solid var(--border-control, var(--border));
+  border-radius: 0.5rem;
+  background: var(--surface-elevated);
+  color: var(--text);
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  transition:
+    border-color 0.15s var(--ease-out),
+    box-shadow 0.15s var(--ease-out);
+}
+
+.card-field input::placeholder {
+  color: color-mix(in srgb, var(--muted) 55%, transparent);
+  letter-spacing: 0.02em;
+}
+
+.card-field input:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border-control, var(--border)));
+}
+
+.card-field input:focus {
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.card-field input:disabled {
+  opacity: 0.6;
+}
+
+.card-field.has-error input {
+  border-color: var(--bad);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--bad) 14%, transparent);
+}
+
+.card-input-wrap {
+  position: relative;
+}
+
+.card-input-wrap input {
+  padding-right: 6.5rem;
+}
+
+.card-badge {
+  position: absolute;
+  top: 50%;
+  right: 0.5rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+  transform: translateY(-50%);
+  animation: card-pay-in 0.25s var(--ease-spring);
+}
+
+.card-error,
+.card-hint {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+
+.card-error {
+  color: var(--bad);
+}
+
+.card-hint {
+  color: var(--text-subtle);
+}
+
+.card-secure {
+  display: flex;
+  grid-column: 1 / -1;
+  gap: 0.45rem;
+  align-items: flex-start;
+  margin: 0;
+  color: var(--text-subtle);
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.card-secure svg {
+  flex: none;
+  margin-top: 0.1rem;
+  color: var(--accent);
+}
+
+.card-test {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.card-test:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+@media (max-width: 40rem) {
+  .card-pay {
+    grid-template-columns: 1fr;
+  }
+
+  .card-preview {
+    max-width: 19rem;
+    margin-inline: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-pay,
+  .card-badge {
+    animation: none;
+  }
+
+  .card-face {
+    transition: none;
+  }
+}
