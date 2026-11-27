@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { api } from "../api/client";
+import { type CardFieldRefs, CardPayment } from "../components/CardPayment";
 import { KaspiQr } from "../components/KaspiQr";
 import { Status } from "../components/Layout";
 import { Button, Card, EmptyState, ErrorState, FadeIn, Skeleton } from "../components/ui";
 import { useAuth } from "../lib/auth-context";
+import { type CardInput, EMPTY_CARD, validateCard } from "../lib/card";
 import { type Booking, clock, price, when } from "../lib/format";
 import { type TranslationKey, useI18n } from "../lib/i18n";
 import { messageOf, must, statusOf, useApi } from "../lib/useApi";
@@ -171,6 +173,7 @@ function BookingView({ booking: initial, refresh }: { booking: Booking; refresh:
         {booking.status === "pending" && !kaspi && (
           <PayForm
             busy={busy}
+            total={booking.total_amount}
             onPay={(method, decline) => {
               if (method === "kaspi") {
                 setMessage(null);
@@ -206,22 +209,50 @@ function BookingView({ booking: initial, refresh }: { booking: Booking; refresh:
 
 function PayForm({
   busy,
+  total,
   onPay,
   onCancel,
 }: {
   busy: boolean;
+  total: string;
   onPay: (method: "card" | "kaspi", simulateDecline: boolean) => void;
   onCancel: () => void;
 }) {
   const { t } = useI18n();
   const [method, setMethod] = useState<"card" | "kaspi">("card");
   const [decline, setDecline] = useState(false);
+  // Card details live only in this form: the API is told the method, never the card.
+  const [card, setCard] = useState<CardInput>(EMPTY_CARD);
+  const [tried, setTried] = useState(false);
+  const refs: CardFieldRefs = {
+    number: useRef(null),
+    name: useRef(null),
+    expiry: useRef(null),
+    cvc: useRef(null),
+  };
+  // Errors appear after the first pay attempt, then follow the typing.
+  const errors = tried ? validateCard(card) : {};
+
+  function submit() {
+    if (method === "card") {
+      const found = validateCard(card);
+      const first = (Object.keys(EMPTY_CARD) as (keyof CardInput)[]).find((key) => found[key]);
+      if (first) {
+        setTried(true);
+        refs[first].current?.focus();
+        return;
+      }
+    }
+    onPay(method, decline);
+  }
+
   return (
     <form
       className="pay"
+      noValidate
       onSubmit={(e) => {
         e.preventDefault();
-        onPay(method, decline);
+        submit();
       }}
     >
       <fieldset>
@@ -234,17 +265,26 @@ function PayForm({
         ))}
       </fieldset>
       {method === "card" ? (
-        <label className="choice muted small">
-          <input type="checkbox" checked={decline} onChange={(e) => setDecline(e.target.checked)} />
-          {t("booking.demoDecline")}
-        </label>
+        <>
+          <CardPayment card={card} onChange={setCard} errors={errors} disabled={busy} refs={refs} />
+          <label className="choice muted small">
+            <input type="checkbox" checked={decline} onChange={(e) => setDecline(e.target.checked)} />
+            {t("booking.demoDecline")}
+          </label>
+        </>
       ) : (
-        <p className="muted small">{t("booking.kaspiHint")}</p>
+        <>
+          <p className="muted small">{t("booking.kaspiHint")}</p>
+          <p className="muted small">{t("booking.simulatedNote")}</p>
+        </>
       )}
-      <p className="muted small">{t("booking.simulatedNote")}</p>
       <div className="actions">
         <Button type="submit" variant="solid" loading={busy} disabled={busy}>
-          {busy ? t("auth.pleaseWait") : method === "kaspi" ? t("booking.showKaspiQr") : t("booking.payNow")}
+          {busy
+            ? t("booking.processingPayment")
+            : method === "kaspi"
+              ? t("booking.showKaspiQr")
+              : t("booking.payAmount", { amount: price(total) })}
         </Button>
         <Button type="button" variant="ghost" disabled={busy} onClick={onCancel}>
           {t("booking.cancelFree")}
