@@ -492,6 +492,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/me/avatar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Upload Avatar
+         * @description Upload a profile avatar (JPEG, PNG or WebP, up to 2 MB). Returns the public URL.
+         */
+        post: operations["upload_avatar_api_me_avatar_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/me/bookings": {
         parameters: {
             query?: never;
@@ -799,6 +819,11 @@ export interface components {
             seat_number: number;
             /** Seat Type */
             seat_type: string;
+        };
+        /** AvatarOut */
+        AvatarOut: {
+            /** Url */
+            url: string;
         };
         /** BookingOut */
         BookingOut: {
@@ -2465,6 +2490,32 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Me"];
+                };
+            };
+        };
+    };
+    upload_avatar_api_me_avatar_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "image/jpeg": string;
+                "image/png": string;
+                "image/webp": string;
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AvatarOut"];
                 };
             };
         };

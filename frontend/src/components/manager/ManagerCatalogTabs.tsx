@@ -1,9 +1,10 @@
-import { type FormEvent, useState } from "react";
+import { type ChangeEvent, type FormEvent, useRef, useState } from "react";
 import { api } from "../../api/client";
 import type { AdminHall, AdminMovie } from "../../lib/format";
+import { uploadPoster } from "../../lib/posterUpload";
 import { messageOf, must, useApi } from "../../lib/useApi";
 import { Status } from "../Layout";
-import { Badge, Button, EmptyState, ErrorState, Skeleton } from "../ui";
+import { Badge, Button, EmptyState, ErrorState, Skeleton, Squircle } from "../ui";
 
 const AGE_RATINGS = [0, 6, 12, 16, 18] as const;
 const HALL_TYPES = ["2D", "3D", "IMAX"] as const;
@@ -20,9 +21,34 @@ export function ManagerMoviesTab({
   onChanged: () => void;
 }) {
   const [editing, setEditing] = useState<AdminMovie | "new" | null>(null);
+  const [posterUrl, setPosterUrl] = useState("");
+  const [uploadingPoster, setUploadingPoster] = useState(false);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<{ tone: "info" | "error"; text: string } | null>(null);
+  const posterFileRef = useRef<HTMLInputElement>(null);
   const movies = useApi(() => api.GET("/api/admin/movies").then(must), refreshKey);
+
+  function openEditor(target: AdminMovie | "new" | null) {
+    setEditing(target);
+    setPosterUrl(target && target !== "new" ? (target.poster_url ?? "") : "");
+  }
+
+  async function onPickPoster(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    setUploadingPoster(true);
+    setNotice(null);
+    try {
+      const url = await uploadPoster(file);
+      setPosterUrl(url);
+      setNotice({ tone: "info", text: "Poster uploaded. Save the movie to keep it." });
+    } catch (err) {
+      setNotice({ tone: "error", text: messageOf(err) });
+    } finally {
+      setUploadingPoster(false);
+    }
+  }
 
   if (movies.state === "loading") return <Skeleton width="100%" height="14rem" radius={12} aria-busy="true" />;
   if (movies.state === "error") {
@@ -45,7 +71,7 @@ export function ManagerMoviesTab({
       .map((g) => g.trim())
       .filter(Boolean);
     const yearRaw = String(form.get("release_year") ?? "").trim();
-    const posterRaw = String(form.get("poster_url") ?? "").trim();
+    const posterRaw = posterUrl.trim();
     const descRaw = String(form.get("description") ?? "").trim();
     const payload = {
       title: String(form.get("title") ?? "").trim(),
@@ -71,7 +97,7 @@ export function ManagerMoviesTab({
           .then(must);
         setNotice({ tone: "info", text: `Saved "${payload.title}".` });
       }
-      setEditing(null);
+      openEditor(null);
       onChanged();
     } catch (err) {
       setNotice({ tone: "error", text: messageOf(err) });
@@ -126,7 +152,7 @@ export function ManagerMoviesTab({
     <section aria-label="Movies catalog management">
       <div className="mgr-toolbar">
         <h2>Movies ({movies.data.length})</h2>
-        <Button size="sm" variant="solid" onClick={() => setEditing(editing ? null : "new")}>
+        <Button size="sm" variant="solid" onClick={() => openEditor(editing ? null : "new")}>
           {editing ? "Close form" : "Add movie"}
         </Button>
       </div>
@@ -178,23 +204,76 @@ export function ManagerMoviesTab({
               defaultValue={draft?.genres.join(", ") ?? ""}
             />
           </label>
-          <label>
-            Poster URL
-            <input
-              name="poster_url"
-              placeholder="/posters/film.svg"
-              defaultValue={draft?.poster_url ?? ""}
-            />
-          </label>
+          <div className="mgr-poster-field">
+            <div className="mgr-poster-row">
+              <Squircle
+                radius={4}
+                smoothing={0.5}
+                stroke="var(--border)"
+                strokeWidth={1}
+                clipContent
+                shadow="none"
+                className="mgr-poster-preview"
+              >
+                {posterUrl.trim() ? <img src={posterUrl.trim()} alt="Poster preview" /> : null}
+              </Squircle>
+              <div className="mgr-poster-controls">
+                <label>
+                  Poster image or URL
+                  <input
+                    name="poster_url"
+                    placeholder="/posters/film.svg or upload an image"
+                    value={posterUrl}
+                    onChange={(e) => setPosterUrl(e.target.value)}
+                  />
+                </label>
+                <div className="mgr-poster-actions">
+                  <input
+                    ref={posterFileRef}
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp"
+                    className="sr-only"
+                    onChange={onPickPoster}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    loading={uploadingPoster}
+                    disabled={uploadingPoster || busy}
+                    onClick={() => posterFileRef.current?.click()}
+                  >
+                    Upload poster
+                  </Button>
+                  {posterUrl.trim() && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      disabled={uploadingPoster || busy}
+                      onClick={() => setPosterUrl("")}
+                    >
+                      Clear
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
           <label className="mgr-span-all">
             Description
             <textarea name="description" defaultValue={draft?.description ?? ""} />
           </label>
           <div className="mgr-form-actions">
-            <Button type="submit" variant="solid" loading={busy} disabled={busy}>
+            <Button type="submit" variant="solid" loading={busy} disabled={busy || uploadingPoster}>
               {draft ? "Save changes" : "Create movie"}
             </Button>
-            <Button type="button" variant="ghost" disabled={busy} onClick={() => setEditing(null)}>
+            <Button
+              type="button"
+              variant="ghost"
+              disabled={busy || uploadingPoster}
+              onClick={() => openEditor(null)}
+            >
               Cancel
             </Button>
           </div>
@@ -236,7 +315,7 @@ export function ManagerMoviesTab({
                   </td>
                   <td className="num">
                     <span className="mgr-row-actions">
-                      <Button size="sm" variant="ghost" disabled={busy} onClick={() => setEditing(m)}>
+                      <Button size="sm" variant="ghost" disabled={busy} onClick={() => openEditor(m)}>
                         Edit
                       </Button>
                       <Button

@@ -1,28 +1,44 @@
 """The logged-in user: Supabase login linked to a customer and/or staff profile."""
 
 import re
+import uuid
 from typing import Annotated, Literal
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.auth import CurrentUserDep
+from app.config import get_settings
 from app.db import get_session
 from app.models import Customer, Staff
 from app.phone import InvalidPhone, normalize_phone
+from app.storage import (
+    EXTENSIONS as IMAGE_EXTENSIONS,
+)
+from app.storage import (
+    StorageError,
+    delete_object_by_url,
+    put_object,
+    read_image_body,
+)
 
 router = APIRouter(tags=["me"])
 
 SessionDep = Annotated[Session, Depends(get_session)]
 
+AVATAR_MAX_BYTES = 2 * 1024 * 1024
 MAX_AVATAR_URL_LEN = 200_000
 _AVATAR_RE = re.compile(
     r"^(preset:[a-z0-9_-]{1,30}|https://\S+|data:image/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+)$"
 )
+
+
+class AvatarOut(BaseModel):
+    url: str
 
 
 class CustomerOut(BaseModel):
@@ -157,6 +173,7 @@ def update_customer(body: CustomerUpdate, user: CurrentUserDep, db: SessionDep) 
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Customer profile not found")
 
     fields = body.model_fields_set
+    old_avatar = customer.avatar_url
     if "full_name" in fields:
         name = (body.full_name or "").strip()
         if not name:
@@ -178,4 +195,43 @@ def update_customer(body: CustomerUpdate, user: CurrentUserDep, db: SessionDep) 
         raise HTTPException(
             status.HTTP_409_CONFLICT, "That email is already linked to another customer profile"
         ) from exc
+    if "avatar_url" in fields and old_avatar and old_avatar != customer.avatar_url:
+        delete_object_by_url(get_settings().avatar_bucket, old_avatar)
     return _customer_out(customer)
+
+
+def put_avatar_object(path: str, content: bytes, content_type: str) -> str:
+    """Store a file in the avatar bucket; returns its public URL. Replaced in tests."""
+    return put_object(get_settings().avatar_bucket, path, content, content_type)
+
+
+@router.post(
+    "/me/avatar",
+    response_model=AvatarOut,
+    status_code=status.HTTP_201_CREATED,
+    openapi_extra={
+        "requestBody": {
+            "required": True,
+            "content": {
+                t: {"schema": {"type": "string", "format": "binary"}} for t in IMAGE_EXTENSIONS
+            },
+        }
+    },
+)
+async def upload_avatar(request: Request, user: CurrentUserDep) -> AvatarOut:
+    """Upload a profile avatar (JPEG, PNG or WebP, up to 2 MB). Returns the public URL."""
+    s = get_settings()
+    if not (s.supabase_url and s.supabase_storage_key):
+        raise HTTPException(
+            status.HTTP_503_SERVICE_UNAVAILABLE,
+            "Avatar upload isn't set up (SUPABASE_STORAGE_KEY). Pick a preset icon instead.",
+        )
+    content, mime_type, ext = await read_image_body(request, AVATAR_MAX_BYTES, "2 MB")
+    path = f"{user.id}/{uuid.uuid4().hex}.{ext}"
+    try:
+        url = put_avatar_object(path, content, mime_type)
+    except StorageError as exc:
+        raise HTTPException(
+            status.HTTP_502_BAD_GATEWAY, f"Storage refused the file: {exc}"
+        ) from exc
+    return AvatarOut(url=url)

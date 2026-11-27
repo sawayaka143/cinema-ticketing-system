@@ -3,7 +3,7 @@
 Agreed on 2026-10-30 by reviewing the Week 9 Task 09 document ("Database Project Check: Cinema Ticketing System") question by question.
 This file is the source for the first Alembic migration. It is **not** a migration itself.
 
-Database: Supabase Postgres (two projects: prod and dev). All data goes through FastAPI; Supabase is used only for the database and login.
+Database: Supabase Postgres (two projects: prod and dev). All data goes through FastAPI; Supabase is used for Postgres, login, and object storage (`posters` and `avatars` public buckets, written only by FastAPI via `SUPABASE_STORAGE_KEY`).
 
 ---
 
@@ -30,7 +30,7 @@ Database: Supabase Postgres (two projects: prod and dev). All data goes through 
 | email | varchar(100) | NOT NULL, UNIQUE (copied from Supabase login at sign-up; synced on profile update) |
 | phone | varchar(20) | NULL; `CHECK (phone ~ '^\+7[0-9]{10}$')` (stored as `+77011234567`) |
 | city | varchar(60) | NULL (optional city chosen in Settings, e.g. Almaty) |
-| avatar_url | text | NULL (preset icon key like `preset:reel`, `https://` URL, or compact `data:image/...` URI) |
+| avatar_url | text | NULL (preset icon key like `preset:reel`, Supabase Storage public URL in `avatars`, `https://` URL, or legacy `data:image/...` URI) |
 | created_at | timestamptz | NOT NULL DEFAULT now() |
 
 ### STAFF — cashier, manager or admin account
@@ -51,7 +51,7 @@ The same login may have both a CUSTOMER and a STAFF row (UNIQUE is per table, no
 | movie_id | bigint identity | PK |
 | title | varchar(150) | NOT NULL |
 | description | text | NULL |
-| poster_url | text | NULL |
+| poster_url | text | NULL (Supabase Storage public URL in `posters`, `/posters/...` static path, or `https://` URL) |
 | duration_min | int | NOT NULL, `CHECK (duration_min BETWEEN 40 AND 300)` |
 | min_age | int | NOT NULL, `CHECK (min_age IN (0,6,12,16,18))` (shown as "16+") |
 | release_year | int | `CHECK (release_year BETWEEN 1900 AND 2100)` |
