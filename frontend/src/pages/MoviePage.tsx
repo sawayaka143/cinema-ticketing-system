@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router";
 import { api } from "../api/client";
 import { Age, Poster, ShowtimeChip } from "../components/MovieRow";
+import { ArrowLeftIcon } from "../components/TabIcons";
 import { Card, EmptyState, ErrorState, FadeIn, Skeleton } from "../components/ui";
 import { type MovieWithScreenings, movieKey } from "../lib/catalogCache";
 import { type Screening, dayOf, nextDays, runtime } from "../lib/format";
@@ -12,6 +14,8 @@ export function MoviePage() {
   const movieId = Number(useParams().id);
   const [params] = useSearchParams();
   const selectedDay = params.get("day");
+  const [pickedDay, setPickedDay] = useState<string | null>(null);
+
   const page = useApi<MovieWithScreenings>(async () => {
     const path = { path: { movie_id: movieId } };
     const [movie, screenings] = await Promise.all([
@@ -24,13 +28,20 @@ export function MoviePage() {
   if (page.state === "loading") {
     return (
       <Card as="article" elevated className="movie-card" aria-busy="true">
-        <div className="movie-layout">
-          <Skeleton radius={4} className="poster-squircle" />
-          <div className="movie-info movie-info-skeleton">
-            <Skeleton width="60%" height="2rem" radius={8} />
-            <Skeleton width="40%" height="1.2rem" radius={6} style={{ marginTop: "0.5rem" }} />
-            <Skeleton width="100%" height="4rem" radius={8} style={{ marginTop: "1rem" }} />
+        <div className="movie-hero">
+          <div className="movie-hero-poster">
+            <Skeleton radius={4} className="poster-squircle" />
           </div>
+          <div className="movie-hero-info movie-info-skeleton">
+            <Skeleton width="60%" height="2rem" radius={8} />
+            <Skeleton width="42%" height="1.15rem" radius={6} style={{ marginTop: "0.5rem" }} />
+            <Skeleton width="100%" height="3.25rem" radius={8} style={{ marginTop: "1rem" }} />
+          </div>
+        </div>
+        <div className="movie-schedule">
+          <Skeleton width="9rem" height="1.35rem" radius={6} />
+          <Skeleton width="100%" height="2.75rem" radius={10} style={{ marginTop: "0.75rem" }} />
+          <Skeleton width="100%" height="5.5rem" radius={10} style={{ marginTop: "0.75rem" }} />
         </div>
       </Card>
     );
@@ -62,56 +73,78 @@ export function MoviePage() {
   ];
 
   const activeDays = nextDays(7, locale, t("program.today")).filter((d) => byDay.has(d.iso));
-  const orderedDays =
-    selectedDay && byDay.has(selectedDay)
-      ? [
-          ...activeDays.filter((d) => d.iso === selectedDay),
-          ...activeDays.filter((d) => d.iso !== selectedDay),
-        ]
-      : activeDays;
+  const activeDayIso =
+    (pickedDay && byDay.has(pickedDay) ? pickedDay : null) ??
+    (selectedDay && byDay.has(selectedDay) ? selectedDay : null) ??
+    activeDays[0]?.iso ??
+    null;
+  const currentScreenings = activeDayIso ? (byDay.get(activeDayIso) ?? []) : [];
 
   return (
     <FadeIn direction="up">
-      <p className="back-link">
-        <Link to={selectedDay ? `/?day=${encodeURIComponent(selectedDay)}` : "/"}>← {t("nav.backWhatsOn")}</Link>
-      </p>
+      <div className="back-row">
+        <Link
+          to={selectedDay ? `/?day=${encodeURIComponent(selectedDay)}` : "/"}
+          className="back-btn"
+          aria-label={t("nav.backWhatsOn")}
+        >
+          <span className="back-btn-circle">
+            <ArrowLeftIcon />
+          </span>
+          <span className="back-btn-label">{t("nav.backWhatsOn")}</span>
+        </Link>
+      </div>
+
       <Card as="article" elevated className="movie-card">
-        <div className="movie-layout">
-          <div className="movie-poster-col">
+        <div className="movie-hero">
+          <div className="movie-hero-poster">
             <Poster movie={movie} priority />
           </div>
-          <div className="movie-header-col">
+          <div className="movie-hero-head">
             <div className="title">
               <h1>{movie.title}</h1>
               <Age minAge={movie.min_age} />
             </div>
             <p className="meta">{facts.filter(Boolean).join(" · ")}</p>
           </div>
-          <div className="movie-body-col">
-            {movie.description && <p className="lead">{movie.description}</p>}
-            <h2>{t("movie.screenings")}</h2>
-            {screenings.length === 0 && (
-              <EmptyState
-                title={t("movie.noUpcomingTitle")}
-                description={t("movie.noUpcomingDesc")}
-              />
-            )}
-            {orderedDays.map((d) => (
-              <section
-                key={d.iso}
-                className={`day-group${selectedDay === d.iso ? " day-group-selected" : ""}`}
-              >
-                <h3>
-                  {d.weekday}, {d.date}
-                </h3>
-                <div className="times">
-                  {byDay.get(d.iso)?.map((s) => (
-                    <ShowtimeChip key={s.screening_id} screening={s} />
-                  ))}
-                </div>
-              </section>
-            ))}
-          </div>
+          {movie.description && <p className="movie-hero-lead">{movie.description}</p>}
+        </div>
+
+        <div className="movie-schedule">
+          <h2>{t("movie.screenings")}</h2>
+          {activeDays.length === 0 ? (
+            <EmptyState
+              title={t("movie.noUpcomingTitle")}
+              description={t("movie.noUpcomingDesc")}
+            />
+          ) : (
+            <>
+              <div className="movie-days" role="tablist" aria-label={t("program.dayGroup")}>
+                {activeDays.map((d) => {
+                  const selected = d.iso === activeDayIso;
+                  return (
+                    <button
+                      key={d.iso}
+                      type="button"
+                      role="tab"
+                      aria-selected={selected}
+                      className={`movie-day-pill${selected ? " movie-day-pill-active" : ""}`}
+                      onClick={() => setPickedDay(d.iso)}
+                    >
+                      <span className="movie-day-weekday">{d.weekday}</span>
+                      <b className="movie-day-date">{d.date}</b>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="movie-times" role="tabpanel">
+                {currentScreenings.map((s) => (
+                  <ShowtimeChip key={s.screening_id} screening={s} />
+                ))}
+              </div>
+            </>
+          )}
         </div>
       </Card>
     </FadeIn>

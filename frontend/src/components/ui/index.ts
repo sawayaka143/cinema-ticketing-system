@@ -10,3 +10,4 @@ export * from "./EmptyState";
 export * from "./ErrorState";
 export * from "./BrandMark";
 export * from "./ScrollArea";
+export * from "./SegmentedPill";

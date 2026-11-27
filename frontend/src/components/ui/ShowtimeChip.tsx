@@ -1,4 +1,5 @@
 import { Link } from "react-router";
+import { prefetchSeatMap } from "../../lib/catalogCache";
 import { type Screening, price, timeOf } from "../../lib/format";
 import { Squircle } from "./Squircle";
 
@@ -15,10 +16,15 @@ export function ShowtimeChip({ screening, className = "" }: ShowtimeChipProps) {
         ? "chip-type-3d"
         : "chip-type-2d";
 
+  const warm = () => prefetchSeatMap(screening.screening_id);
+
   return (
     <Squircle
       as={Link}
       to={`/screenings/${screening.screening_id}`}
+      onPointerEnter={warm}
+      onFocus={warm}
+      onTouchStart={warm}
       radius={6}
       smoothing={0.5}
       fill="var(--surface-2)"

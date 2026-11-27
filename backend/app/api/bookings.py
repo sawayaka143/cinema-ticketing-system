@@ -75,11 +75,14 @@ class BookingOut(BaseModel):
     checked_in_at: datetime | None
 
 
-def expire_stale_holds(db: Session, screening_id: int | None = None) -> int:
+def expire_stale_holds(
+    db: Session, screening_id: int | None = None, *, commit_if_empty: bool = True
+) -> int:
     """Run the lazy expiry check. Returns how many bookings it expired. Commits."""
-    expired = db.scalar(text("SELECT expire_stale_holds(:sid)"), {"sid": screening_id})
-    db.commit()
-    return expired or 0
+    expired = db.scalar(text("SELECT expire_stale_holds(:sid)"), {"sid": screening_id}) or 0
+    if expired or commit_if_empty:
+        db.commit()
+    return expired
 
 
 def _own_booking(db: Session, user: CurrentUser, booking_id: int, *, lock: bool = False) -> Booking:

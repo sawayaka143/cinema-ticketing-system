@@ -7,7 +7,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel
 from sqlalchemy import select
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.api.bookings import expire_stale_holds
 from app.db import get_session
@@ -193,15 +193,20 @@ def get_seat_map(screening_id: int, db: SessionDep) -> SeatMap:
     s = db.scalar(
         select(Screening)
         .where(Screening.screening_id == screening_id)
-        .options(selectinload(Screening.hall))
+        .options(joinedload(Screening.hall))
     )
     if s is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Screening not found")
-    expire_stale_holds(db, screening_id)
-    taken = set(db.scalars(select(Ticket.seat_id).where(Ticket.screening_id == screening_id)))
-    seats = db.scalars(
-        select(Seat).where(Seat.hall_id == s.hall_id).order_by(Seat.grid_row, Seat.grid_col)
-    )
+    expire_stale_holds(db, screening_id, commit_if_empty=False)
+    rows = db.execute(
+        select(Seat, Ticket.ticket_id.is_not(None).label("is_taken"))
+        .outerjoin(
+            Ticket,
+            (Ticket.seat_id == Seat.seat_id) & (Ticket.screening_id == screening_id),
+        )
+        .where(Seat.hall_id == s.hall_id)
+        .order_by(Seat.grid_row, Seat.grid_col)
+    ).all()
     return SeatMap(
         screening_id=s.screening_id,
         hall=HallOut(hall_id=s.hall.hall_id, name=s.hall.name, hall_type=s.hall.hall_type),
@@ -214,9 +219,9 @@ def get_seat_map(screening_id: int, db: SessionDep) -> SeatMap:
                 grid_col=seat.grid_col,
                 seat_type=seat.seat_type,
                 price=ticket_price(s.base_price, seat.seat_type),
-                is_taken=seat.seat_id in taken,
+                is_taken=bool(is_taken),
             )
-            for seat in seats
+            for seat, is_taken in rows
         ],
     )
 

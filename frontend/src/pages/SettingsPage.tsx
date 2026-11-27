@@ -3,10 +3,10 @@ import { Link } from "react-router";
 import { api } from "../api/client";
 import { Status } from "../components/Layout";
 import { MoonIcon, SunIcon } from "../components/TabIcons";
-import { Button, Card, EmptyState, FadeIn, Skeleton } from "../components/ui";
+import { Button, Card, EmptyState, FadeIn, SegmentedPill, Skeleton } from "../components/ui";
 import { PRESET_AVATARS, UserAvatar, resizeAvatarFile } from "../components/UserAvatar";
 import { useAuth } from "../lib/auth-context";
-import { LANGUAGES, useI18n } from "../lib/i18n";
+import { LANGUAGES, type LangCode, useI18n } from "../lib/i18n";
 import { supabase } from "../lib/supabase";
 import { useTheme } from "../lib/theme";
 import { messageOf, must } from "../lib/useApi";
@@ -112,140 +112,125 @@ function ProfileForm({
   }
 
   return (
-    <>
-      <Card as="section" elevated className="settings-card">
-        <div className="settings-card-head">
-          <h2>{t("settings.profile")}</h2>
-          <p className="muted">{t("settings.profileDesc")}</p>
-        </div>
+    <Card as="section" elevated className="settings-card">
+      <h2>{t("settings.profile")}</h2>
 
-        <form className="form settings-form" onSubmit={saveProfile}>
-          <div className="avatar-editor">
-            <UserAvatar avatarUrl={avatarUrl} name={fullName} email={email} size="lg" />
-            <div className="avatar-editor-actions">
-              <span className="avatar-editor-label">{t("settings.iconLabel")}</span>
-              <div className="avatar-editor-buttons">
-                <input
-                  ref={fileRef}
-                  type="file"
-                  accept="image/png,image/jpeg,image/webp"
-                  className="sr-only"
-                  onChange={onPickFile}
-                />
-                <Button type="button" variant="outline" size="sm" onClick={() => fileRef.current?.click()}>
-                  {t("settings.uploadIcon")}
-                </Button>
-                {avatarUrl && (
-                  <Button type="button" variant="ghost" size="sm" onClick={() => setAvatarUrl(null)}>
-                    {t("settings.removeIcon")}
-                  </Button>
-                )}
-              </div>
-              <span className="settings-hint">{t("settings.iconHint")}</span>
-            </div>
-          </div>
-
-          <div className="avatar-presets">
-            <span className="settings-hint">{t("settings.presetsLabel")}</span>
-            <div className="avatar-presets-grid" role="group" aria-label={t("settings.presetsLabel")}>
-              {PRESET_AVATARS.map((preset) => {
-                const active = avatarUrl === preset.id;
-                return (
-                  <button
-                    key={preset.id}
-                    type="button"
-                    className={`preset-btn${active ? " preset-btn-active" : ""}`}
-                    aria-pressed={active}
-                    aria-label={preset.label}
-                    title={preset.label}
-                    onClick={() => setAvatarUrl(preset.id)}
-                  >
-                    <UserAvatar avatarUrl={preset.id} size="sm" />
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="settings-fields">
-            <label>
-              {t("settings.fullName")}
-              <input
-                name="full_name"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                autoComplete="name"
-                required
-                maxLength={100}
-              />
-            </label>
-            <label>
-              {t("settings.phone")}
-              <input
-                name="phone"
-                type="tel"
-                inputMode="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder={t("settings.phonePlaceholder")}
-                autoComplete="tel"
-                maxLength={30}
-              />
-            </label>
-            <label>
-              {t("settings.city")}
-              <input
-                name="city"
-                list="kz-cities"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                placeholder={t("settings.cityPlaceholder")}
-                autoComplete="address-level2"
-                maxLength={60}
-              />
-              <datalist id="kz-cities">
-                {KZ_CITIES.map((c) => (
-                  <option key={c} value={c} />
-                ))}
-              </datalist>
-            </label>
-          </div>
-
-          <div className="settings-submit">
-            <Button type="submit" variant="solid" size="md" loading={busy} disabled={busy}>
-              {busy ? t("settings.saving") : t("settings.saveProfile")}
-            </Button>
-          </div>
-          {status && <Status tone={status.tone}>{status.text}</Status>}
-        </form>
-      </Card>
-
-      <Card as="section" elevated className="settings-card">
-        <div className="settings-card-head">
-          <h2>{t("settings.emailSection")}</h2>
-          <p className="muted">{t("settings.emailDesc")}</p>
-        </div>
-        <form className="form settings-form" onSubmit={updateEmail}>
-          <label>
-            {t("auth.email")}
+      <form className="form settings-form" onSubmit={saveProfile}>
+        <div className="avatar-editor">
+          <UserAvatar avatarUrl={avatarUrl} name={fullName} email={email} size="md" />
+          <div className="avatar-editor-buttons">
             <input
-              name="email"
-              type="email"
-              value={newEmail}
-              onChange={(e) => setNewEmail(e.target.value)}
-              autoComplete="email"
+              ref={fileRef}
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              className="sr-only"
+              onChange={onPickFile}
+            />
+            <Button type="button" variant="outline" size="sm" onClick={() => fileRef.current?.click()}>
+              {t("settings.uploadIcon")}
+            </Button>
+            {avatarUrl && (
+              <Button type="button" variant="ghost" size="sm" onClick={() => setAvatarUrl(null)}>
+                {t("settings.removeIcon")}
+              </Button>
+            )}
+          </div>
+        </div>
+
+        <div className="avatar-presets-grid" role="group" aria-label={t("settings.presetsLabel")}>
+          {PRESET_AVATARS.map((preset) => {
+            const active = avatarUrl === preset.id;
+            return (
+              <button
+                key={preset.id}
+                type="button"
+                className={`preset-btn${active ? " preset-btn-active" : ""}`}
+                aria-pressed={active}
+                aria-label={preset.label}
+                title={preset.label}
+                onClick={() => setAvatarUrl(preset.id)}
+              >
+                <UserAvatar avatarUrl={preset.id} size="sm" />
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="settings-fields">
+          <label>
+            {t("settings.fullName")}
+            <input
+              name="full_name"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              autoComplete="name"
               required
+              maxLength={100}
             />
           </label>
-          <div className="settings-submit">
-            <Button type="submit" variant="outline" size="md" loading={emailBusy} disabled={emailBusy}>
-              {t("settings.updateEmail")}
-            </Button>
-          </div>
-          {emailStatus && <Status tone={emailStatus.tone}>{emailStatus.text}</Status>}
-        </form>
-      </Card>
-    </>
+          <label>
+            {t("settings.phone")}
+            <input
+              name="phone"
+              type="tel"
+              inputMode="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder={t("settings.phonePlaceholder")}
+              autoComplete="tel"
+              maxLength={30}
+            />
+          </label>
+          <label>
+            {t("settings.city")}
+            <input
+              name="city"
+              list="kz-cities"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              placeholder={t("settings.cityPlaceholder")}
+              autoComplete="address-level2"
+              maxLength={60}
+            />
+            <datalist id="kz-cities">
+              {KZ_CITIES.map((c) => (
+                <option key={c} value={c} />
+              ))}
+            </datalist>
+          </label>
+        </div>
+
+        <div className="settings-submit">
+          <Button type="submit" variant="solid" size="md" loading={busy} disabled={busy}>
+            {busy ? t("settings.saving") : t("settings.saveProfile")}
+          </Button>
+        </div>
+        {status && <Status tone={status.tone}>{status.text}</Status>}
+      </form>
+
+      <hr className="settings-divider" />
+
+      <form className="form settings-form" onSubmit={updateEmail}>
+        <label>
+          {t("settings.emailSection")}
+          <input
+            name="email"
+            type="email"
+            value={newEmail}
+            onChange={(e) => setNewEmail(e.target.value)}
+            autoComplete="email"
+            required
+          />
+        </label>
+        <p className="settings-hint">{t("settings.emailDesc")}</p>
+        <div className="settings-submit">
+          <Button type="submit" variant="outline" size="md" loading={emailBusy} disabled={emailBusy}>
+            {t("settings.updateEmail")}
+          </Button>
+        </div>
+        {emailStatus && <Status tone={emailStatus.tone}>{emailStatus.text}</Status>}
+      </form>
+    </Card>
   );
 }
 
@@ -258,20 +243,46 @@ export function SettingsPage() {
   const email = session?.user.email ?? "";
   const profileKey = `${session?.user.id ?? "anon"}:${customer?.customer_id ?? "none"}:${customer?.full_name ?? ""}:${customer?.phone ?? ""}:${customer?.city ?? ""}:${customer?.avatar_url ?? ""}`;
 
+  const appearanceOptions = [
+    {
+      value: "light" as const,
+      label: (
+        <>
+          <SunIcon />
+          <span>{t("settings.themeLight")}</span>
+        </>
+      ),
+    },
+    {
+      value: "dark" as const,
+      label: (
+        <>
+          <MoonIcon />
+          <span>{t("settings.themeDark")}</span>
+        </>
+      ),
+    },
+  ];
+
+  const languageOptions = LANGUAGES.map((l) => ({
+    value: l.code as LangCode,
+    label: l.short,
+    ariaLabel: l.name,
+  }));
+
   return (
     <div className="settings-page">
       <FadeIn direction="up" delay={0}>
         <div className="settings-head">
           <h1>{t("settings.title")}</h1>
-          <p className="muted">{t("settings.subtitle")}</p>
         </div>
       </FadeIn>
 
-      <FadeIn direction="up" delay={50}>
+      <FadeIn direction="up" delay={40}>
         {!ready || (session && !meReady) ? (
           <Card as="section" elevated className="settings-card" aria-busy="true">
             <Skeleton width="8rem" height="1.5rem" radius={6} />
-            <Skeleton width="100%" height="4.5rem" radius={12} style={{ marginTop: "1rem" }} />
+            <Skeleton width="100%" height="4rem" radius={12} style={{ marginTop: "0.75rem" }} />
             <Skeleton width="100%" height="3rem" radius={10} style={{ marginTop: "0.75rem" }} />
           </Card>
         ) : session ? (
@@ -302,79 +313,40 @@ export function SettingsPage() {
         )}
       </FadeIn>
 
-      <FadeIn direction="up" delay={100}>
+      <FadeIn direction="up" delay={80}>
         <Card as="section" elevated className="settings-card">
-          <div className="settings-card-head">
-            <h2>{t("settings.appearance")}</h2>
-            <p className="muted">{t("settings.appearanceDesc")}</p>
-          </div>
-          <div className="theme-choices" role="radiogroup" aria-label={t("settings.appearance")}>
-            <button
-              type="button"
-              role="radio"
-              aria-checked={mode === "light"}
-              className={`theme-choice${mode === "light" ? " theme-choice-active" : ""}`}
-              onClick={() => setMode("light")}
-            >
-              <span className="theme-choice-icon">
-                <SunIcon />
-              </span>
-              <span className="theme-choice-text">
-                <b>{t("settings.themeLight")}</b>
-                <span>{t("settings.themeLightDesc")}</span>
-              </span>
-            </button>
-            <button
-              type="button"
-              role="radio"
-              aria-checked={mode === "dark"}
-              className={`theme-choice${mode === "dark" ? " theme-choice-active" : ""}`}
-              onClick={() => setMode("dark")}
-            >
-              <span className="theme-choice-icon">
-                <MoonIcon />
-              </span>
-              <span className="theme-choice-text">
-                <b>{t("settings.themeDark")}</b>
-                <span>{t("settings.themeDarkDesc")}</span>
-              </span>
-            </button>
-          </div>
-        </Card>
-      </FadeIn>
-
-      <FadeIn direction="up" delay={150}>
-        <Card as="section" elevated className="settings-card">
-          <div className="settings-card-head">
-            <h2>{t("settings.language")}</h2>
-            <p className="muted">{t("settings.languageDesc")}</p>
-          </div>
-          <div className="lang-choices" role="radiogroup" aria-label={t("settings.language")}>
-            {LANGUAGES.map((l) => (
-              <button
-                key={l.code}
-                type="button"
-                role="radio"
-                aria-checked={lang === l.code}
-                className={`lang-choice${lang === l.code ? " lang-choice-active" : ""}`}
-                onClick={() => setLang(l.code)}
-              >
-                <span className="lang-choice-short">{l.short}</span>
-                <span>{l.name}</span>
-              </button>
-            ))}
+          <h2>{t("settings.preferences")}</h2>
+          <div className="settings-pref-group">
+            <div className="settings-pref-row">
+              <span className="settings-pref-label">{t("settings.appearance")}</span>
+              <SegmentedPill
+                value={mode}
+                options={appearanceOptions}
+                onChange={setMode}
+                ariaLabel={t("settings.appearance")}
+              />
+            </div>
+            <div className="settings-pref-row">
+              <span className="settings-pref-label">{t("settings.language")}</span>
+              <SegmentedPill
+                value={lang}
+                options={languageOptions}
+                onChange={setLang}
+                ariaLabel={t("nav.language")}
+              />
+            </div>
           </div>
         </Card>
       </FadeIn>
 
       {session && (
-        <FadeIn direction="up" delay={200}>
+        <FadeIn direction="up" delay={120}>
           <Card as="section" elevated className="settings-card settings-account-card">
-            <div className="settings-card-head">
+            <div className="settings-account-info">
               <h2>{t("settings.account")}</h2>
               <p className="muted">{t("settings.signedInAs", { email })}</p>
             </div>
-            <Button variant="outline" size="md" onClick={() => supabase.auth.signOut()}>
+            <Button variant="danger" size="md" onClick={() => supabase.auth.signOut()}>
               {t("nav.logout")}
             </Button>
           </Card>

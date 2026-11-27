@@ -133,3 +133,40 @@ export function EyeOffIcon() {
     </Icon>
   );
 }
+
+/** Left arrow: circular back button. */
+export function ArrowLeftIcon() {
+  return (
+    <Icon>
+      <path d="M19 12H5" />
+      <path d="m11 6-6 6 6 6" />
+    </Icon>
+  );
+}
+
+/** Plus: zoom in. */
+export function ZoomInIcon() {
+  return (
+    <Icon>
+      <path d="M12 6v12M6 12h12" />
+    </Icon>
+  );
+}
+
+/** Minus: zoom out. */
+export function ZoomOutIcon() {
+  return (
+    <Icon>
+      <path d="M6 12h12" />
+    </Icon>
+  );
+}
+
+/** Fit to screen: reset zoom. */
+export function FitViewIcon() {
+  return (
+    <Icon>
+      <path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4" />
+    </Icon>
+  );
+}

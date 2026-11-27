@@ -1,9 +1,10 @@
+import os
 from collections.abc import Iterator
 from functools import lru_cache
 
 from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
-from sqlalchemy.pool import NullPool
+from sqlalchemy.pool import NullPool, QueuePool
 
 from app.config import get_settings
 
@@ -18,8 +19,18 @@ def get_engine() -> Engine:
     if not url:
         raise RuntimeError("DATABASE_URL is not set")
     # Serverless (Vercel) + Supabase transaction pooler:
-    # no client-side pool, and no prepared statements (the pooler doesn't support them).
-    return create_engine(url, poolclass=NullPool, connect_args={"prepare_threshold": None})
+    # no client-side pool on Vercel; locally pool connections to avoid TLS per request.
+    connect_args = {"prepare_threshold": None}
+    if os.getenv("VERCEL"):
+        return create_engine(url, poolclass=NullPool, connect_args=connect_args)
+    return create_engine(
+        url,
+        poolclass=QueuePool,
+        pool_size=5,
+        max_overflow=10,
+        pool_pre_ping=True,
+        connect_args=connect_args,
+    )
 
 
 def get_session() -> Iterator[Session]:

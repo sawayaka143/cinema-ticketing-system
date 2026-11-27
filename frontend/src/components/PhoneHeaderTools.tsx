@@ -4,12 +4,13 @@ import { useAuth } from "../lib/auth-context";
 import { LANGUAGES, type LangCode, useI18n } from "../lib/i18n";
 import { supabase } from "../lib/supabase";
 import { useTheme } from "../lib/theme";
-import { GlobeIcon, MoonIcon, SettingsIcon, SunIcon, UserIcon } from "./TabIcons";
+import { MoonIcon, SettingsIcon, SunIcon, UserIcon } from "./TabIcons";
 import { Badge } from "./ui/Badge";
 import { Button } from "./ui/Button";
+import { SegmentedPill } from "./ui/SegmentedPill";
 import { UserAvatar } from "./UserAvatar";
 
-/** Top-right Profile icon + unified dropdown menu (Language, Theme, Settings, Auth) on desktop & mobile. */
+/** Top-right Profile icon + unified dropdown menu on desktop & mobile. */
 export function ProfileMenu() {
   const { session, ready, me } = useAuth();
   const { lang, setLang, t } = useI18n();
@@ -42,53 +43,68 @@ export function ProfileMenu() {
 
   const close = () => setOpenAt(null);
 
-  const chooseLang = (code: LangCode) => {
-    setLang(code);
-  };
+  const appearanceOptions = [
+    {
+      value: "light" as const,
+      label: (
+        <>
+          <SunIcon />
+          <span>{t("settings.themeLight")}</span>
+        </>
+      ),
+    },
+    {
+      value: "dark" as const,
+      label: (
+        <>
+          <MoonIcon />
+          <span>{t("settings.themeDark")}</span>
+        </>
+      ),
+    },
+  ];
+
+  const languageOptions = LANGUAGES.map((l) => ({
+    value: l.code as LangCode,
+    label: l.short,
+    ariaLabel: l.name,
+  }));
 
   return (
-    <div className="rail-end-controls">
-      {ready && !session && (
-        <Button as={Link} to="/login" variant="outline" size="sm" className="rail-login-btn">
-          {t("nav.login")}
-        </Button>
-      )}
-      <div className="profile-menu-wrap" ref={ref}>
-        <button
-          type="button"
-          className={`profile-trigger${open ? " profile-trigger-open" : ""}`}
-          aria-haspopup="dialog"
-          aria-expanded={open}
-          aria-controls="profile-dropdown"
-          aria-label={t("nav.profile")}
-          onClick={() => setOpenAt(open ? null : location.pathname)}
-        >
-          {ready && session ? (
-            <UserAvatar
-              avatarUrl={me?.customer?.avatar_url}
-              name={displayName}
-              email={email}
-              size="sm"
-            />
-          ) : (
-            <span className="profile-trigger-icon">
-              <UserIcon />
-            </span>
-          )}
-          <svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true" className="tool-caret">
-            <path d="m2.5 4.5 3.5 3.5 3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.5" />
-          </svg>
-        </button>
+    <div className="profile-menu-wrap" ref={ref}>
+      <button
+        type="button"
+        className={`profile-trigger${open ? " profile-trigger-open" : ""}`}
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        aria-controls="profile-dropdown"
+        aria-label={t("nav.profile")}
+        onClick={() => setOpenAt(open ? null : location.pathname)}
+      >
+        {ready && session ? (
+          <UserAvatar
+            avatarUrl={me?.customer?.avatar_url}
+            name={displayName}
+            email={email}
+            size="sm"
+          />
+        ) : (
+          <span className="profile-trigger-icon">
+            <UserIcon />
+          </span>
+        )}
+        <svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true" className="tool-caret">
+          <path d="m2.5 4.5 3.5 3.5 3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.5" />
+        </svg>
+      </button>
 
-        {open && (
-          <>
-            <div className="profile-backdrop" aria-hidden="true" onClick={close} />
-            <div
-              id="profile-dropdown"
-              className="profile-dropdown"
-              role="dialog"
-              aria-label={t("nav.profile")}
-            >
+      {open && (
+        <div
+          id="profile-dropdown"
+          className="profile-dropdown"
+          role="dialog"
+          aria-label={t("nav.profile")}
+        >
           {ready && session ? (
             <div className="profile-dropdown-header">
               <UserAvatar
@@ -120,79 +136,44 @@ export function ProfileMenu() {
 
           <div className="profile-dropdown-divider" role="separator" />
 
-          <div className="profile-dropdown-section">
-            <div className="profile-dropdown-label">
-              <GlobeIcon />
-              <span>{t("nav.language")}</span>
-            </div>
-            <div className="profile-dropdown-pills" role="radiogroup" aria-label={t("nav.language")}>
-              {LANGUAGES.map((l) => (
-                <button
-                  key={l.code}
-                  type="button"
-                  role="radio"
-                  aria-checked={lang === l.code}
-                  className={`profile-pill${lang === l.code ? " profile-pill-active" : ""}`}
-                  onClick={() => chooseLang(l.code)}
-                >
-                  {l.short}
-                </button>
-              ))}
-            </div>
-          </div>
+          <div className="profile-dropdown-links">
+            <Link to="/settings" className="profile-dropdown-link" onClick={close}>
+              <SettingsIcon />
+              <span>{t("nav.settings")}</span>
+            </Link>
 
-          <div className="profile-dropdown-section">
-            <div className="profile-dropdown-label">
-              {mode === "dark" ? <MoonIcon /> : <SunIcon />}
-              <span>{t("settings.appearance")}</span>
-            </div>
-            <div className="profile-dropdown-pills profile-dropdown-pills-2" role="radiogroup" aria-label={t("settings.appearance")}>
+            {ready && session && (
               <button
                 type="button"
-                role="radio"
-                aria-checked={mode === "light"}
-                className={`profile-pill${mode === "light" ? " profile-pill-active" : ""}`}
-                onClick={() => setMode("light")}
+                className="profile-dropdown-link profile-dropdown-logout"
+                onClick={() => {
+                  close();
+                  void supabase.auth.signOut();
+                }}
               >
-                <SunIcon />
-                <span>{t("settings.themeLight")}</span>
+                <span>{t("nav.logout")}</span>
               </button>
-              <button
-                type="button"
-                role="radio"
-                aria-checked={mode === "dark"}
-                className={`profile-pill${mode === "dark" ? " profile-pill-active" : ""}`}
-                onClick={() => setMode("dark")}
-              >
-                <MoonIcon />
-                <span>{t("settings.themeDark")}</span>
-              </button>
-            </div>
+            )}
           </div>
 
           <div className="profile-dropdown-divider" role="separator" />
 
-          <Link to="/settings" className="profile-dropdown-link" onClick={close}>
-            <SettingsIcon />
-            <span>{t("nav.settings")}</span>
-          </Link>
-
-          {ready && session && (
-            <button
-              type="button"
-              className="profile-dropdown-link profile-dropdown-logout"
-              onClick={() => {
-                close();
-                void supabase.auth.signOut();
-              }}
-            >
-              <span>{t("nav.logout")}</span>
-            </button>
-          )}
-            </div>
-          </>
-        )}
-      </div>
+          <div className="profile-dropdown-controls">
+            <SegmentedPill
+              value={mode}
+              options={appearanceOptions}
+              onChange={setMode}
+              ariaLabel={t("settings.appearance")}
+            />
+            <SegmentedPill
+              value={lang}
+              options={languageOptions}
+              onChange={setLang}
+              ariaLabel={t("nav.language")}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

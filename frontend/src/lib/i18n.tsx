@@ -103,6 +103,9 @@ const EN = {
   "seat.ariaTaken": "Row {row}, seat {seat}, {type}, taken",
   "seat.ariaViewFrom": "View from row {row}, seat {seat}. Arrow keys look around, Escape goes back to the hall view.",
   "seat.ariaOverview": "3D view of the hall from above. Use the 2D map toggle or seat list to choose a seat.",
+  "seat.zoomIn": "Zoom in",
+  "seat.zoomOut": "Zoom out",
+  "seat.resetZoom": "Fit hall",
 
   // Ticket types
   "ticket.adult": "Adult",
@@ -193,6 +196,7 @@ const EN = {
 
   // Settings
   "settings.title": "Settings",
+  "settings.preferences": "Preferences",
   "settings.subtitle": "Manage your profile, appearance, and language.",
   "settings.appearance": "Appearance",
   "settings.appearanceDesc": "Choose how Alatau Cinema looks on this device.",
@@ -319,6 +323,9 @@ const KK: Record<TranslationKey, string> = {
   "seat.ariaTaken": "{row}-қатар, {seat}-орын, {type}, бос емес",
   "seat.ariaViewFrom": "{row}-қатар, {seat}-орыннан көрініс. Бағыт пернелерімен айнала қараңыз, Escape — залға оралу.",
   "seat.ariaOverview": "Залдың жоғарыдан 3D көрінісі. Орын таңдау үшін 2D сызбаға өтіңіз немесе тізімді пайдаланыңыз.",
+  "seat.zoomIn": "Жақындату",
+  "seat.zoomOut": "Алыстату",
+  "seat.resetZoom": "Залды сыйдыру",
 
   "ticket.adult": "Ересек",
   "ticket.student": "Студент",
@@ -404,6 +411,7 @@ const KK: Record<TranslationKey, string> = {
   "auth.checkEmail": "Растау үшін поштаңызды тексеріңіз, содан кейін кіріңіз.",
 
   "settings.title": "Баптаулар",
+  "settings.preferences": "Көрініс және тіл",
   "settings.subtitle": "Профиль, тақырып және тіл баптаулары.",
   "settings.appearance": "Көрініс",
   "settings.appearanceDesc": "Осы құрылғыдағы түс тақырыбын таңдаңыз.",
@@ -528,6 +536,9 @@ const RU: Record<TranslationKey, string> = {
   "seat.ariaTaken": "Ряд {row}, место {seat}, {type}, занято",
   "seat.ariaViewFrom": "Вид с ряда {row}, места {seat}. Стрелки поворачивают камеру, Escape возвращает к залу.",
   "seat.ariaOverview": "3D-вид зала сверху. Переключитесь на 2D-схему или используйте список мест ниже.",
+  "seat.zoomIn": "Приблизить",
+  "seat.zoomOut": "Отдалить",
+  "seat.resetZoom": "По размеру зала",
 
   "ticket.adult": "Взрослый",
   "ticket.student": "Студент",
@@ -613,6 +624,7 @@ const RU: Record<TranslationKey, string> = {
   "auth.checkEmail": "Проверьте почту для подтверждения аккаунта, затем войдите.",
 
   "settings.title": "Настройки",
+  "settings.preferences": "Оформление и язык",
   "settings.subtitle": "Управляйте профилем, темой оформления и языком.",
   "settings.appearance": "Оформление",
   "settings.appearanceDesc": "Выберите тему интерфейса на этом устройстве.",

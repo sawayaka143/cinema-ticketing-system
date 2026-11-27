@@ -3,9 +3,10 @@ import { Link, useNavigate, useParams } from "react-router";
 import { api } from "../api/client";
 import { Status } from "../components/Layout";
 import { SeatMap } from "../components/SeatMap";
+import { ArrowLeftIcon } from "../components/TabIcons";
 import { Button, Card, ErrorState, FadeIn, Skeleton } from "../components/ui";
 import { useAuth } from "../lib/auth-context";
-import { screeningKey } from "../lib/catalogCache";
+import { fetchSeatMap, screeningKey } from "../lib/catalogCache";
 import { price, span, type Seat } from "../lib/format";
 import { type TranslationKey, useI18n } from "../lib/i18n";
 import { messageOf, must, statusOf, useApi } from "../lib/useApi";
@@ -74,7 +75,9 @@ export function ScreeningPage() {
   const { session, ready } = useAuth();
   const { t } = useI18n();
   const isPhone = useMediaQuery(PHONE_QUERY);
-  const [viewMode, setViewMode] = useState<"2d" | "3d">(() => defaultViewMode(isPhone));
+  const [manualViewMode, setManualViewMode] = useState<"2d" | "3d" | null>(null);
+  const viewMode = manualViewMode ?? defaultViewMode(isPhone);
+  const setViewMode = (mode: "2d" | "3d") => setManualViewMode(mode);
   // Bumping `reload` refetches the seat map (after a 409, someone else took a seat).
   const [reload, setReload] = useState(0);
   const [picked, setPicked] = useState<Map<number, string>>(() => loadSavedPicks(screeningId));
@@ -95,7 +98,7 @@ export function ScreeningPage() {
     screeningKey(screeningId),
   );
   const seats = useApi(
-    () => api.GET("/api/screenings/{screening_id}/seats", path).then(must),
+    () => fetchSeatMap(screeningId, reload > 0),
     `${screeningId}:${reload}`,
   );
 
@@ -235,17 +238,26 @@ export function ScreeningPage() {
     <>
       <FadeIn direction="up">
         <section className={chosen.length > 0 ? "screening-has-picks" : undefined}>
-        <p className="back-link">
-          <Link to={`/movies/${s.movie.movie_id}`}>← {s.movie.title}</Link>
-        </p>
         <div className="screening-head">
-          <div>
-            <h1>
-              {s.hall.name} · {s.hall.hall_type}
-            </h1>
-            <p className="meta">
-              {span(s)} · {t("screening.fromPrice", { price: price(s.base_price) })}
-            </p>
+          <div className="screening-title-group">
+            <Link
+              to={`/movies/${s.movie.movie_id}`}
+              className="back-btn screening-back-btn"
+              aria-label={s.movie.title}
+            >
+              <span className="back-btn-circle">
+                <ArrowLeftIcon />
+              </span>
+              <span className="back-btn-label">{s.movie.title}</span>
+            </Link>
+            <div className="screening-heading-text">
+              <h1>
+                {s.hall.name} · {s.hall.hall_type}
+              </h1>
+              <p className="meta">
+                {span(s)} · {t("screening.fromPrice", { price: price(s.base_price) })}
+              </p>
+            </div>
           </div>
           <div className="view-toggle" role="group" aria-label={t("screening.viewModeLabel")}>
             <button
@@ -270,7 +282,14 @@ export function ScreeningPage() {
         <div className="booking-layout">
           <div className="hall-panel">
             {!map ? (
-              <Skeleton width="100%" height="24rem" radius={18} aria-busy="true" />
+              <div className="hall-skeleton" aria-busy="true">
+                <Skeleton width="72%" height="0.5rem" radius={999} />
+                <div className="hall-skeleton-rows">
+                  {Array.from({ length: 7 }, (_, i) => (
+                    <Skeleton key={i} width={`${76 + (i % 3) * 6}%`} height="1.5rem" radius={6} />
+                  ))}
+                </div>
+              </div>
             ) : viewMode === "2d" ? (
               <SeatMap seats={map.seats} picked={new Set(picked.keys())} onToggle={toggle} disabled={busy} />
             ) : (

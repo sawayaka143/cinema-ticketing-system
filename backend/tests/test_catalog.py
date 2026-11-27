@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from app.api.catalog import ALMATY
-from app.models import Genre, Hall, Movie, Screening
+from app.models import Genre, Hall, Movie, Screening, Seat
 
 
 @pytest.fixture
@@ -151,3 +151,40 @@ def test_all_screenings_for_a_past_day_are_empty(client: TestClient, catalog: di
 
 def test_all_screenings_with_a_bad_date_are_422(client: TestClient, catalog: dict):
     assert client.get("/api/screenings", params={"date": "soon"}).status_code == 422
+
+
+def test_seat_map_returns_ordered_seats_and_prices(client: TestClient, catalog: dict, db: Session):
+    s = catalog["screenings"]["tomorrow"]
+    seats = [
+        Seat(
+            hall_id=s.hall_id,
+            row_label="A",
+            seat_number=2,
+            grid_row=1,
+            grid_col=2,
+            seat_type="vip",
+        ),
+        Seat(
+            hall_id=s.hall_id,
+            row_label="A",
+            seat_number=1,
+            grid_row=1,
+            grid_col=1,
+            seat_type="standard",
+        ),
+    ]
+    db.add_all(seats)
+    db.flush()
+
+    res = client.get(f"/api/screenings/{s.screening_id}/seats")
+    assert res.status_code == 200
+    body = res.json()
+    assert body["screening_id"] == s.screening_id
+    assert body["hall"]["hall_type"] == "IMAX"
+    assert [seat["seat_number"] for seat in body["seats"]] == [1, 2]
+    assert [seat["is_taken"] for seat in body["seats"]] == [False, False]
+    assert Decimal(body["seats"][1]["price"]) > Decimal(body["seats"][0]["price"])
+
+
+def test_seat_map_unknown_screening_is_404(client: TestClient, catalog: dict):
+    assert client.get("/api/screenings/999999999/seats").status_code == 404

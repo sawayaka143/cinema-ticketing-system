@@ -4,6 +4,7 @@ export type Movie = components["schemas"]["MovieOut"];
 export type Screening = components["schemas"]["ScreeningOut"];
 export type ScreeningDetail = components["schemas"]["ScreeningDetail"];
 export type Seat = components["schemas"]["SeatOut"];
+export type SeatMapData = components["schemas"]["SeatMap"];
 export type TicketType = components["schemas"]["TicketTypeOut"];
 export type Booking = components["schemas"]["BookingOut"];
 export type MyBooking = components["schemas"]["MyBookingOut"];
