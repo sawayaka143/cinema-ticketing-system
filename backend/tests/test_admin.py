@@ -42,10 +42,15 @@ def _act_as(user: CurrentUser) -> None:
 
 @pytest.fixture
 def w(db: Session) -> dict:
-    """A manager, a cashier, a hall with one seat, and a 100-minute movie."""
-    manager, cashier = _login(db, "boss@test.kz"), _login(db, "kassa@test.kz")
+    """An admin, a manager, a cashier, a hall with one seat, and a 100-minute movie."""
+    admin, manager, cashier = (
+        _login(db, "admin@test.kz"),
+        _login(db, "boss@test.kz"),
+        _login(db, "kassa@test.kz"),
+    )
     db.add_all(
         [
+            Staff(auth_user_id=admin.id, full_name="Admin", role="admin"),
             Staff(auth_user_id=manager.id, full_name="Boss", role="manager"),
             Staff(auth_user_id=cashier.id, full_name="Kassa", role="cashier"),
         ]
@@ -58,7 +63,14 @@ def w(db: Session) -> dict:
     db.add(seat)
     db.commit()  # a savepoint; a 409 rollback inside a request must not undo this setup
     _act_as(manager)
-    return {"manager": manager, "cashier": cashier, "hall": hall, "movie": movie, "seat": seat}
+    return {
+        "admin": admin,
+        "manager": manager,
+        "cashier": cashier,
+        "hall": hall,
+        "movie": movie,
+        "seat": seat,
+    }
 
 
 def _new_screening(client: TestClient, w: dict, start: datetime = START, **extra):
@@ -112,6 +124,14 @@ def test_cashier_cant_list_screenings(client: TestClient, w: dict):
 
 def test_without_login_is_401(client: TestClient):
     assert client.get("/api/admin/report").status_code == 401
+
+
+@pytest.mark.parametrize("role", ["manager", "admin"])
+def test_manager_and_admin_can_access_admin_endpoints(client: TestClient, w: dict, role: str):
+    _act_as(w[role])
+    assert client.get("/api/admin/movies").status_code == 200
+    assert client.get("/api/admin/screenings").status_code == 200
+    assert client.get("/api/admin/report").status_code == 200
 
 
 # --- movies -----------------------------------------------------------------------------------

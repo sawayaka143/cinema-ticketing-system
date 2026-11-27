@@ -1,6 +1,7 @@
-"""Create test logins for every role on the DEV Supabase project: customer, cashier, manager, admin.
+"""Create test logins for every role on Supabase: customer, cashier, manager, admin.
 
 Run from backend/:  python -m app.seed_users
+Seed only staff roles:  python -m app.seed_users --roles admin manager
 Needs two values in backend/.env (never commit them):
   SUPABASE_SERVICE_ROLE_KEY  Supabase dashboard -> Project Settings -> API keys -> service_role
   SEED_USER_PASSWORD         one shared password for all test logins (at least 6 characters)
@@ -8,12 +9,14 @@ Needs two values in backend/.env (never commit them):
 The logins are created already confirmed through the Supabase Admin API, so no confirmation
 email is sent (the built-in mailer allows only a few per hour). Safe to run again: an existing
 login gets its password reset to SEED_USER_PASSWORD, and existing profiles are kept.
-Refuses to run when APP_ENV=production.
+Refuses to run when APP_ENV=production, unless --allow-production is passed.
 """
 
+import argparse
 import json
 import urllib.error
 import urllib.request
+from collections.abc import Sequence
 from dataclasses import dataclass
 from uuid import UUID
 
@@ -38,6 +41,18 @@ TEST_USERS = [
     TestUser("manager@alatau.test", "Test Manager", "manager"),
     TestUser("admin@alatau.test", "Test Admin", "admin"),
 ]
+AVAILABLE_ROLES = tuple(u.role for u in TEST_USERS)
+
+
+def selected_users(roles: Sequence[str] | None = None) -> list[TestUser]:
+    """Return TEST_USERS matching `roles` (preserving order), or all when `roles` is omitted."""
+    if not roles:
+        return list(TEST_USERS)
+    wanted = set(roles)
+    unknown = sorted(wanted - set(AVAILABLE_ROLES))
+    if unknown:
+        raise ValueError(f"Unknown role(s): {', '.join(unknown)}")
+    return [u for u in TEST_USERS if u.role in wanted]
 
 
 class AuthAdmin:
@@ -58,11 +73,12 @@ class AuthAdmin:
             return json.loads(res.read() or b"{}")
 
     def find(self, email: str) -> UUID | None:
+        target = email.lower()
         page = 1
         while True:
             users = self._call("GET", f"{self.base}?page={page}&per_page=200").get("users", [])
             for u in users:
-                if (u.get("email") or "").lower() == email:
+                if (u.get("email") or "").lower() == target:
                     return UUID(u["id"])
             if len(users) < 200:
                 return None
@@ -106,10 +122,28 @@ def link_profiles(db: Session, users: list[tuple[TestUser, UUID]]) -> list[str]:
     return added
 
 
-def main() -> None:
+def main(argv: Sequence[str] | None = None) -> None:
+    parser = argparse.ArgumentParser(prog="python -m app.seed_users", description=__doc__)
+    parser.add_argument(
+        "--roles",
+        nargs="+",
+        choices=AVAILABLE_ROLES,
+        default=None,
+        help="only seed these roles (default: all)",
+    )
+    parser.add_argument(
+        "--allow-production",
+        action="store_true",
+        help="seed even when APP_ENV=production (use with care)",
+    )
+    args = parser.parse_args(argv)
+
     settings = get_settings()
-    if settings.app_env == "production":
-        raise SystemExit("Refusing to create test logins: APP_ENV=production.")
+    if settings.app_env == "production" and not args.allow_production:
+        raise SystemExit(
+            "Refusing to create test logins: APP_ENV=production. "
+            "Pass --allow-production to seed production on purpose."
+        )
     missing = [
         name
         for name, value in [
@@ -124,9 +158,10 @@ def main() -> None:
     if len(settings.seed_user_password) < 6:
         raise SystemExit("SEED_USER_PASSWORD must have at least 6 characters.")
 
+    targets = selected_users(args.roles)
     admin = AuthAdmin(settings.supabase_url, settings.supabase_service_role_key)
     try:
-        users = [(u, admin.ensure(u, settings.seed_user_password)) for u in TEST_USERS]
+        users = [(u, admin.ensure(u, settings.seed_user_password)) for u in targets]
     except urllib.error.HTTPError as exc:
         detail = exc.read().decode()[:300]
         raise SystemExit(f"Supabase Admin API said {exc.code}: {detail}") from exc
@@ -135,7 +170,7 @@ def main() -> None:
         added = link_profiles(db, users)
     print("Added " + (", ".join(added) if added else "nothing (all profiles exist)"))
     print("Logins (password = SEED_USER_PASSWORD):")
-    for u in TEST_USERS:
+    for u in targets:
         print(f"  {u.role:<9} {u.email}")
 
 
