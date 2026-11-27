@@ -2,6 +2,7 @@ import { useEffect, useEffectEvent } from "react";
 import { Link } from "react-router";
 import { api } from "../api/client";
 import type { Booking } from "../lib/format";
+import { useI18n } from "../lib/i18n";
 import { must, useApi } from "../lib/useApi";
 import { Button, ErrorState, Skeleton, Squircle } from "./ui";
 
@@ -21,6 +22,7 @@ export function KaspiQr({
   onPaid: (booking: Booking) => void;
   onBack: () => void;
 }) {
+  const { t } = useI18n();
   const path = { params: { path: { booking_id: booking.booking_id } } };
   const invoice = useApi(async () => {
     const inv = await api.POST("/api/bookings/{booking_id}/kaspi-invoice", path).then(must);
@@ -55,8 +57,8 @@ export function KaspiQr({
   if (invoice.state === "error") {
     return (
       <ErrorState
-        title="Couldn't start the Kaspi payment"
-        message="We couldn't create a payment link for this booking. Please try again."
+        title={t("kaspi.errorTitle")}
+        message={t("kaspi.errorMsg")}
         details={invoice.message}
         onRetry={invoice.reload}
       />
@@ -73,34 +75,33 @@ export function KaspiQr({
         fill="#fff"
         shadow="elevated"
         className="kaspi-qr-code"
-        aria-label="Open the Kaspi payment page (demo)"
-        title="Tap to open the payment page"
+        aria-label={t("kaspi.openKaspi")}
+        title={t("kaspi.openKaspi")}
       >
         <img src={image} alt="" width={240} height={240} />
         <span className="kaspi-qr-tap" aria-hidden="true">
-          <TapIcon /> Tap
+          <TapIcon /> {t("kaspi.tap")}
         </span>
       </Squircle>
       <div className="kaspi-qr-text">
         <p>
-          <b>Scan with your phone camera</b> to pay in the demo Kaspi app.
+          <b>{t("kaspi.scanBold")}</b> {t("kaspi.scanRest")}
         </p>
         <p className="kaspi-qr-hint">
           <TapIcon />
           <span>
-            On your phone? <b>Tap the code</b> to open the payment page.
+            {t("kaspi.phoneHintPrefix")} <b>{t("kaspi.phoneHintBold")}</b> {t("kaspi.phoneHintRest")}
           </span>
         </p>
         <p className="muted small" role="status" aria-live="polite">
-          <span className="kaspi-qr-pulse" aria-hidden="true" /> Waiting for the payment… this page
-          updates by itself.
+          <span className="kaspi-qr-pulse" aria-hidden="true" /> {t("kaspi.waiting")}
         </p>
         <div className="actions">
           <Button as={Link} to={link} variant="solid" className="kaspi-open">
-            Open Kaspi
+            {t("kaspi.openKaspi")}
           </Button>
           <Button type="button" variant="ghost" onClick={onBack}>
-            Pay by card instead
+            {t("kaspi.payCardInstead")}
           </Button>
         </div>
       </div>

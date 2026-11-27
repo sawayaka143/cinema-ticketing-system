@@ -1,41 +1,16 @@
-import { type ReactNode, useEffect, useRef, useState } from "react";
-import { Link, NavLink, Outlet, useLocation } from "react-router";
+import type { ReactNode } from "react";
+import { Link, NavLink, Outlet } from "react-router";
 import { useAuth } from "../lib/auth-context";
-import { supabase } from "../lib/supabase";
-import { Badge } from "./ui/Badge";
+import { useI18n } from "../lib/i18n";
+import { ProfileMenu } from "./PhoneHeaderTools";
+import { DashboardIcon, FilmIcon, SettingsIcon, TicketIcon } from "./TabIcons";
 import { BrandMark } from "./ui/BrandMark";
-import { PhoneHeaderTools } from "./PhoneHeaderTools";
-import { DashboardIcon, FilmIcon, TicketIcon, UserIcon } from "./TabIcons";
-import { Button } from "./ui/Button";
 
 export function Layout() {
-  const { session, ready, me } = useAuth();
+  const { me } = useAuth();
+  const { t } = useI18n();
   const staffRole = me?.staff?.role ?? null;
-  const staffLabel = staffRole === "cashier" ? "Box office" : "Manager";
-  const location = useLocation();
-  // The sheet is open only for the path it was opened on, so navigating closes it.
-  const [openAt, setOpenAt] = useState<string | null>(null);
-  const menuOpen = openAt === location.pathname;
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  const path = location.pathname;
-
-  // Close the phone account sheet on outside tap or Escape.
-  useEffect(() => {
-    if (!menuOpen) return;
-    const onPointer = (e: PointerEvent) => {
-      if (!menuRef.current?.contains(e.target as Node)) setOpenAt(null);
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpenAt(null);
-    };
-    document.addEventListener("pointerdown", onPointer);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("pointerdown", onPointer);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [menuOpen]);
+  const staffLabel = staffRole === "cashier" ? t("nav.boxOffice") : t("nav.manager");
 
   return (
     <>
@@ -45,65 +20,30 @@ export function Layout() {
             <BrandMark size="md" />
             <span>Alatau Cinema</span>
           </Link>
-          {path === "/" && ready && <PhoneHeaderTools signedIn={!!session} />}
           <nav className="rail-nav" aria-label="Main">
             <NavLink to="/" end>
-              What&apos;s on
+              {t("nav.whatsOn")}
             </NavLink>
-            <NavLink to="/me/bookings">My bookings</NavLink>
+            <NavLink to="/me/bookings">{t("nav.myBookings")}</NavLink>
             {staffRole && <NavLink to="/manager">{staffLabel}</NavLink>}
           </nav>
-          <div className="account">
-            {!ready ? null : session ? (
-              <>
-                {staffRole && (
-                  <Badge tone="accent" variant="subtle" className="cap account-desktop">
-                    {staffRole}
-                  </Badge>
-                )}
-                <span className="who">{session.user.email}</span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="account-desktop"
-                  onClick={() => supabase.auth.signOut()}
-                >
-                  Log out
-                </Button>
-              </>
-            ) : (
-              <Button as={Link} to="/login" variant="ghost" size="sm">
-                Log in
-              </Button>
-            )}
+          <div className="rail-end">
+            <ProfileMenu />
           </div>
         </div>
       </header>
       <main className="page">
         <Outlet />
       </main>
-      <div className="tabbar-wrap" ref={menuRef}>
-        {menuOpen && session && (
-          <div className="account-sheet" id="account-sheet" role="dialog" aria-label="Profile">
-            <p className="account-sheet-email">{session.user.email}</p>
-            {staffRole && (
-              <Badge tone="accent" variant="subtle" className="cap">
-                {staffRole}
-              </Badge>
-            )}
-            <Button variant="outline" size="md" onClick={() => supabase.auth.signOut()}>
-              Log out
-            </Button>
-          </div>
-        )}
+      <div className="tabbar-wrap">
         <nav className="tabbar" aria-label="Main (phone)">
           <NavLink to="/" end>
             <FilmIcon />
-            <span>What&apos;s on</span>
+            <span>{t("nav.whatsOn")}</span>
           </NavLink>
           <NavLink to="/me/bookings">
             <TicketIcon />
-            <span>Bookings</span>
+            <span>{t("nav.bookings")}</span>
           </NavLink>
           {staffRole && (
             <NavLink to="/manager">
@@ -111,31 +51,16 @@ export function Layout() {
               <span>{staffLabel}</span>
             </NavLink>
           )}
-          {session ? (
-            <button
-              type="button"
-              className={menuOpen ? "active" : ""}
-              aria-expanded={menuOpen}
-              aria-controls="account-sheet"
-              onClick={() => setOpenAt(menuOpen ? null : location.pathname)}
-            >
-              <UserIcon />
-              <span>Profile</span>
-            </button>
-          ) : (
-            <NavLink to="/login">
-              <UserIcon />
-              <span>Profile</span>
-            </NavLink>
-          )}
+          <NavLink to="/settings">
+            <SettingsIcon />
+            <span>{t("nav.settings")}</span>
+          </NavLink>
         </nav>
       </div>
       <footer className="foot">
         <div className="rail-content foot-inner">
-          <p>Alatau Cinema · Almaty</p>
-          <p className="foot-info">
-            Halls 2D · 3D · IMAX · All times Asia/Almaty (UTC+5) · Prices in tenge (₸)
-          </p>
+          <p>{t("footer.city")}</p>
+          <p className="foot-info">{t("footer.info")}</p>
         </div>
       </footer>
     </>

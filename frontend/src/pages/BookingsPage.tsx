@@ -3,23 +3,25 @@ import { api } from "../api/client";
 import { Badge, Button, Card, EmptyState, ErrorState, FadeIn, Skeleton } from "../components/ui";
 import { useAuth } from "../lib/auth-context";
 import { type MyBooking, price, when } from "../lib/format";
+import { type TranslationKey, useI18n } from "../lib/i18n";
 import { must, useApi } from "../lib/useApi";
 
-const LABEL: Record<MyBooking["status"], string> = {
-  pending: "On hold",
-  paid: "Paid",
-  cancelled: "Cancelled",
-  expired: "Expired",
+const STATUS_KEY: Record<MyBooking["status"], TranslationKey> = {
+  pending: "bookings.status.pending",
+  paid: "bookings.status.paid",
+  cancelled: "bookings.status.cancelled",
+  expired: "bookings.status.expired",
 };
 
 export function BookingsPage() {
   const { session, ready } = useAuth();
+  const { locale, t } = useI18n();
   const list = useApi(() => api.GET("/api/me/bookings").then(must), session?.user.id ?? "anon");
 
   return (
     <FadeIn direction="up">
       <section className="panel">
-        <h1>My bookings</h1>
+        <h1>{t("bookings.title")}</h1>
         {!ready ? (
           <div className="my-bookings" aria-busy="true">
             <Skeleton width="100%" height="4rem" radius={12} />
@@ -28,11 +30,11 @@ export function BookingsPage() {
           </div>
         ) : !session ? (
           <EmptyState
-            title="Log in to see your bookings"
-            description="Sign in to view your held seats, paid QR tickets, and booking history."
+            title={t("bookings.loginTitle")}
+            description={t("bookings.loginDesc")}
             action={
               <Button as={Link} to="/login" variant="solid">
-                Log in
+                {t("nav.login")}
               </Button>
             }
           />
@@ -44,18 +46,18 @@ export function BookingsPage() {
           </div>
         ) : list.state === "error" ? (
           <ErrorState
-            title="Couldn't load your bookings"
-            message="We had trouble retrieving your booking history. Please try again."
+            title={t("bookings.loadErrorTitle")}
+            message={t("bookings.loadErrorMsg")}
             details={list.message}
             onRetry={list.reload}
           />
         ) : list.data.length === 0 ? (
           <EmptyState
-            title="No bookings yet"
-            description="Pick a movie and choose your seats on the hall map."
+            title={t("bookings.emptyTitle")}
+            description={t("bookings.emptyDesc")}
             action={
               <Button as={Link} to="/" variant="solid">
-                Find a movie
+                {t("bookings.findMovie")}
               </Button>
             }
           />
@@ -70,14 +72,17 @@ export function BookingsPage() {
               >
                 <Link to={`/bookings/${b.booking_id}`}>
                   {/* Cancelled and expired bookings lost their tickets, so movie, hall and time are null. */}
-                  <b>{b.movie_title ?? `Booking #${b.booking_id}`}</b>
+                  <b>{b.movie_title ?? t("bookings.bookingNumber", { id: b.booking_id })}</b>
                   <span className="muted">
-                    {b.start_time ? when(b.start_time) : `Booked ${when(b.booking_time)}`}
+                    {b.start_time
+                      ? when(b.start_time, locale)
+                      : t("bookings.bookedAt", { when: when(b.booking_time, locale) })}
                     {b.hall && ` · ${b.hall}`}
-                    {b.tickets.length > 0 && ` · ${b.tickets.length} seat${b.tickets.length > 1 ? "s" : ""}`}
+                    {b.tickets.length > 0 &&
+                      ` · ${t(b.tickets.length === 1 ? "bookings.seatOne" : "bookings.seatMany", { count: b.tickets.length })}`}
                   </span>
                 </Link>
-                <Badge tone={b.status === "paid" ? "accent" : "neutral"}>{LABEL[b.status]}</Badge>
+                <Badge tone={b.status === "paid" ? "accent" : "neutral"}>{t(STATUS_KEY[b.status])}</Badge>
                 {b.tickets.length > 0 && <span className="num">{price(b.total_amount)}</span>}
               </Card>
             ))}

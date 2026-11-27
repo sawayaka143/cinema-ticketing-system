@@ -68,7 +68,11 @@ export const Squircle = forwardRef<HTMLElement, SquircleProps>(function Squircle
     measure();
     const observer = new ResizeObserver(measure);
     observer.observe(el, { box: "border-box" });
-    return () => observer.disconnect();
+    window.addEventListener("resize", measure);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", measure);
+    };
   }, []);
 
   const path =
@@ -103,6 +107,8 @@ export const Squircle = forwardRef<HTMLElement, SquircleProps>(function Squircle
         <svg
           className="squircle-svg"
           aria-hidden="true"
+          viewBox={`0 0 ${size.width} ${size.height}`}
+          preserveAspectRatio="none"
           width={size.width}
           height={size.height}
           style={{

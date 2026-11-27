@@ -1,18 +1,23 @@
 import { type KeyboardEvent, type ReactNode, useEffect, useEffectEvent, useRef, useState } from "react";
 import { type Seat, price } from "../lib/format";
+import { type TranslationKey, useI18n } from "../lib/i18n";
 import { HallScene, SEAT_COLORS } from "../three/hallScene";
 import { Badge, Button, Card, Squircle } from "./ui";
 
-const TYPE_LABEL: Record<string, string> = { standard: "Standard", vip: "VIP", wheelchair: "Wheelchair" };
+const SEAT_TYPE_KEY: Record<string, TranslationKey> = {
+  standard: "seat.standard",
+  vip: "seat.vip",
+  wheelchair: "seat.wheelchair",
+};
 
 type LegendKind = "free" | "vip" | "wheelchair" | "picked" | "taken";
 
-const LEGEND: { color: string; label: string; kind: LegendKind }[] = [
-  { color: SEAT_COLORS.standard, label: "Free", kind: "free" },
-  { color: SEAT_COLORS.vip, label: "VIP", kind: "vip" },
-  { color: SEAT_COLORS.wheelchair, label: "Wheelchair", kind: "wheelchair" },
-  { color: SEAT_COLORS.picked, label: "Your pick", kind: "picked" },
-  { color: SEAT_COLORS.taken, label: "Taken", kind: "taken" },
+const LEGEND_ITEMS: { color: string; labelKey: TranslationKey; kind: LegendKind }[] = [
+  { color: SEAT_COLORS.standard, labelKey: "seat.free", kind: "free" },
+  { color: SEAT_COLORS.vip, labelKey: "seat.vip", kind: "vip" },
+  { color: SEAT_COLORS.wheelchair, labelKey: "seat.wheelchair", kind: "wheelchair" },
+  { color: SEAT_COLORS.picked, labelKey: "seat.yourPick", kind: "picked" },
+  { color: SEAT_COLORS.taken, labelKey: "seat.taken", kind: "taken" },
 ];
 
 function LegendMark({ kind }: { kind: LegendKind }) {
@@ -50,7 +55,7 @@ function LegendMark({ kind }: { kind: LegendKind }) {
 }
 
 /**
- * The hall in 3D (Three.js + GSAP), the main way to pick seats. It opens looking down on the whole
+ * The hall in 3D (Three.js + GSAP), paired with the 2D toggle. It opens looking down on the whole
  * hall; click a seat and the camera comes down to a seated person's eyes, facing the screen.
  * Drag to look around 180°; "Back to hall view" goes up again. Without WebGL it shows `fallback`.
  */
@@ -71,10 +76,13 @@ export default function HallView3D({
   /** Shown instead when the device can't do 3D (WebGL): the 2D seat map. */
   fallback: ReactNode;
 }) {
+  const { t } = useI18n();
   const mountRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<HallScene | null>(null);
+  const panelBtnRef = useRef<HTMLElement | null>(null);
   const [focusedId, setFocusedId] = useState<number | null>(null);
   const [moving, setMoving] = useState(false);
+  const [sceneReady, setSceneReady] = useState(false);
   const [hover, setHover] = useState<{ seat: Seat; x: number; y: number } | null>(null);
   const [failed, setFailed] = useState(() => !hasWebGL());
 
@@ -106,9 +114,11 @@ export default function HallView3D({
     }
     scene.update(initial.seats, initial.picked);
     sceneRef.current = scene;
+    void Promise.resolve().then(() => setSceneReady(true));
     return () => {
       scene.dispose();
       sceneRef.current = null;
+      setSceneReady(false);
     };
   }, [layout, hallType, failed]);
 
@@ -117,10 +127,20 @@ export default function HallView3D({
     sceneRef.current?.update(seats, picked);
   }, [seats, picked]);
 
+  // Move keyboard focus to the pick button when a seat is focused so keyboard users aren't trapped.
+  useEffect(() => {
+    if (focusedId !== null) {
+      panelBtnRef.current?.focus();
+    }
+  }, [focusedId]);
+
   if (failed) return <>{fallback}</>;
 
   const focused = seats.find((s) => s.seat_id === focusedId) ?? null;
   const isPicked = focused ? picked.has(focused.seat_id) : false;
+
+  const typeLabel = (seatType: string) =>
+    SEAT_TYPE_KEY[seatType] ? t(SEAT_TYPE_KEY[seatType]) : seatType;
 
   function onKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     const step = 40;
@@ -158,20 +178,33 @@ export default function HallView3D({
         aria-roledescription="3D hall"
         aria-label={
           focused
-            ? `View from row ${focused.row_label}, seat ${focused.seat_number}. Arrow keys look around, Escape goes back to the hall view.`
-            : "3D view of the hall from above. Use the seat list after it to choose a seat."
+            ? t("seat.ariaViewFrom", { row: focused.row_label, seat: focused.seat_number })
+            : t("seat.ariaOverview")
         }
         onKeyDown={onKeyDown}
       />
 
-      {/* Keyboard and screen-reader access to every seat; each one opens its view. */}
-      <ul className="sr-only" aria-label="Seats">
+      {!sceneReady && (
+        <div className="hall3d-loading" role="status" aria-live="polite">
+          <span className="spinner" aria-hidden="true" />
+          <span>{t("seat.loading3d")}</span>
+        </div>
+      )}
+
+      {/* Keyboard and screen-reader access to every seat; each one opens its view and moves focus to the action panel. */}
+      <ul className="sr-only" aria-label={t("screening.yourSeats")}>
         {seats.map((s) => (
           <li key={s.seat_id}>
             <button type="button" onClick={() => sceneRef.current?.flyToSeat(s.seat_id)}>
-              Row {s.row_label}, seat {s.seat_number}, {TYPE_LABEL[s.seat_type] ?? s.seat_type},{" "}
-              {s.is_taken ? "taken" : price(s.price)}
-              {picked.has(s.seat_id) ? ", picked" : ""}
+              {s.is_taken
+                ? t("seat.ariaTaken", { row: s.row_label, seat: s.seat_number, type: typeLabel(s.seat_type) })
+                : t("seat.ariaSeat", {
+                    row: s.row_label,
+                    seat: s.seat_number,
+                    type: typeLabel(s.seat_type),
+                    price: price(s.price),
+                  })}
+              {picked.has(s.seat_id) ? `, ${t("seat.picked")}` : ""}
             </button>
           </li>
         ))}
@@ -180,23 +213,23 @@ export default function HallView3D({
       <p className="hall3d-hint" aria-hidden="true">
         {focused
           ? moving
-            ? "Taking your seat…"
-            : "Drag to look around · 180°"
-          : "Tap a seat to see the screen from it"}
+            ? t("seat.hintMoving")
+            : t("seat.hintLook")
+          : t("seat.hintOverview")}
       </p>
 
       {focused && (
         <div className="hall3d-back">
           <Button size="sm" variant="solid" onClick={() => sceneRef.current?.backToOverview()} disabled={moving}>
-            ← Back to hall view
+            {t("seat.backToHall")}
           </Button>
         </div>
       )}
 
       {!focused && (
-        <ul className="hall3d-legend" aria-label="Legend">
-          {LEGEND.map((item) => (
-            <li key={item.label}>
+        <ul className="hall3d-legend" aria-label={t("seat.legend")}>
+          {LEGEND_ITEMS.map((item) => (
+            <li key={item.kind}>
               <i
                 className={`legend-swatch legend-swatch-${item.kind}`}
                 style={{ background: item.color }}
@@ -204,7 +237,7 @@ export default function HallView3D({
               >
                 <LegendMark kind={item.kind} />
               </i>
-              {item.label}
+              {t(item.labelKey)}
             </li>
           ))}
         </ul>
@@ -213,7 +246,7 @@ export default function HallView3D({
       {hover && !focused && (
         <span className="hall3d-tip" style={{ left: hover.x, top: hover.y }} aria-hidden="true">
           {hover.seat.row_label}
-          {hover.seat.seat_number} · {hover.seat.is_taken ? "taken" : price(hover.seat.price)}
+          {hover.seat.seat_number} · {hover.seat.is_taken ? t("seat.taken") : price(hover.seat.price)}
         </span>
       )}
 
@@ -221,28 +254,27 @@ export default function HallView3D({
         <div className="hall3d-panel">
           <Card elevated aria-live="polite">
             <div className="hall3d-seat">
-              <b>
-                Row {focused.row_label}, seat {focused.seat_number}
-              </b>
+              <b>{t("screening.rowSeat", { row: focused.row_label, seat: focused.seat_number })}</b>
               <span className="hall3d-badges">
                 {focused.seat_type !== "standard" && (
                   <Badge tone="accent" variant="subtle">
-                    {TYPE_LABEL[focused.seat_type] ?? focused.seat_type}
+                    {typeLabel(focused.seat_type)}
                   </Badge>
                 )}
                 <Badge tone={focused.is_taken ? "neutral" : "success"} variant="outline">
-                  {focused.is_taken ? "Taken" : price(focused.price)}
+                  {focused.is_taken ? t("seat.taken") : price(focused.price)}
                 </Badge>
               </span>
             </div>
             {!focused.is_taken && (
               <Button
+                ref={panelBtnRef}
                 size="sm"
                 variant={isPicked ? "ghost" : "solid"}
                 disabled={disabled || moving}
                 onClick={() => onToggle(focused)}
               >
-                {isPicked ? "Remove from my seats" : "Pick this seat"}
+                {isPicked ? t("seat.removeThis") : t("seat.pickThis")}
               </Button>
             )}
           </Card>

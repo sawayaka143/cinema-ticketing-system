@@ -1,5 +1,6 @@
 import { Link } from "react-router";
 import { type Movie, type Screening, runtime } from "../lib/format";
+import { useI18n } from "../lib/i18n";
 import { Badge } from "./ui/Badge";
 import { Card } from "./ui/Card";
 import { ShowtimeChip } from "./ui/ShowtimeChip";
@@ -50,6 +51,7 @@ export function Age({ minAge }: { minAge: number }) {
 export { ShowtimeChip } from "./ui/ShowtimeChip";
 
 export function MovieRow({ movie, screenings, priority = false }: { movie: Movie; screenings: Screening[]; priority?: boolean }) {
+  const { t } = useI18n();
   return (
     <Card className="film-card">
       <div className="film-layout">
@@ -64,7 +66,9 @@ export function MovieRow({ movie, screenings, priority = false }: { movie: Movie
               </h2>
               <Age minAge={movie.min_age} />
             </div>
-            <p className="meta">{[...movie.genres, runtime(movie.duration_min)].join(" · ")}</p>
+            <p className="meta">
+              {[...movie.genres, runtime(movie.duration_min, t("movie.hoursShort"), t("movie.minShort"))].join(" · ")}
+            </p>
             {movie.description && <p className="film-synopsis">{movie.description}</p>}
           </div>
           <div className="times">

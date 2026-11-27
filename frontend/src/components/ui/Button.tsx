@@ -7,7 +7,7 @@ import {
 } from "react";
 import { Squircle } from "./Squircle";
 
-export type ButtonVariant = "solid" | "ghost" | "outline" | "link";
+export type ButtonVariant = "solid" | "ghost" | "outline" | "link" | "danger";
 export type ButtonSize = "sm" | "md" | "lg";
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -82,12 +82,19 @@ export const Button = forwardRef<HTMLElement, ButtonProps>(function Button(
 
   const fill =
     variant === "solid"
-      ? "var(--accent)"
-      : variant === "ghost"
-        ? "var(--surface)"
-        : "transparent";
+      ? "var(--accent-fill, var(--accent))"
+      : variant === "danger"
+        ? "color-mix(in srgb, var(--bad) 10%, transparent)"
+        : variant === "ghost"
+          ? "var(--surface)"
+          : "transparent";
 
-  const stroke = variant === "solid" ? "transparent" : "var(--border)";
+  const stroke =
+    variant === "solid"
+      ? "transparent"
+      : variant === "danger"
+        ? "var(--bad)"
+        : "var(--border-control, var(--border))";
 
   return (
     <Squircle

@@ -56,10 +56,10 @@ const DRAG_SPEED = 0.0045; // radians per dragged pixel
 const CLICK_SLOP = 6; // pixels a pointer may move and still count as a click
 
 export const SEAT_COLORS = {
-  standard: "#a82830",
-  vip: "#6e2348",
-  wheelchair: "#24788f",
-  taken: "#433f3b",
+  standard: "#6f7b8a",
+  vip: "#8b4d8b",
+  wheelchair: "#2d82a3",
+  taken: "#3b3733",
   picked: "#2eb882",
 } as const;
 

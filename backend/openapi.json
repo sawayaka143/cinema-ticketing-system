@@ -400,6 +400,30 @@
       },
       "CustomerCreate": {
         "properties": {
+          "avatar_url": {
+            "anyOf": [
+              {
+                "maxLength": 200000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avatar Url"
+          },
+          "city": {
+            "anyOf": [
+              {
+                "maxLength": 60,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "City"
+          },
           "full_name": {
             "maxLength": 100,
             "minLength": 1,
@@ -431,6 +455,28 @@
       },
       "CustomerOut": {
         "properties": {
+          "avatar_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avatar Url"
+          },
+          "city": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "City"
+          },
           "customer_id": {
             "title": "Customer Id",
             "type": "integer"
@@ -459,9 +505,66 @@
           "customer_id",
           "full_name",
           "email",
-          "phone"
+          "phone",
+          "city",
+          "avatar_url"
         ],
         "title": "CustomerOut",
+        "type": "object"
+      },
+      "CustomerUpdate": {
+        "properties": {
+          "avatar_url": {
+            "anyOf": [
+              {
+                "maxLength": 200000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avatar Url"
+          },
+          "city": {
+            "anyOf": [
+              {
+                "maxLength": 60,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "City"
+          },
+          "full_name": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Full Name"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "maxLength": 30,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Spaces, dashes, brackets and a leading 8 are fine; blank clears the phone.",
+            "title": "Phone"
+          }
+        },
+        "title": "CustomerUpdate",
         "type": "object"
       },
       "FakeKaspiOut": {
@@ -3246,6 +3349,51 @@
       }
     },
     "/api/me/customer": {
+      "patch": {
+        "description": "Update the logged-in customer's profile fields (name, phone, city, avatar).",
+        "operationId": "update_customer_api_me_customer_patch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomerUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Update Customer",
+        "tags": [
+          "me"
+        ]
+      },
       "post": {
         "description": "Create the customer profile for the logged-in user. Email comes from the login.",
         "operationId": "create_customer_api_me_customer_post",

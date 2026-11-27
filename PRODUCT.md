@@ -38,7 +38,7 @@ A single fictional cinema in Almaty, **Alatau Cinema** (name chosen by Claude on
 
 ## Brand Commitments
 
-- UI language: English only.
+- UI language: Trilingual (English, Kazakh, Russian — EN/KZ/RU).
 - Name: Alatau Cinema (fictional).
 
 ## Evidence on Hand

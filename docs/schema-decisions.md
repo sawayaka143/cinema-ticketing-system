@@ -27,8 +27,10 @@ Database: Supabase Postgres (two projects: prod and dev). All data goes through 
 | customer_id | bigint identity | PK |
 | auth_user_id | uuid | NOT NULL, UNIQUE, FK → `auth.users(id)` |
 | full_name | varchar(100) | NOT NULL |
-| email | varchar(100) | NOT NULL, UNIQUE (copied from Supabase login at sign-up) |
+| email | varchar(100) | NOT NULL, UNIQUE (copied from Supabase login at sign-up; synced on profile update) |
 | phone | varchar(20) | NULL; `CHECK (phone ~ '^\+7[0-9]{10}$')` (stored as `+77011234567`) |
+| city | varchar(60) | NULL (optional city chosen in Settings, e.g. Almaty) |
+| avatar_url | text | NULL (preset icon key like `preset:reel`, `https://` URL, or compact `data:image/...` URI) |
 | created_at | timestamptz | NOT NULL DEFAULT now() |
 
 ### STAFF — cashier, manager or admin account
