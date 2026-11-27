@@ -1,11 +1,13 @@
 import { type FormEvent, lazy, Suspense, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { api } from "../api/client";
+import { BundleHint } from "../components/BundleHint";
 import { Status } from "../components/Layout";
 import { SeatMap } from "../components/SeatMap";
 import { ArrowLeftIcon } from "../components/TabIcons";
 import { Button, Card, ErrorState, FadeIn, Skeleton } from "../components/ui";
 import { useAuth } from "../lib/auth-context";
+import { bundleFor, bundleSaving } from "../lib/bundles";
 import { fetchSeatMap, screeningKey } from "../lib/catalogCache";
 import { price, span, type Seat } from "../lib/format";
 import { type TranslationKey, useI18n } from "../lib/i18n";
@@ -148,6 +150,7 @@ export function ScreeningPage() {
   const typeList = types.state === "ready" ? types.data : [];
   const typeNames = typeList.length > 0 ? typeList.map((tt) => tt.name) : ["adult"];
   const discountByType = new Map(typeList.map((tt) => [tt.name, Number(tt.discount_pct)]));
+  const typeInfo = new Map(typeList.map((tt) => [tt.name, tt]));
 
   const ticketLabel = (name: string) =>
     TICKET_TYPE_KEY[name] ? t(TICKET_TYPE_KEY[name]) : name[0].toUpperCase() + name.slice(1);
@@ -162,7 +165,19 @@ export function ScreeningPage() {
     return Math.round(base * (1 - pct / 100));
   };
 
-  const subtotal = chosen.reduce((sum, seat) => sum + seatFinalPrice(seat), 0);
+  const bundleItems = chosen.map((seat) => {
+    const type = picked.get(seat.seat_id) ?? "adult";
+    const info = typeInfo.get(type);
+    return {
+      seatPrice: Number(seat.price),
+      type,
+      discountPct: Number(info?.discount_pct ?? 0),
+      staffOnly: info?.staff_only ?? false,
+    };
+  });
+  const activeBundle = bundleFor(bundleItems.map((i) => i.type));
+  const rawSubtotal = chosen.reduce((sum, seat) => sum + seatFinalPrice(seat), 0);
+  const subtotal = Math.max(0, rawSubtotal - bundleSaving(bundleItems, activeBundle));
   const loginReturnUrl = `/login?next=${encodeURIComponent(`/screenings/${screeningId}`)}`;
 
   function toggle(seat: Seat) {
@@ -360,6 +375,7 @@ export function ScreeningPage() {
                     );
                   })}
                 </ul>
+                <BundleHint items={bundleItems} childAllowed={typeNames.includes("child")} />
                 <div className="basket-total" aria-live="polite">
                   <span>{t("screening.estimatedTotal")}</span>
                   <b>{price(String(subtotal))}</b>

@@ -32,7 +32,7 @@ from app.models import (
     Ticket,
     TicketType,
 )
-from app.pricing import ticket_price
+from app.pricing import BUNDLE_PCT, Bundle, bundle_for, price_before_bundle, ticket_price
 from app.ticket_types import (
     DEFAULT_TYPE,
     MAX_STAFF_TICKETS,
@@ -68,6 +68,11 @@ class BookingOut(BaseModel):
         description="Seconds until the hold ends. 0 unless the booking is pending."
     )
     total_amount: Decimal
+    bundle: Bundle | None = Field(
+        description="Deal applied to the whole booking: family (2+ adults with 1-4 children) "
+        "or group (6+ seats). Ticket prices already include it."
+    )
+    bundle_saving: Decimal = Field(description="What the bundle took off the total (0 if none).")
     tickets: list[BookingTicketOut]
     qr_token: str | None = Field(
         description="Set once paid: one QR code for all seats. Image: GET .../qr.png"
@@ -102,7 +107,7 @@ def _own_booking(db: Session, user: CurrentUser, booking_id: int, *, lock: bool 
 
 def _booking_out(db: Session, booking: Booking) -> BookingOut:
     rows = db.execute(
-        select(Ticket, Seat, TicketType.name)
+        select(Ticket, Seat, TicketType.name, TicketType.staff_only)
         .join(Seat, Seat.seat_id == Ticket.seat_id)
         .join(TicketType, TicketType.ticket_type_id == Ticket.ticket_type_id)
         .where(Ticket.booking_id == booking.booking_id)
@@ -118,8 +123,18 @@ def _booking_out(db: Session, booking: Booking) -> BookingOut:
             ticket_type=type_name,
             price=t.price,
         )
-        for t, s, type_name in rows
+        for t, s, type_name, _ in rows
     ]
+    # The deal follows from the ticket mix; its saving is worked back from the prices sold,
+    # because the screening's price may have changed since the hold.
+    bundle = bundle_for([type_name for _, _, type_name, _ in rows])
+    saving = Decimal("0.00")
+    if bundle:
+        pct = BUNDLE_PCT[bundle]
+        saving = sum(
+            (price_before_bundle(t.price, pct) - t.price for t, _, _, staff in rows if not staff),
+            Decimal("0.00"),
+        )
     seconds_left = 0
     if booking.status == "pending":
         left = booking.hold_expires_at - datetime.now(UTC)
@@ -131,6 +146,8 @@ def _booking_out(db: Session, booking: Booking) -> BookingOut:
         hold_expires_at=booking.hold_expires_at,
         seconds_left=seconds_left,
         total_amount=sum((t.price for t in tickets), Decimal("0.00")),
+        bundle=bundle,
+        bundle_saving=saving,
         tickets=tickets,
         qr_token=booking.qr_token if booking.status == "paid" else None,
         checked_in_at=booking.checked_in_at,
@@ -252,13 +269,21 @@ def hold_seats(body: HoldIn, user: CurrentUserDep, db: SessionDep) -> BookingOut
     if len(seats) != len(ids):
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "A seat is not in this screening's hall")
     chosen = _ticket_types_for(db, user, body, screening)
+    # Family or group deal for the whole booking (§7); staff tickets keep their own price.
+    bundle = bundle_for([t.name for t in chosen.values()])
+    bundle_pct = BUNDLE_PCT[bundle] if bundle else Decimal(0)
 
     # Plain values first: the commit in the lazy check expires the ORM objects above.
     rows = [
         (
             seat.seat_id,
             chosen[seat.seat_id].ticket_type_id,
-            ticket_price(screening.base_price, seat.seat_type, chosen[seat.seat_id].discount_pct),
+            ticket_price(
+                screening.base_price,
+                seat.seat_type,
+                chosen[seat.seat_id].discount_pct,
+                Decimal(0) if chosen[seat.seat_id].staff_only else bundle_pct,
+            ),
         )
         for seat in seats
     ]

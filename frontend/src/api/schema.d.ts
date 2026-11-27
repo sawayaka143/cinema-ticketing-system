@@ -749,6 +749,16 @@ export interface components {
              * Format: date-time
              */
             booking_time: string;
+            /**
+             * Bundle
+             * @description Deal applied to the whole booking: family (2+ adults with 1-4 children) or group (6+ seats). Ticket prices already include it.
+             */
+            bundle: ("family" | "group") | null;
+            /**
+             * Bundle Saving
+             * @description What the bundle took off the total (0 if none).
+             */
+            bundle_saving: string;
             /** Checked In At */
             checked_in_at: string | null;
             /**
@@ -1148,6 +1158,16 @@ export interface components {
              * Format: date-time
              */
             booking_time: string;
+            /**
+             * Bundle
+             * @description Deal applied to the whole booking: family (2+ adults with 1-4 children) or group (6+ seats). Ticket prices already include it.
+             */
+            bundle: ("family" | "group") | null;
+            /**
+             * Bundle Saving
+             * @description What the bundle took off the total (0 if none).
+             */
+            bundle_saving: string;
             /** Checked In At */
             checked_in_at: string | null;
             /** Hall */

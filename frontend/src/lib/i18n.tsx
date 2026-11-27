@@ -165,6 +165,15 @@ const EN = {
   "booking.colPrice": "Price",
   "booking.total": "Total",
 
+  // Family & group bundle deals
+  "bundle.family": "Family deal",
+  "bundle.group": "Group deal",
+  "bundle.saveAbout": "you save about {amount}",
+  "bundle.nudgeAddAdult": "Add one more adult ticket to get the family deal: −10% on the whole booking.",
+  "bundle.nudgeAddChild": "Coming with kids? Add a child ticket to get the family deal: −10% on the whole booking.",
+  "bundle.nudgeAddSeatsOne": "Add {count} more seat to get the group deal: −10% on the whole booking.",
+  "bundle.nudgeAddSeatsMany": "Add {count} more seats to get the group deal: −10% on the whole booking.",
+
   // Bank card form
   "card.numberLabel": "Card number",
   "card.nameLabel": "Name on card",
@@ -413,6 +422,14 @@ const KK: Record<TranslationKey, string> = {
   "booking.colPrice": "Бағасы",
   "booking.total": "Барлығы",
 
+  "bundle.family": "Отбасылық жеңілдік",
+  "bundle.group": "Топтық жеңілдік",
+  "bundle.saveAbout": "үнемдеу шамамен {amount}",
+  "bundle.nudgeAddAdult": "Отбасылық жеңілдік алу үшін тағы 1 ересек билет қосыңыз: бүкіл броньға −10%.",
+  "bundle.nudgeAddChild": "Балалармен барасыз ба? Отбасылық жеңілдік үшін бала билетін қосыңыз: бүкіл броньға −10%.",
+  "bundle.nudgeAddSeatsOne": "Топтық жеңілдік алу үшін тағы {count} орын қосыңыз: бүкіл броньға −10%.",
+  "bundle.nudgeAddSeatsMany": "Топтық жеңілдік алу үшін тағы {count} орын қосыңыз: бүкіл броньға −10%.",
+
   "card.numberLabel": "Карта нөмірі",
   "card.nameLabel": "Картадағы есім",
   "card.namePlaceholder": "NAME SURNAME",
@@ -654,6 +671,14 @@ const RU: Record<TranslationKey, string> = {
   "booking.colTicket": "Билет",
   "booking.colPrice": "Цена",
   "booking.total": "Итого",
+
+  "bundle.family": "Семейная скидка",
+  "bundle.group": "Групповая скидка",
+  "bundle.saveAbout": "экономия около {amount}",
+  "bundle.nudgeAddAdult": "Добавьте ещё один взрослый билет для семейной скидки: −10% на всю бронь.",
+  "bundle.nudgeAddChild": "Идёте с детьми? Добавьте детский билет для семейной скидки: −10% на всю бронь.",
+  "bundle.nudgeAddSeatsOne": "Добавьте ещё {count} место для групповой скидки: −10% на всю бронь.",
+  "bundle.nudgeAddSeatsMany": "Добавьте ещё {count} мест для групповой скидки: −10% на всю бронь.",
 
   "card.numberLabel": "Номер карты",
   "card.nameLabel": "Имя на карте",

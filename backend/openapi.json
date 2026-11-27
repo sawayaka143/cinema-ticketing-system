@@ -215,6 +215,27 @@
             "title": "Booking Time",
             "type": "string"
           },
+          "bundle": {
+            "anyOf": [
+              {
+                "enum": [
+                  "family",
+                  "group"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Deal applied to the whole booking: family (2+ adults with 1-4 children) or group (6+ seats). Ticket prices already include it.",
+            "title": "Bundle"
+          },
+          "bundle_saving": {
+            "description": "What the bundle took off the total (0 if none).",
+            "title": "Bundle Saving",
+            "type": "string"
+          },
           "checked_in_at": {
             "anyOf": [
               {
@@ -278,6 +299,8 @@
           "hold_expires_at",
           "seconds_left",
           "total_amount",
+          "bundle",
+          "bundle_saving",
           "tickets",
           "qr_token",
           "checked_in_at"
@@ -1310,6 +1333,27 @@
             "title": "Booking Time",
             "type": "string"
           },
+          "bundle": {
+            "anyOf": [
+              {
+                "enum": [
+                  "family",
+                  "group"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Deal applied to the whole booking: family (2+ adults with 1-4 children) or group (6+ seats). Ticket prices already include it.",
+            "title": "Bundle"
+          },
+          "bundle_saving": {
+            "description": "What the bundle took off the total (0 if none).",
+            "title": "Bundle Saving",
+            "type": "string"
+          },
           "checked_in_at": {
             "anyOf": [
               {
@@ -1408,6 +1452,8 @@
           "hold_expires_at",
           "seconds_left",
           "total_amount",
+          "bundle",
+          "bundle_saving",
           "tickets",
           "qr_token",
           "checked_in_at",

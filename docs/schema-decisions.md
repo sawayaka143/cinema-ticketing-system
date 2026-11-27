@@ -247,6 +247,11 @@ Bookings are never deleted; only their tickets are.
 
 - **Price:** `ticket.price = base_price × (1.5 if seat_type = 'vip' else 1) × (1 − discount_pct / 100)`, rounded to 2 decimals.
 - **Age vs ticket type:** a ticket type with `max_age` can't be used for a movie with `min_age > max_age` (e.g. no child tickets for 12+ and older). The seat-map UI hides those types. The real ID check for 16+/18+ happens at the cinema door; no birthdates are stored.
+- **Bundle deals (family and group):** one extra −10% for the whole booking, on top of the ticket types.
+  *Family:* at least 2 `adult` and 1–4 `child` tickets (so only for movies a child ticket is allowed for).
+  *Group:* 6 or more seats in one booking (at most 10). When both apply, the bigger discount wins (family on a tie).
+  Staff tickets count towards the group size but keep their own price. The deal is baked into `ticket.price` at hold time,
+  so `booking_total`, the report and refunds need no change; the API reports the deal and its saving from the ticket mix.
 - **Staff discount:** a `staff_only` ticket type is allowed only if the logged-in user also has an **active** STAFF row; at most **2** staff tickets per booking.
 - **Roles:** every request maps the Supabase login to CUSTOMER and/or active STAFF; customers see only their own bookings, tickets and payments.
 - **Screening end_time:** start_time + movie.duration_min + 15 min.
