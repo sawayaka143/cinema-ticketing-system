@@ -2,11 +2,13 @@
 
 from uuid import UUID, uuid4
 
+import pytest
 from sqlalchemy import select, text
 from sqlalchemy.orm import Session
 
+from app.config import Settings
 from app.models import Customer, Staff
-from app.seed_users import TEST_USERS, TestUser, link_profiles
+from app.seed_users import TEST_USERS, TestUser, link_profiles, main, selected_users
 
 
 def _logins(db: Session, users: list[TestUser]) -> list[tuple[TestUser, UUID]]:
@@ -47,3 +49,16 @@ def test_link_profiles_reactivates_a_deactivated_staff_login(db: Session):
     assert link_profiles(db, [(manager, auth_id)]) == []
     staff = db.scalar(select(Staff).where(Staff.auth_user_id == auth_id))
     assert (staff.role, staff.is_active) == ("manager", True)
+
+
+def test_selected_users_filters_roles_and_rejects_unknown():
+    assert selected_users() == TEST_USERS
+    assert [u.role for u in selected_users(["admin", "manager"])] == ["manager", "admin"]
+    with pytest.raises(ValueError, match="Unknown role"):
+        selected_users(["superuser"])
+
+
+def test_main_refuses_production_without_flag(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr("app.seed_users.get_settings", lambda: Settings(app_env="production"))
+    with pytest.raises(SystemExit, match="APP_ENV=production"):
+        main([])
