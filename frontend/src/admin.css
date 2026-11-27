@@ -1,0 +1,412 @@
+/* Admin panel (/admin): plain and dense on purpose. Tables, numbers, one accent colour. */
+
+.admin {
+  display: grid;
+  gap: var(--s6);
+}
+
+.admin-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s4) var(--s8);
+  align-items: end;
+  justify-content: space-between;
+  padding-bottom: var(--s3);
+  border-bottom: 1px solid var(--border);
+}
+
+.admin-head h1 {
+  margin: 0;
+}
+
+.admin-tabs {
+  display: flex;
+  gap: var(--s1);
+}
+
+.admin-tabs button,
+.admin-presets button,
+.admin-day button {
+  min-height: 2.25rem;
+  padding: 0 var(--s3);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.9375rem;
+  cursor: pointer;
+}
+
+.admin-tabs button:hover,
+.admin-presets button:hover,
+.admin-day button:hover {
+  color: var(--text);
+}
+
+.admin-tabs button.on,
+.admin-presets button.on {
+  border-color: var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.admin-body {
+  display: grid;
+  gap: var(--s4);
+}
+
+.admin-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s3) var(--s4);
+  align-items: end;
+}
+
+.admin-toolbar > :last-child {
+  margin-left: auto;
+}
+
+.admin-toolbar label,
+.admin-form label {
+  display: grid;
+  gap: 0.25rem;
+  color: var(--muted);
+  font-size: 0.8125rem;
+}
+
+.admin input,
+.admin select,
+.admin textarea {
+  min-height: 2.25rem;
+  padding: 0.35rem 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.9375rem;
+}
+
+.admin textarea {
+  resize: vertical;
+}
+
+.admin input:focus-visible,
+.admin select:focus-visible,
+.admin textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.admin-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s1);
+}
+
+.admin-day {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2);
+  align-items: center;
+}
+
+.admin-day button {
+  border-color: var(--border);
+}
+
+/* Totals: four numbers in a row, no decoration. */
+.admin-totals {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.admin-totals > div {
+  padding: var(--s4);
+}
+
+.admin-totals > div + div {
+  border-left: 1px solid var(--border);
+}
+
+.admin-totals dt {
+  color: var(--muted);
+  font-size: 0.8125rem;
+}
+
+.admin-totals dd {
+  margin: 0.25rem 0 0;
+  font-size: 1.75rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.admin-h2 {
+  margin: var(--s2) 0 0;
+  font-size: 1rem;
+}
+
+/* Revenue per day: one bar per day, the first and last date under it. */
+.admin-chart {
+  position: relative;
+  display: flex;
+  gap: 2px;
+  align-items: end;
+  height: 10rem;
+  padding: var(--s3) var(--s3) 1.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.admin-bar {
+  display: flex;
+  flex: 1;
+  align-items: end;
+  height: 100%;
+}
+
+.admin-bar span {
+  width: 100%;
+  min-height: 1px;
+  border-radius: 2px 2px 0 0;
+  background: var(--accent);
+}
+
+.admin-bar:hover span {
+  background: var(--text);
+}
+
+.admin-chart-from,
+.admin-chart-to {
+  position: absolute;
+  bottom: 0.4rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.admin-chart-from {
+  left: var(--s3);
+}
+
+.admin-chart-to {
+  right: var(--s3);
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 0.55rem var(--s3);
+  border-bottom: 1px solid var(--border-subtle);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.admin-table thead th {
+  border-bottom-color: var(--border);
+  color: var(--muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.admin-table .num {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.admin-table .nowrap {
+  white-space: nowrap;
+}
+
+.admin-table .actions {
+  width: 1%;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.admin-table small {
+  color: var(--muted);
+}
+
+.admin-table tr.archived td {
+  color: var(--muted);
+}
+
+.admin-share {
+  display: inline-block;
+  width: 6rem;
+  height: 0.5rem;
+  margin-right: var(--s2);
+  border-radius: 999px;
+  background: var(--surface-2);
+  vertical-align: middle;
+}
+
+.admin-share i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+}
+
+.admin-form {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--s3) var(--s4);
+  padding: var(--s4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.admin-form .wide {
+  grid-column: span 2;
+}
+
+.admin-form .full {
+  grid-column: 1 / -1;
+}
+
+.admin-form-end {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s3);
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.admin-form-end small {
+  margin-right: auto;
+}
+
+.admin-muted {
+  margin: 0;
+  color: var(--muted);
+}
+
+.admin-ok,
+.admin-error {
+  margin: 0;
+  padding: 0.5rem var(--s3);
+  border-radius: var(--radius);
+  font-size: 0.9375rem;
+}
+
+.admin-ok {
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+}
+
+.admin-error {
+  background: color-mix(in srgb, var(--bad) 10%, var(--surface));
+  color: var(--bad);
+}
+
+/* The role badge in the header opens the admin panel. */
+.role-link {
+  display: inline-flex;
+  border-radius: 999px;
+  text-decoration: none;
+}
+
+.role-link:hover .badge,
+.role-link:focus-visible .badge {
+  text-decoration: underline;
+}
+
+@media (max-width: 48rem) {
+  .admin-totals {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-totals > div:nth-child(3) {
+    border-left: 0;
+  }
+
+  .admin-totals > div:nth-child(n + 3) {
+    border-top: 1px solid var(--border);
+  }
+
+  .admin-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-table {
+    display: block;
+    overflow-x: auto;
+  }
+
+  .admin-toolbar > :last-child {
+    margin-left: 0;
+  }
+}
+
+.admin-hint {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+/* Poster: a small 2:3 preview that is also the upload button. */
+.admin-poster {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  aspect-ratio: 2 / 3;
+  padding: 0;
+  overflow: hidden;
+  border: 1px dashed var(--border);
+  border-radius: 4px;
+  background: var(--surface-2);
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.6875rem;
+  cursor: pointer;
+}
+
+.admin-poster:hover,
+.admin-poster:focus-visible {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.admin-poster img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.admin-poster-busy {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgb(0 0 0 / 0.45);
+  color: #fff;
+}
+
+.admin-poster-field {
+  display: flex;
+  gap: var(--s3);
+  align-items: end;
+}
+
+.admin-poster-field .admin-poster {
+  width: 3.5rem;
+  flex: none;
+}
+
+.admin-poster-field label {
+  flex: 1;
+}

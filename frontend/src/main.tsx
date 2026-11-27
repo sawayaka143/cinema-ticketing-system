@@ -4,10 +4,12 @@ import { BrowserRouter, Route, Routes } from "react-router";
 import "./index.css";
 import "./booking.css";
 import "./manager.css";
+import "./admin.css";
 import { Layout, Status } from "./components/Layout";
 import { AuthProvider } from "./lib/auth";
 import { I18nProvider } from "./lib/i18n";
 import { applyColorMode, readColorMode, ThemeProvider } from "./lib/theme";
+import { AdminPage } from "./pages/AdminPage";
 import { BookingPage } from "./pages/BookingPage";
 import { BookingsPage } from "./pages/BookingsPage";
 import { FakeKaspiPage } from "./pages/FakeKaspiPage";
@@ -43,6 +45,7 @@ createRoot(document.getElementById("root")!).render(
                 <Route path="me/bookings" element={<BookingsPage />} />
                 <Route path="settings" element={<SettingsPage />} />
                 <Route path="manager" element={<ManagerPage />} />
+                <Route path="admin" element={<AdminPage />} />
                 <Route path="*" element={<Status>Page not found.</Status>} />
               </Route>
             </Routes>
